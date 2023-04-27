@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main
-      - 'develop'
+      - "develop"
   workflow_dispatch:
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
       - name: Read .nvmrc
         working-directory: ./api
         run: |
-          echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+          echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
         id: nvm
       - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
         uses: actions/setup-node@v3
