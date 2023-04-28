@@ -29,4 +29,4 @@ jobs:
       - name: Run API unit tests
         working-directory: ./api
         run: |
-          npm run test
+          npm run test:cov
