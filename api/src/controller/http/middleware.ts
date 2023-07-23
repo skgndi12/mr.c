@@ -26,7 +26,7 @@ export class Middleware {
         bodyBytes: res.getHeader('Content-Length'),
         elapsedMs: end - start,
         contentType: res.getHeader('Content-Type')?.toString().split(';')[0],
-        error: res.locals.error?.message
+        errors: res.locals.error?.messages
       });
     });
 
@@ -66,19 +66,29 @@ export class Middleware {
     );
   };
 
-  private respondError = (error: CustomError, res: Response) => {
-    let statusCode = 500;
-    if (error.type in NotFoundErrorType) {
-      statusCode = 404;
-    } else if (error.type in InternalErrorType) {
-      statusCode = 500;
-    }
+  private respondError = (err: CustomError, res: Response) => {
+    const statusCode = this.getStatusCode(err);
 
-    res.locals.error = error;
+    res.locals.error = err;
     res.status(statusCode);
     res.send({
-      type: error.type,
-      message: error.message
+      type: err.type,
+      messages: err.messages
     });
+  };
+
+  private getStatusCode = (err: CustomError) => {
+    switch (err.type) {
+      case 'ROUTE_NOT_FOUND':
+        return 404;
+      case 'USER_NOT_FOUND':
+        return 404;
+      case 'REVIEW_NOT_FOUND':
+        return 404;
+      case 'REPLY_NOT_FOUND':
+        return 404;
+      default:
+        return 500;
+    }
   };
 }

@@ -96,7 +96,7 @@ describe('Test handler', () => {
   it('should 405 when POST method for the route is not allowed', async () => {
     const expectedResponse = {
       type: MethodNotAllowedErrorType.METHOD_NOT_ALLOWED,
-      message: `The POST for the "${baseUrl}/test" route is not allowed`
+      messages: [`The POST for the "${baseUrl}/test" route is not allowed`]
     };
     const response = await request(testHttpServer.app).post(`${baseUrl}/test`);
     expect(response.status).toEqual(405);

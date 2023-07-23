@@ -17,6 +17,6 @@ export const methodNotAllowed = (
   res.locals.error = error;
   res.status(405).send({
     type: error.type,
-    message: error.message
+    messages: error.messages
   });
 };
