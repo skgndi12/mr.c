@@ -1,12 +1,15 @@
 export class CustomError extends Error {
+  messages: string[];
+
   constructor(
     public type:
       | NotFoundErrorType
       | MethodNotAllowedErrorType
       | InternalErrorType,
-    public message: string
+    ...messages: string[]
   ) {
-    super(message);
+    super(messages[0]);
+    this.messages = messages;
   }
 }
 
