@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 
 import { methodNotAllowed } from '@controller/http/handler';
+import { LivenessResponse } from '@controller/http/health/response/health.response';
 
 export class HealthController {
   public routes = (): Router => {
@@ -10,7 +11,7 @@ export class HealthController {
     return router;
   };
 
-  public checkLiveness = (req: Request, res: Response<{ message: string }>) => {
+  public checkLiveness = (req: Request, res: Response<LivenessResponse>) => {
     res.send({ message: 'OK' });
   };
 }

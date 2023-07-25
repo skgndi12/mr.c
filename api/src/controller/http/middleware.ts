@@ -7,6 +7,7 @@ import {
   InternalErrorType,
   NotFoundErrorType
 } from '@controller/http/errors';
+import { HttpErrorResponse } from '@controller/http/response';
 
 export class Middleware {
   constructor(public logger: Logger) {}
@@ -36,7 +37,7 @@ export class Middleware {
   public handleError = (
     err: Error,
     req: Request,
-    res: Response,
+    res: Response<HttpErrorResponse>,
     next: NextFunction
   ) => {
     let customError: CustomError;
@@ -54,7 +55,7 @@ export class Middleware {
 
   public handleNotFoundRoute = (
     req: Request,
-    res: Response,
+    res: Response<HttpErrorResponse>,
     next: NextFunction
   ) => {
     this.respondError(
@@ -66,7 +67,10 @@ export class Middleware {
     );
   };
 
-  private respondError = (err: CustomError, res: Response) => {
+  private respondError = (
+    err: CustomError,
+    res: Response<HttpErrorResponse>
+  ) => {
     const statusCode = this.getStatusCode(err);
 
     res.locals.error = err;

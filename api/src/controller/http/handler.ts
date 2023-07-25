@@ -4,10 +4,11 @@ import {
   CustomError,
   MethodNotAllowedErrorType
 } from '@controller/http/errors';
+import { HttpErrorResponse } from '@controller/http/response';
 
 export const methodNotAllowed = (
   req: Request,
-  res: Response,
+  res: Response<HttpErrorResponse>,
   next: NextFunction
 ) => {
   const error = new CustomError(

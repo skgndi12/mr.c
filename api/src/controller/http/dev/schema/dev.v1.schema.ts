@@ -1,6 +1,8 @@
 import { Tspec } from 'tspec';
 
-import { DevV1Controller } from '@controller/http/dev/dev.v1.controller';
+import { GreetingV1Request } from '@controller/http/dev/request/dev.v1.request';
+import { GreetingV1Response } from '@controller/http/dev/response/dev.v1.response';
+import { HttpErrorResponse } from '@controller/http/response';
 
 export type DevApiSpec = Tspec.DefineApiSpec<{
   basePath: '/api/v1/dev';
@@ -10,7 +12,11 @@ export type DevApiSpec = Tspec.DefineApiSpec<{
     '/greeting': {
       post: {
         summary: 'Greeting';
-        handler: typeof DevV1Controller.prototype.greeting;
+        body: GreetingV1Request;
+        responses: {
+          200: GreetingV1Response;
+          default: HttpErrorResponse;
+        };
       };
     };
   };
