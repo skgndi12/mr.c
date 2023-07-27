@@ -4,10 +4,11 @@ import {
   CustomError,
   MethodNotAllowedErrorType
 } from '@controller/http/errors';
+import { HttpErrorResponse } from '@controller/http/response';
 
 export const methodNotAllowed = (
   req: Request,
-  res: Response,
+  res: Response<HttpErrorResponse>,
   next: NextFunction
 ) => {
   const error = new CustomError(
@@ -17,6 +18,6 @@ export const methodNotAllowed = (
   res.locals.error = error;
   res.status(405).send({
     type: error.type,
-    message: error.message
+    messages: error.messages
   });
 };

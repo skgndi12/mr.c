@@ -7,6 +7,7 @@ import {
   InternalErrorType,
   NotFoundErrorType
 } from '@controller/http/errors';
+import { HttpErrorResponse } from '@controller/http/response';
 
 export class Middleware {
   constructor(public logger: Logger) {}
@@ -26,7 +27,7 @@ export class Middleware {
         bodyBytes: res.getHeader('Content-Length'),
         elapsedMs: end - start,
         contentType: res.getHeader('Content-Type')?.toString().split(';')[0],
-        error: res.locals.error?.message
+        errors: res.locals.error?.messages
       });
     });
 
@@ -36,7 +37,7 @@ export class Middleware {
   public handleError = (
     err: Error,
     req: Request,
-    res: Response,
+    res: Response<HttpErrorResponse>,
     next: NextFunction
   ) => {
     let customError: CustomError;
@@ -54,7 +55,7 @@ export class Middleware {
 
   public handleNotFoundRoute = (
     req: Request,
-    res: Response,
+    res: Response<HttpErrorResponse>,
     next: NextFunction
   ) => {
     this.respondError(
@@ -66,19 +67,32 @@ export class Middleware {
     );
   };
 
-  private respondError = (error: CustomError, res: Response) => {
-    let statusCode = 500;
-    if (error.type in NotFoundErrorType) {
-      statusCode = 404;
-    } else if (error.type in InternalErrorType) {
-      statusCode = 500;
-    }
+  private respondError = (
+    err: CustomError,
+    res: Response<HttpErrorResponse>
+  ) => {
+    const statusCode = this.getStatusCode(err);
 
-    res.locals.error = error;
+    res.locals.error = err;
     res.status(statusCode);
     res.send({
-      type: error.type,
-      message: error.message
+      type: err.type,
+      messages: err.messages
     });
+  };
+
+  private getStatusCode = (err: CustomError) => {
+    switch (err.type) {
+      case 'ROUTE_NOT_FOUND':
+        return 404;
+      case 'USER_NOT_FOUND':
+        return 404;
+      case 'REVIEW_NOT_FOUND':
+        return 404;
+      case 'REPLY_NOT_FOUND':
+        return 404;
+      default:
+        return 500;
+    }
   };
 }

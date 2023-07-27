@@ -1,6 +1,7 @@
 import { Tspec } from 'tspec';
 
-import { HealthController } from '@controller/http/health/health.controller';
+import { LivenessResponse } from '@controller/http/health/response/health.response';
+import { HttpErrorResponse } from '@controller/http/response';
 
 export type HealthApiSpec = Tspec.DefineApiSpec<{
   basePath: '/healthz';
@@ -9,7 +10,10 @@ export type HealthApiSpec = Tspec.DefineApiSpec<{
     '/liveness': {
       get: {
         summary: 'Check for liveness';
-        handler: typeof HealthController.prototype.checkLiveness;
+        responses: {
+          200: LivenessResponse;
+          default: HttpErrorResponse;
+        };
       };
     };
   };

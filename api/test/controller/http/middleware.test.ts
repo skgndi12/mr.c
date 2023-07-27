@@ -112,7 +112,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
       type: InternalErrorType.UNEXPECTED,
-      message: 'Error from throwSyncCustomError'
+      messages: ['Error from throwSyncCustomError']
     });
   });
 
@@ -123,7 +123,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
       type: InternalErrorType.UNEXPECTED,
-      message: 'Error from throwAsyncCustomError'
+      messages: ['Error from throwAsyncCustomError']
     });
   });
 
@@ -134,7 +134,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
       type: InternalErrorType.UNEXPECTED,
-      message: 'Unexpected error happened'
+      messages: ['Unexpected error happened']
     });
   });
 
@@ -145,7 +145,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
       type: InternalErrorType.UNEXPECTED,
-      message: 'Unexpected error happened'
+      messages: ['Unexpected error happened']
     });
   });
 
@@ -156,7 +156,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(404);
     expect(response.body).toStrictEqual({
       type: NotFoundErrorType.ROUTE_NOT_FOUND,
-      message: 'No matching route found'
+      messages: ['No matching route found']
     });
   });
 });

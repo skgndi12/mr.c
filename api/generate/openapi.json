@@ -44,6 +44,16 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -62,16 +72,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": [
-                    "message"
-                  ]
+                  "$ref": "#/components/schemas/LivenessResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
                 }
               }
             }
@@ -91,30 +102,33 @@
         },
         "additionalProperties": false
       },
-      "qs.ParsedQs": {
+      "HttpErrorResponse": {
         "type": "object",
-        "additionalProperties": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "$ref": "#/components/schemas/qs.ParsedQs"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/qs.ParsedQs"
-              }
-            },
-            {
+        "properties": {
+          "type": {
+            "enum": [
+              "COMMENT_NOT_FOUND",
+              "METHOD_NOT_ALLOWED",
+              "REPLY_NOT_FOUND",
+              "REVIEW_NOT_FOUND",
+              "ROUTE_NOT_FOUND",
+              "UNEXPECTED",
+              "USER_NOT_FOUND"
+            ],
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
               "type": "string"
             }
-          ]
-        }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "messages",
+          "type"
+        ]
       },
       "GreetingV1Request": {
         "type": "object",
@@ -125,11 +139,17 @@
         },
         "additionalProperties": false
       },
-      "ParamsDictionary": {
+      "LivenessResponse": {
         "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        }
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "message"
+        ]
       }
     },
     "securitySchemes": {
