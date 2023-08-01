@@ -106,16 +106,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "enum": [
-              "COMMENT_NOT_FOUND",
-              "METHOD_NOT_ALLOWED",
-              "REPLY_NOT_FOUND",
-              "REVIEW_NOT_FOUND",
-              "ROUTE_NOT_FOUND",
-              "UNEXPECTED",
-              "USER_NOT_FOUND"
-            ],
-            "type": "string"
+            "$ref": "#/components/schemas/ErrorType"
           },
           "messages": {
             "type": "array",
@@ -129,6 +120,24 @@
           "messages",
           "type"
         ]
+      },
+      "ErrorType": {
+        "enum": [
+          "BAD_REQUEST",
+          "COMMENT_NOT_FOUND",
+          "FORBIDDEN",
+          "METHOD_NOT_ALLOWED",
+          "NOT_ACCEPTABLE",
+          "PAYLOAD_TOO_LARGE",
+          "REPLY_NOT_FOUND",
+          "REVIEW_NOT_FOUND",
+          "ROUTE_NOT_FOUND",
+          "UNAUTHORIZED",
+          "UNEXPECTED",
+          "UNSUPPORTED_MEDIA_TYPE",
+          "USER_NOT_FOUND"
+        ],
+        "type": "string"
       },
       "GreetingV1Request": {
         "type": "object",

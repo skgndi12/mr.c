@@ -1,10 +1,6 @@
-import {
-  InternalErrorType,
-  MethodNotAllowedErrorType,
-  NotFoundErrorType
-} from '@controller/http/errors';
+import { ErrorType } from '@controller/http/errors';
 
 export interface HttpErrorResponse {
-  type: NotFoundErrorType | InternalErrorType | MethodNotAllowedErrorType;
+  type: ErrorType;
   messages: string[];
 }

@@ -30,7 +30,6 @@ export class HttpServer {
     this.app = express();
     this.app.disable('x-powered-by');
     this.app.set('trust proxy', 0);
-    this.app.use(express.json());
     await this.buildApiDocument();
     this.app.use('/api', this.middleware.accessLog);
     this.app.use(
