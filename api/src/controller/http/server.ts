@@ -1,6 +1,8 @@
 import express from 'express';
+import { middleware as OpenApiValidatorMiddleware } from 'express-openapi-validator';
 import { Express } from 'express-serve-static-core';
 import http from 'http';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import { Tspec, TspecDocsMiddleware } from 'tspec';
 import { Logger } from 'winston';
@@ -28,10 +30,18 @@ export class HttpServer {
     this.app = express();
     this.app.disable('x-powered-by');
     this.app.set('trust proxy', 0);
+    this.app.use(express.json());
+    await this.buildApiDocument();
     this.app.use('/api', this.middleware.accessLog);
+    this.app.use(
+      OpenApiValidatorMiddleware({
+        apiSpec: path.join(__dirname, '../../../generate/openapi.json'),
+        validateRequests: true,
+        validateResponses: true
+      })
+    );
     this.app.use('/api', this.getApiRouters());
     this.app.use('/healthz', this.getHealthRouters());
-    await this.buildApiDocument();
     this.app.use(this.middleware.handleError);
     this.app.use(this.middleware.handleNotFoundRoute);
 
