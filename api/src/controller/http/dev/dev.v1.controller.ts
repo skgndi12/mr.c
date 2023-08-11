@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import express from 'express';
 import { Logger } from 'winston';
 
 import { GreetingV1Request } from '@controller/http/dev/request/dev.v1.request';
@@ -13,6 +14,7 @@ export class DevV1Controller {
     const prefix = '/v1/dev';
 
     router
+      .use(express.json())
       .route(`${prefix}/greeting`)
       .post(this.greeting)
       .all(methodNotAllowed);
@@ -24,6 +26,7 @@ export class DevV1Controller {
     req: Request<any, any, GreetingV1Request>,
     res: Response<GreetingV1Response>
   ) => {
+    this.logger.info(req.body);
     res.send({ message: 'Hello World!' });
   };
 }

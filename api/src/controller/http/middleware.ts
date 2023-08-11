@@ -1,11 +1,19 @@
 import { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
+import { HttpError as ValidationError } from 'express-openapi-validator/dist/framework/types';
 import { Logger } from 'winston';
 
 import {
+  BadRequestErrorType,
   CustomError,
+  ForbiddenErrorType,
   InternalErrorType,
-  NotFoundErrorType
+  MethodNotAllowedErrorType,
+  NotAcceptableErrorType,
+  NotFoundErrorType,
+  PayloadTooLargeErrorType,
+  UnauthorizedErrorType,
+  UnsupportedMediaErrorType
 } from '@controller/http/errors';
 import { HttpErrorResponse } from '@controller/http/response';
 
@@ -43,6 +51,8 @@ export class Middleware {
     let customError: CustomError;
     if (err instanceof CustomError) {
       customError = err;
+    } else if (err instanceof ValidationError) {
+      customError = this.convertValidationErrorToCustomError(err);
     } else {
       customError = new CustomError(
         InternalErrorType.UNEXPECTED,
@@ -53,6 +63,7 @@ export class Middleware {
     this.respondError(customError, res);
   };
 
+  // TODO: https://github.com/MovieReviewComment/Mr.C/issues/49
   public handleNotFoundRoute = (
     req: Request,
     res: Response<HttpErrorResponse>,
@@ -65,6 +76,51 @@ export class Middleware {
       ),
       res
     );
+  };
+
+  private convertValidationErrorToCustomError = (
+    err: ValidationError
+  ): CustomError => {
+    const errMessages = err.errors.map((e) => e.message);
+
+    switch (err.status) {
+      case 400:
+        return new CustomError(BadRequestErrorType.BAD_REQUEST, ...errMessages);
+      case 401:
+        return new CustomError(
+          UnauthorizedErrorType.UNAUTHORIZED,
+          ...errMessages
+        );
+      case 403:
+        return new CustomError(ForbiddenErrorType.FORBIDDEN, ...errMessages);
+      case 404:
+        return new CustomError(
+          NotFoundErrorType.ROUTE_NOT_FOUND,
+          ...errMessages
+        );
+      case 405:
+        return new CustomError(
+          MethodNotAllowedErrorType.METHOD_NOT_ALLOWED,
+          ...errMessages
+        );
+      case 406:
+        return new CustomError(
+          NotAcceptableErrorType.NOT_ACCEPTABLE,
+          ...errMessages
+        );
+      case 413:
+        return new CustomError(
+          PayloadTooLargeErrorType.PAYLOAD_TOO_LARGE,
+          ...errMessages
+        );
+      case 415:
+        return new CustomError(
+          UnsupportedMediaErrorType.UNSUPPORTED_MEDIA_TYPE,
+          ...errMessages
+        );
+      default:
+        return new CustomError(InternalErrorType.UNEXPECTED, ...errMessages);
+    }
   };
 
   private respondError = (
@@ -83,6 +139,12 @@ export class Middleware {
 
   private getStatusCode = (err: CustomError) => {
     switch (err.type) {
+      case 'BAD_REQUEST':
+        return 400;
+      case 'UNAUTHORIZED':
+        return 401;
+      case 'FORBIDDEN':
+        return 403;
       case 'ROUTE_NOT_FOUND':
         return 404;
       case 'USER_NOT_FOUND':
@@ -91,6 +153,14 @@ export class Middleware {
         return 404;
       case 'REPLY_NOT_FOUND':
         return 404;
+      case 'METHOD_NOT_ALLOWED':
+        return 405;
+      case 'NOT_ACCEPTABLE':
+        return 406;
+      case 'PAYLOAD_TOO_LARGE':
+        return 413;
+      case 'UNSUPPORTED_MEDIA_TYPE':
+        return 415;
       default:
         return 500;
     }

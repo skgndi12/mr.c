@@ -6,6 +6,7 @@ import {
 } from '@controller/http/errors';
 import { HttpErrorResponse } from '@controller/http/response';
 
+// TODO: https://github.com/MovieReviewComment/Mr.C/issues/49
 export const methodNotAllowed = (
   req: Request,
   res: Response<HttpErrorResponse>,

@@ -1,0 +1,156 @@
+{
+  "info": {
+    "title": "Mr.C API test",
+    "version": "0.0.1"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/dev/throwSyncCustomError": {
+      "post": {
+        "operationId": "TestApiSpec_post_/throwSyncCustomError",
+        "tags": [
+          "Test"
+        ],
+        "summary": "Throw sync custom error",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dev/throwAsyncCustomError": {
+      "post": {
+        "operationId": "TestApiSpec_post_/throwAsyncCustomError",
+        "tags": [
+          "Test"
+        ],
+        "summary": "Throw async custom error",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dev/throwSyncError": {
+      "post": {
+        "operationId": "TestApiSpec_post_/throwSyncError",
+        "tags": [
+          "Test"
+        ],
+        "summary": "Throw sync error",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dev/throwAsyncError": {
+      "post": {
+        "operationId": "TestApiSpec_post_/throwAsyncError",
+        "tags": [
+          "Test"
+        ],
+        "summary": "Throw async error",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dev/authRequired": {
+      "get": {
+        "operationId": "TestApiSpec_get_/authRequired",
+        "tags": [
+          "Test"
+        ],
+        "summary": "Authorization header required",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "qs.ParsedQs": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "$ref": "#/components/schemas/qs.ParsedQs"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/qs.ParsedQs"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "ParamsDictionary": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "securitySchemes": {
+      "jwt": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
