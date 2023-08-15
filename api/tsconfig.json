@@ -2,9 +2,7 @@
   "include": ["src/**/*.ts", "test/**/*.test.ts"],
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "module": "commonjs",
     "allowJs": true,
     "outDir": "build",
@@ -18,9 +16,9 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "paths": {
-      "@root/*": ["./*"],
+      "@controller/*": ["src/controller/*"],
       "@src/*": ["src/*"],
-      "@controller/*": ["src/controller/*"]
+      "@root/*": ["./*"]
     }
   }
 }
