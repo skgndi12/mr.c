@@ -1,22 +1,22 @@
 import {
   buildHttpConfig,
   buildLoggerConfig,
-  configLoad
+  loadConfig
 } from '@src/config/loader';
-import { loggerInitialize } from '@src/logger/logger';
+import { initializeLogger } from '@src/logger/logger';
 
 import { HttpServer } from '@controller/http/server';
 
 async function main() {
   let config;
   try {
-    config = configLoad();
+    config = loadConfig();
   } catch (e) {
     console.error(`${e}`);
     process.exit(1);
   }
 
-  const logger = loggerInitialize(buildLoggerConfig(config));
+  const logger = initializeLogger(buildLoggerConfig(config));
   const httpServer = new HttpServer(logger, buildHttpConfig(config));
   await httpServer.start();
   // await httpServer.close();

@@ -10,7 +10,7 @@ import { LogFormat, LoggerConfig } from '@src/logger/types';
 
 // The available log levels are described in the link below.
 // https://github.com/winstonjs/winston#logging-levels
-export function loggerInitialize(config: LoggerConfig): Logger {
+export function initializeLogger(config: LoggerConfig): Logger {
   let loggerOption: LoggerOptions;
   try {
     if (config.format === LogFormat.JSON) {

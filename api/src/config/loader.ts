@@ -9,7 +9,7 @@ import {
 import { HttpConfig } from '@src/controller/http/types';
 import { LoggerConfig } from '@src/logger/types';
 
-export function configLoad(): Config {
+export function loadConfig(): Config {
   try {
     return {
       env: config.get<string>('env'),
