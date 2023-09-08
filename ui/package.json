@@ -1,0 +1,16 @@
+{
+  "name": "mrc-ui",
+  "packageManager": "yarn@3.6.3",
+  "version": "0.0.1",
+  "description": "UI for Mr.C",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MovieReviewComment/Mr.C/ui"
+  },
+  "author": "2wheeh",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
