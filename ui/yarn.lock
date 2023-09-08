@@ -151,10 +151,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mrc/common-utils@workspace:*, @mrc/common-utils@workspace:packages/common-utils":
+  version: 0.0.0-use.local
+  resolution: "@mrc/common-utils@workspace:packages/common-utils"
+  languageName: unknown
+  linkType: soft
+
 "@mrc/mr-c.app@workspace:packages/mr-c.app":
   version: 0.0.0-use.local
   resolution: "@mrc/mr-c.app@workspace:packages/mr-c.app"
   dependencies:
+    "@mrc/common-utils": "workspace:*"
     "@types/node": 20.5.9
     "@types/react": 18.2.21
     "@types/react-dom": 18.2.7

@@ -1,3 +1,7 @@
+import { hello } from '@mrc/common-utils';
+
 export default function Home() {
-  return <>home</>;
+  const helloMrC = hello('Mr C');
+
+  return <>{helloMrC}</>;
 }
