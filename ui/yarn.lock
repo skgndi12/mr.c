@@ -151,6 +151,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mrc/mr-c.app@workspace:packages/mr-c.app":
+  version: 0.0.0-use.local
+  resolution: "@mrc/mr-c.app@workspace:packages/mr-c.app"
+  dependencies:
+    "@types/node": 20.5.9
+    "@types/react": 18.2.21
+    "@types/react-dom": 18.2.7
+    autoprefixer: 10.4.15
+    eslint: 8.48.0
+    eslint-config-next: 13.4.19
+    next: 13.4.19
+    postcss: 8.4.29
+    react: 18.2.0
+    react-dom: 18.2.0
+    tailwindcss: 3.3.3
+    typescript: 5.2.2
+  languageName: unknown
+  linkType: soft
+
 "@next/env@npm:13.4.19":
   version: 13.4.19
   resolution: "@next/env@npm:13.4.19"
@@ -2637,25 +2656,6 @@ __metadata:
   checksum: a96865108c6c3b1b8e1d5e9f11843de1e077e57737602de1b82030815f311be11f96f09cce59bd5b903d0b29834733e5313f9301e3ed6d6f6fba2eae0df4298f
   languageName: node
   linkType: hard
-
-"mr-c.app@workspace:packages/mr-c.app":
-  version: 0.0.0-use.local
-  resolution: "mr-c.app@workspace:packages/mr-c.app"
-  dependencies:
-    "@types/node": 20.5.9
-    "@types/react": 18.2.21
-    "@types/react-dom": 18.2.7
-    autoprefixer: 10.4.15
-    eslint: 8.48.0
-    eslint-config-next: 13.4.19
-    next: 13.4.19
-    postcss: 8.4.29
-    react: 18.2.0
-    react-dom: 18.2.0
-    tailwindcss: 3.3.3
-    typescript: 5.2.2
-  languageName: unknown
-  linkType: soft
 
 "mrc-ui@workspace:.":
   version: 0.0.0-use.local

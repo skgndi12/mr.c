@@ -12,5 +12,8 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "mr-c.app": "yarn workspace @mrc/mr-c.app"
+  }
 }
