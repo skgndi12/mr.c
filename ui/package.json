@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "mr-c.app": "yarn workspace @mrc/mr-c.app",
-    "common-components": "yarn workspace @mrc/common-components"
+    "common-components": "yarn workspace @mrc/common-components",
+    "common-utils": "yarn workspace @mrc/common-utils"
   }
 }
