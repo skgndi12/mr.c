@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tailwind.config": "./tailwind.config.ts"
+  },
   "scripts": {
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "storybook": "storybook dev -p 6006",
@@ -13,6 +17,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@mrc/common-utils": "workspace:*",
     "@storybook/addon-essentials": "^7.4.0",
     "@storybook/addon-interactions": "^7.4.0",
     "@storybook/addon-links": "^7.4.0",

@@ -1968,10 +1968,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mrc/common-components@workspace:packages/common-components":
+"@mrc/common-components@workspace:*, @mrc/common-components@workspace:packages/common-components":
   version: 0.0.0-use.local
   resolution: "@mrc/common-components@workspace:packages/common-components"
   dependencies:
+    "@mrc/common-utils": "workspace:*"
     "@storybook/addon-essentials": ^7.4.0
     "@storybook/addon-interactions": ^7.4.0
     "@storybook/addon-links": ^7.4.0
@@ -2010,6 +2011,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@mrc/mr-c.app@workspace:packages/mr-c.app"
   dependencies:
+    "@mrc/common-components": "workspace:*"
     "@mrc/common-utils": "workspace:*"
     "@types/node": 20.5.9
     "@types/react": 18.2.21
