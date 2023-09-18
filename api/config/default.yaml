@@ -7,3 +7,8 @@ http:
 logger:
   level: 'http' # Log only if less than or equal to this level
   format: 'text'
+database:
+  host: '127.0.0.1'
+  port: 5432
+  user: 'admin'
+  password: 'Admin123!'
