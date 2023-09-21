@@ -16,3 +16,4 @@
 | dev    | [개발 모드](https://nextjs.org/docs/getting-started/installation#run-the-development-server)로 실행합니다. (localhost:3000) |
 | build  | 빌드합니다.                                                                                                                 |
 | start  | 빌드된 앱을 실행합니다. (localhost:3000)                                                                                    |
+| test   | 유닛 테스트를 실행합니다.                                                                                                   |
