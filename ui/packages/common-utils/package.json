@@ -1,0 +1,6 @@
+{
+  "name": "@mrc/common-utils",
+  "packageManager": "yarn@3.6.3",
+  "version": "0.0.1",
+  "main": "src/index.ts"
+}
