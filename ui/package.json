@@ -18,6 +18,11 @@
     "common-components": "yarn workspace @mrc/common-components",
     "common-utils": "yarn workspace @mrc/common-utils",
     "test:affected": "yarn workspaces foreach --since -pR run test",
-    "test:all": "yarn workspaces foreach --all run test"
+    "test:all": "yarn workspaces foreach --all run test",
+  },
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3"
   }
 }
