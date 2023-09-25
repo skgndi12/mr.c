@@ -1,0 +1,17 @@
+volumes:
+  postgresql_data:
+
+services:
+  db:
+    container_name: mrc-db
+    image: bitnami/postgresql:16-debian-11
+    restart: always
+    ports:
+      - "${POSTGRESQL_PORT}:5432"
+    volumes:
+      - postgresql_data:/bitnami/postgresql
+    environment:
+      POSTGRESQL_USER: mrc-client
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRESQL_DATABASE: mrc 
+      POSTGRESQL_POSTGRES_PASSWORD: ${POSTGRESQL_POSTGRES_PASSWORD}
