@@ -8,15 +8,15 @@ const { Primary, Secondary } = composeStories(Stories);
 
 describe('MolecularComponent', () => {
   it("has class 'text-blue-300' on Primary", () => {
-    const { getByText } = render(<Primary />);
+    const { getByTestId } = render(<Primary />);
 
-    expect(getByText(Primary.args.description as string)).toHaveClass('text-blue-300');
+    expect(getByTestId('color')).toHaveClass('text-blue-300');
   });
 
   it("has class 'text-blue-600' on Secondary", () => {
-    const { getByText } = render(<Secondary />);
+    const { getByTestId } = render(<Secondary />);
 
-    expect(getByText(Secondary.args.description as string)).toHaveClass('text-blue-600');
+    expect(getByTestId('color')).toHaveClass('text-blue-600');
   });
 
   it('renders description', () => {
