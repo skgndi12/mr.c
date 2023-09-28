@@ -16,6 +16,7 @@
 | --------------- | ------------------------------------------------ |
 | storybook       | Storybook dev 서버를 실행합니다 (localhost:6000) |
 | build-storybook | Storybook을 빌드합니다 (storybook-static)        |
+| test            | 유닛 테스트를 실행합니다.                        |
 
 ## 사용하기
 

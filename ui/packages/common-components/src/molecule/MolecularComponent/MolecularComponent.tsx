@@ -20,7 +20,9 @@ const MolecularComponent = ({ color = 'primary', description }: MolecularCompone
 
   return (
     <div>
-      <p className={colorClass}>{description}</p>
+      <p className={colorClass} data-testid='color'>
+        {description}
+      </p>
       <AtomicComponent color={color} />
       <p>{helloString}</p>
     </div>

@@ -16,6 +16,8 @@
   "scripts": {
     "mr-c.app": "yarn workspace @mrc/mr-c.app",
     "common-components": "yarn workspace @mrc/common-components",
-    "common-utils": "yarn workspace @mrc/common-utils"
+    "common-utils": "yarn workspace @mrc/common-utils",
+    "test:affected": "yarn workspaces foreach --since -pR run test",
+    "test:all": "yarn workspaces foreach --all run test"
   }
 }

@@ -15,9 +15,12 @@
   - [목차](#목차)
   - [설치하기](#설치하기)
   - [구조](#구조)
-  - [스크립트 실행](#스크립트-실행)
-  - [프로젝트간 참조](#프로젝트간-참조)
-  - [프로젝트 추가](#프로젝트-추가)
+  - [스크립트](#스크립트)
+    - [개별 프로젝트의 스크립트 실행](#개별-프로젝트의-스크립트-실행)
+    - [테스트](#테스트)
+  - [프로젝트 설정](#프로젝트-설정)
+    - [프로젝트간 참조](#프로젝트간-참조)
+    - [프로젝트 추가](#프로젝트-추가)
 
 ## 설치하기
 
@@ -58,28 +61,63 @@
      └── ...(more packages)
 ```
 
-## 스크립트 실행
+## 스크립트
 
-개별 프로젝트의 스크립트는 `ui`의 루트 경로에서 `yarn workspace ${프로젝트명} 스크립트` 로 실행할 수 있습니다.
+| script            | description                                         |
+| ----------------- | --------------------------------------------------- |
+| mr-c.app          | mr-c.app 프로젝트의 스크립트를 실행합니다.          |
+| common-components | common-components 프로젝트의 스크립트를 실행합니다. |
+| common-utils      | common-utils 프로젝트의 스크립트를 실행합니다.      |
+| test:affected     | 변경된 프로젝트의 테스트를 실행합니다.              |
+| test:all          | 모든 프로젝트의 테스트를 실행합니다.                |
 
-다음의 설정을 통해 스크립트를 간결하게 실행합니다:
+### 개별 프로젝트의 스크립트 실행
 
-```jsonc
-// ui/package.json
-"scripts": {
-  "mr-c.app": "yarn workspace @mrc/mr-c.app",
-  "common-components": "yarn workspace @mrc/common-components",
-  ...
-}
-```
+1. 개별 프로젝트의 스크립트는 `ui`의 루트 경로에서 `yarn workspace ${프로젝트명} 스크립트` 로 실행할 수 있습니다.
 
-예시. `mr-c.app` 프로젝트의 `dev` 스크립트 실행:
+   다음의 설정을 통해 스크립트를 간결하게 실행합니다:
 
-```bash
-yarn mr-c.app dev
-```
+   ```jsonc
+   // ui/package.json
 
-## 프로젝트간 참조
+   "scripts": {
+      "mr-c.app": "yarn workspace @mrc/mr-c.app",
+      "common-components": "yarn workspace @mrc/common-components",
+      ...
+   }
+   ```
+
+2. 예시. `mr-c.app` 프로젝트의 `dev` 스크립트 실행 :
+
+   ```bash
+   yarn mr-c.app dev
+   ```
+
+### 테스트
+
+1. `test:affected` : 변경된 프로젝트와 그에 의존하는 프로젝트의 테스트를 실행합니다.
+
+   ```jsonc
+   "test:affected": "yarn workspaces foreach --since -pR run test",
+   ```
+
+   > [yarn workspaces foreach](https://yarnpkg.com/cli/workspaces/foreach) 의 [--since](https://github.com/yarnpkg/berry/issues/2374) 옵션은 `.yarnrc.yml`의 [changesetBaseRefs](https://yarnpkg.com/configuration/yarnrc#changesetBaseRefs) 을 기준으로 변경된 프로젝트를 찾습니다. 변경된 프로젝트와 그에 의존하는 프로젝트의 테스트를 실행합니다.
+   >
+   > ```yml
+   > # ui/.yarnrc.yml
+   >
+   > changesetBaseRefs: [develop, baseRef]
+   > ```
+
+2. `test:all` : 모든 프로젝트의 테스트를 실행합니다.
+
+   ```jsonc
+   "test:all": "yarn workspaces foreach --all run test"
+   ```
+
+## 프로젝트 설정
+
+### 프로젝트간 참조
 
 1. `yarn workspace` 로 관리되는 프로젝트는 해당 프로젝트의 패키지명 (`package.json`의 `name`) 으로 식별되며, [`workspace:` 프로토콜](https://yarnpkg.com/features/workspaces#cross-references)을 따라 참조관계를 설정합니다.
 
@@ -91,12 +129,12 @@ yarn mr-c.app dev
 
    ```jsonc
    // ui/packages/mr-c.app/package.json
+
    "dependencies": {
       "@mrc/common-components": "workspace:*",
       "@mrc/common-utils": "workspace:*",
       ...
    }
-
    ```
 
 2. 각 프로젝트는 `TypeScript` 로 작성되었으며, 공용으로 사용되는 프로젝트를 미리 트랜스파일 하지 않습니다.
@@ -106,6 +144,7 @@ yarn mr-c.app dev
 
    ```javascript
    // ui/packages/mr-c.app/next.config.js
+
    module.exports = {
       transpilePackages: [
          '@mrc/common-components',
@@ -118,7 +157,7 @@ yarn mr-c.app dev
 
    > `transpilePackage` 에 추가되어 `nextjs` 가 트랜스파일하는 경우, `nextjs` 의 컴파일러(SWC)는 해당 프로젝트의 로컬 `tsconfig` 를 참조하지 않습니다. 따라서 참조되는 프로젝트는 `paths` 설정을 통한 alias 대신 상대 경로를 사용하여 코드를 작성해야합니다.
 
-## 프로젝트 추가
+### 프로젝트 추가
 
 1. `ui/packages` 의 하위 디렉토리로 프로젝트를 추가합니다.
    ```bash

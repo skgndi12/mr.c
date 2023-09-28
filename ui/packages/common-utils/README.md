@@ -7,6 +7,7 @@
 - [@mrc/common-utils](#mrccommon-utils)
   - [목차](#목차)
   - [사용하기](#사용하기)
+  - [스크립트](#스크립트)
 
 ## 사용하기
 
@@ -21,3 +22,9 @@
 
    console.log(message); // Hello, world!
    ```
+
+## 스크립트
+
+| script | description               |
+| ------ | ------------------------- |
+| test   | 유닛 테스트를 실행합니다. |
