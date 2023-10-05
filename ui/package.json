@@ -19,7 +19,10 @@
     "common-utils": "yarn workspace @mrc/common-utils",
     "test:affected": "yarn workspaces foreach --since -pR run test",
     "test:all": "yarn workspaces foreach --all run test",
-    "lint:all": "yarn workspaces foreach --all run lint"
+    "lint:all": "yarn workspaces foreach --all run lint",
+    "format:check": "prettier --config .prettierrc 'packages/**/*.{js,jsx,mjs,cjs,ts,tsx}' '**/package.json' '**/tsconfig.json' '**/tsconfig.**.json' --check",
+    "format:fix": "prettier --config .prettierrc 'packages/**/*.{js,jsx,mjs,cjs,ts,tsx}' '**/package.json' '**/tsconfig.json' '**/tsconfig.**.json' --write"
+
   },
   "devDependencies": {
     "husky": "^8.0.0",

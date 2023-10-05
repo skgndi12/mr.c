@@ -25,6 +25,3 @@ dist-ssr
 
 # Storybook
 storybook-static
-
-# Typecheck
-tsconfig.tsbuildinfo

@@ -10,4 +10,15 @@
 .yarn/cache
 #.pnp.*
 
-node_modules
+
+# node_modules
+**/node_modules
+
+# Typecheck
+**/tsconfig.tsbuildinfo
+
+# testing
+**/coverage
+
+# local env files
+# TODO 
