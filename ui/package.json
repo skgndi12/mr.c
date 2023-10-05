@@ -21,8 +21,8 @@
     "test:all": "yarn workspaces foreach --all run test",
     "lint:all": "yarn workspaces foreach --all run lint",
     "format:check": "prettier --config .prettierrc 'packages/**/*.{js,jsx,mjs,cjs,ts,tsx}' '**/package.json' '**/tsconfig.json' '**/tsconfig.**.json' --check",
-    "format:fix": "prettier --config .prettierrc 'packages/**/*.{js,jsx,mjs,cjs,ts,tsx}' '**/package.json' '**/tsconfig.json' '**/tsconfig.**.json' --write"
-
+    "format:fix": "prettier --config .prettierrc 'packages/**/*.{js,jsx,mjs,cjs,ts,tsx}' '**/package.json' '**/tsconfig.json' '**/tsconfig.**.json' --write",
+    "postinstall": "cd .. && husky install ui/.husky"
   },
   "devDependencies": {
     "husky": "^8.0.0",
