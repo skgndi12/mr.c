@@ -19,6 +19,7 @@
     "common-utils": "yarn workspace @mrc/common-utils",
     "test:affected": "yarn workspaces foreach --since -pR run test",
     "test:all": "yarn workspaces foreach --all run test",
+    "lint:all": "yarn workspaces foreach --all run lint"
   },
   "devDependencies": {
     "husky": "^8.0.0",
