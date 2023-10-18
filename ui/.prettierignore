@@ -1,0 +1,22 @@
+# node_modules
+**/node_modules
+
+# Storybook
+**/storybook-static
+
+# Typecheck
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Test
+**/coverage
+
+# Next.js
+**/.next
+
+# vercel
+**/.vercel
+
+# Production
+**/build
+**/dist

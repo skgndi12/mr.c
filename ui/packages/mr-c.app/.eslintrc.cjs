@@ -1,22 +1,19 @@
 module.exports = {
   root: true,
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  ignorePatterns: ['.eslintrc.cjs'],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: 'tsconfig.json',
+  },
   extends: [
+    'next/core-web-vitals',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:@typescript-eslint/stylistic-type-checked',
-    'plugin:react-hooks/recommended',
-    'plugin:storybook/recommended',
   ],
-  ignorePatterns: ['.eslintrc.cjs'],
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    tsconfigRootDir: __dirname,
-    project: ['tsconfig.json'],
-  },
-  plugins: ['react-refresh'],
-  rules: {
-    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-  },
+  rules: {},
 };
 
 /**
