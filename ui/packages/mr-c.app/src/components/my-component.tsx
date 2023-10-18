@@ -7,7 +7,7 @@ export const MyComponent = ({ name }: { name: string }) => {
 
   return (
     <>
-      <MolecularComponent color='primary' description={msg} />
+      <MolecularComponent color="primary" description={msg} />
     </>
   );
 };

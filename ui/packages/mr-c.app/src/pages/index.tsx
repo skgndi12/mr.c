@@ -7,9 +7,9 @@ export default function Home() {
 
   return (
     <>
-      <p className='headline-1-semibold'>{helloMrC}</p>
-      <AtomicComponent color='primary' />
-      <MolecularComponent color='secondary' description='This is a description' />
+      <p className="headline-1-semibold">{helloMrC}</p>
+      <AtomicComponent color="primary" />
+      <MolecularComponent color="secondary" description="This is a description" />
     </>
   );
 }
