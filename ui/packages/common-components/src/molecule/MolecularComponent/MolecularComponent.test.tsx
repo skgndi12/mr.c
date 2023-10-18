@@ -20,7 +20,7 @@ describe('MolecularComponent', () => {
   });
 
   it('renders description', () => {
-    const { getByText } = render(<MolecularComponent color='primary' description='description' />);
+    const { getByText } = render(<MolecularComponent color="primary" description="description" />);
 
     expect(getByText('description')).toBeInTheDocument();
   });
