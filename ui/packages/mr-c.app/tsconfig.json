@@ -7,13 +7,12 @@
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "jsx": "preserve",
-
     "paths": {
       "@/*": ["./src/*"]
     },
-
-    "types": ["@testing-library/jest-dom"]
+    "types": ["@testing-library/jest-dom"],
+    "plugins": [{ "name": "next" }]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.js", ".next/types/**/*.ts"],
   "exclude": ["node_modules", ".next", "coverage"]
 }
