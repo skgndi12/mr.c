@@ -11,8 +11,11 @@
         "start:watch": "npx nodemon",
         "test": "jest",
         "test:cov": "jest --coverage --coverageDirectory='coverage'",
-        "migrate-dev": "npx prisma migrate dev",
-        "migrate-deploy": "npx prisma migrate deploy",
+        "migrate-create:down": "npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-migrations prisma/migrations --shadow-database-url $DATABASE_URL --script > prisma/migrations/down.sql",
+        "migrate-create:up": "npx prisma migrate dev --create-only",
+        "migrate-apply:rollback": "npx prisma db execute --schema prisma/schema.prisma",
+        "migrate-apply:all": "npx prisma migrate dev",
+        "migrate-apply:latest": "npx prisma migrate deploy",
         "migrate-status": "npx prisma migrate status",
         "generate-models": "npx prisma generate",
         "studio": "npx prisma studio"
@@ -91,6 +94,6 @@
         ]
     },
     "prisma": {
-        "schema": "src/infrastructure/prisma/schema.prisma"
+        "schema": "prisma/schema.prisma"
     }
 }
