@@ -2,11 +2,13 @@ import config from 'config';
 
 import {
   Config,
+  ConfigDatabase,
   ConfigHttp,
   ConfigLogger,
   ConfigTimeout
 } from '@src/config/types';
 import { HttpConfig } from '@src/controller/http/types';
+import { DatabaseConfig } from '@src/infrastructure/repositories/types';
 import { LoggerConfig } from '@src/logger/types';
 
 export function loadConfig(): Config {
@@ -15,7 +17,8 @@ export function loadConfig(): Config {
       env: config.get<string>('env'),
       timeout: config.get<ConfigTimeout>('timeout'),
       http: config.get<ConfigHttp>('http'),
-      logger: config.get<ConfigLogger>('logger')
+      logger: config.get<ConfigLogger>('logger'),
+      database: config.get<ConfigDatabase>('database')
     };
   } catch (e) {
     throw new Error(`failed to load config error: ${e}`);
@@ -35,5 +38,14 @@ export function buildHttpConfig(config: Config): HttpConfig {
     env: config.env,
     host: config.http.host,
     port: config.http.port
+  };
+}
+
+export function buildDatabaseConfig(config: Config): DatabaseConfig {
+  return {
+    host: config.database.host,
+    port: config.database.port,
+    user: config.database.user,
+    password: config.database.password
   };
 }

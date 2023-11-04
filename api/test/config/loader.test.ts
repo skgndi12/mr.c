@@ -1,6 +1,7 @@
 import config from 'config';
 
 import {
+  buildDatabaseConfig,
   buildHttpConfig,
   buildLoggerConfig,
   loadConfig
@@ -12,7 +13,13 @@ describe('Test config loader', () => {
       env: 'test',
       timeout: { shutdownSeconds: 30 },
       http: { host: '127.0.0.1', port: 0 },
-      logger: { level: 'silly', format: 'text' }
+      logger: { level: 'silly', format: 'text' },
+      database: {
+        host: '127.0.0.1',
+        port: 5432,
+        user: 'test',
+        password: 'test123!'
+      }
     });
   });
 
@@ -48,6 +55,17 @@ describe('Test build http config', () => {
       env: 'test',
       host: '127.0.0.1',
       port: 0
+    });
+  });
+});
+
+describe('Test build database config', () => {
+  it('should build valid database config from a test.yaml', () => {
+    expect(buildDatabaseConfig(loadConfig())).toStrictEqual({
+      host: '127.0.0.1',
+      port: 5432,
+      user: 'test',
+      password: 'test123!'
     });
   });
 });

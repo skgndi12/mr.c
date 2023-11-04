@@ -5,6 +5,7 @@ export interface Config {
   timeout: ConfigTimeout;
   http: ConfigHttp;
   logger: ConfigLogger;
+  database: ConfigDatabase;
 }
 
 export interface ConfigTimeout {
@@ -19,4 +20,11 @@ export interface ConfigHttp {
 export interface ConfigLogger {
   level: LogLevel;
   format: LogFormat;
+}
+
+export interface ConfigDatabase {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
 }
