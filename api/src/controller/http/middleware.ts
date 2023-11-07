@@ -3,6 +3,8 @@ import 'express-async-errors';
 import { HttpError as ValidationError } from 'express-openapi-validator/dist/framework/types';
 import { Logger } from 'winston';
 
+import { getErrorMessage } from '@src/util/error';
+
 import {
   BadRequestErrorType,
   CustomError,
@@ -56,7 +58,7 @@ export class Middleware {
     } else {
       customError = new CustomError(
         InternalErrorType.UNEXPECTED,
-        'Unexpected error happened'
+        `Unexpected error occured, error: ${getErrorMessage(err)}`
       );
     }
 
@@ -128,6 +130,21 @@ export class Middleware {
     res: Response<HttpErrorResponse>
   ) => {
     const statusCode = this.getStatusCode(err);
+
+    switch (true) {
+      case statusCode >= 500:
+        this.logger.error('5xx error occured', {
+          error: err,
+          statusCode: statusCode
+        });
+        break;
+      case statusCode >= 400:
+        this.logger.warn('4xx error occured', {
+          error: err,
+          statusCode: statusCode
+        });
+        break;
+    }
 
     res.locals.error = err;
     res.status(statusCode);

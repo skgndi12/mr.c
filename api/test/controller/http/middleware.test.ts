@@ -176,7 +176,7 @@ describe('Test middleware', () => {
   let baseUrl: string;
 
   beforeAll(async () => {
-    mockLogger = {};
+    mockLogger = { error: jest.fn(), warn: jest.fn() };
     testHttpServer = new TestHttpServer(mockLogger as Logger);
     baseUrl = '/api/v1/dev';
     await testHttpServer.start();
@@ -215,7 +215,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
       type: InternalErrorType.UNEXPECTED,
-      messages: ['Unexpected error happened']
+      messages: ['Unexpected error occured, error: Error from throwSyncError']
     });
   });
 
@@ -226,7 +226,7 @@ describe('Test middleware', () => {
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
       type: InternalErrorType.UNEXPECTED,
-      messages: ['Unexpected error happened']
+      messages: ['Unexpected error occured, error: Error from throwAsyncError']
     });
   });
 
