@@ -9,6 +9,6 @@ logger:
   format: 'text'
 database:
   host: '127.0.0.1'
-  port: 5432
-  user: 'admin'
-  password: 'Admin123!'
+  port: 5435
+  user: 'mrc-client'
+  password: 'Client123!'

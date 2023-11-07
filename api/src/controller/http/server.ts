@@ -8,6 +8,7 @@ import { Tspec, TspecDocsMiddleware } from 'tspec';
 import { Logger } from 'winston';
 
 import apiSpecification from '@root/generate/openapi.json';
+import { name, version } from '@root/package.json';
 
 import { DevV1Controller } from '@controller/http/dev/dev.v1.controller';
 import { HealthController } from '@controller/http/health/health.controller';
@@ -30,6 +31,7 @@ export class HttpServer {
     this.app = express();
     this.app.disable('x-powered-by');
     this.app.set('trust proxy', 0);
+    this.app.use(express.json());
     await this.buildApiDocument();
     this.app.use('/api', this.middleware.accessLog);
     this.app.use(
@@ -63,7 +65,7 @@ export class HttpServer {
   };
 
   private getApiRouters = (): express.Router[] => {
-    const routers = [new DevV1Controller(this.logger).routes()];
+    const routers = [new DevV1Controller().routes()];
     return routers;
   };
 
@@ -80,8 +82,8 @@ export class HttpServer {
         outputPath: './generate/openapi.json',
         specVersion: 3,
         openapi: {
-          title: 'Mr.C API',
-          version: '1.0.0',
+          title: name,
+          version: version,
           securityDefinitions: {
             jwt: {
               type: 'http',

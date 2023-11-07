@@ -1,6 +1,4 @@
-import { UUID } from 'crypto';
-
 export interface Profile {
-  id: UUID;
+  id: string;
   name: string;
 }
