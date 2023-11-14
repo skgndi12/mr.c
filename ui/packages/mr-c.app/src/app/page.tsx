@@ -1,4 +1,4 @@
-import { AtomicComponent, MolecularComponent } from '@mrc/common-components';
+import { MyComponent } from '@/components/my-component';
 import { hello } from '@mrc/common-utils';
 
 export default function Home() {
@@ -8,8 +8,7 @@ export default function Home() {
   return (
     <>
       <p className="headline-1-semibold">{helloMrC}</p>
-      <AtomicComponent color="primary" />
-      <MolecularComponent color="secondary" description="This is a description" />
+      <MyComponent name="Mr C" />
     </>
   );
 }
