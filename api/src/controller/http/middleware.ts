@@ -3,20 +3,8 @@ import 'express-async-errors';
 import { HttpError as ValidationError } from 'express-openapi-validator/dist/framework/types';
 import { Logger } from 'winston';
 
-import { getErrorMessage } from '@src/util/error';
+import { CustomError, HttpErrorCode } from '@src/error/errors';
 
-import {
-  BadRequestErrorType,
-  CustomError,
-  ForbiddenErrorType,
-  InternalErrorType,
-  MethodNotAllowedErrorType,
-  NotAcceptableErrorType,
-  NotFoundErrorType,
-  PayloadTooLargeErrorType,
-  UnauthorizedErrorType,
-  UnsupportedMediaErrorType
-} from '@controller/http/errors';
 import { HttpErrorResponse } from '@controller/http/response';
 
 export class Middleware {
@@ -37,7 +25,7 @@ export class Middleware {
         bodyBytes: res.getHeader('Content-Length'),
         elapsedMs: end - start,
         contentType: res.getHeader('Content-Type')?.toString().split(';')[0],
-        errors: res.locals.error?.messages
+        error: res.locals?.error
       });
     });
 
@@ -57,12 +45,13 @@ export class Middleware {
       customError = this.convertValidationErrorToCustomError(err);
     } else {
       customError = new CustomError(
-        InternalErrorType.UNEXPECTED,
-        `Unexpected error occured, error: ${getErrorMessage(err)}`
+        HttpErrorCode.INTERNAL_ERROR,
+        err,
+        'Unexpected error occured'
       );
     }
 
-    this.respondError(customError, res);
+    this.responseError(customError, res);
   };
 
   // TODO: https://github.com/MovieReviewComment/Mr.C/issues/49
@@ -71,9 +60,10 @@ export class Middleware {
     res: Response<HttpErrorResponse>,
     next: NextFunction
   ) => {
-    this.respondError(
+    this.responseError(
       new CustomError(
-        NotFoundErrorType.ROUTE_NOT_FOUND,
+        HttpErrorCode.NOT_FOUND,
+        new Error('Not found route'),
         'No matching route found'
       ),
       res
@@ -83,53 +73,66 @@ export class Middleware {
   private convertValidationErrorToCustomError = (
     err: ValidationError
   ): CustomError => {
-    const errMessages = err.errors.map((e) => e.message);
+    const errMessages = this.getValidationErrorMessages(err);
 
     switch (err.status) {
       case 400:
-        return new CustomError(BadRequestErrorType.BAD_REQUEST, ...errMessages);
+        return new CustomError(HttpErrorCode.BAD_REQUEST, err, ...errMessages);
       case 401:
-        return new CustomError(
-          UnauthorizedErrorType.UNAUTHORIZED,
-          ...errMessages
-        );
+        return new CustomError(HttpErrorCode.UNAUTHORIZED, err, ...errMessages);
       case 403:
-        return new CustomError(ForbiddenErrorType.FORBIDDEN, ...errMessages);
+        return new CustomError(HttpErrorCode.FORBIDDEN, err, ...errMessages);
       case 404:
-        return new CustomError(
-          NotFoundErrorType.ROUTE_NOT_FOUND,
-          ...errMessages
-        );
+        return new CustomError(HttpErrorCode.NOT_FOUND, err, ...errMessages);
       case 405:
         return new CustomError(
-          MethodNotAllowedErrorType.METHOD_NOT_ALLOWED,
+          HttpErrorCode.METHOD_NOT_ALLOWED,
+          err,
           ...errMessages
         );
       case 406:
         return new CustomError(
-          NotAcceptableErrorType.NOT_ACCEPTABLE,
+          HttpErrorCode.NOT_ACCEPTABLE,
+          err,
           ...errMessages
         );
       case 413:
         return new CustomError(
-          PayloadTooLargeErrorType.PAYLOAD_TOO_LARGE,
+          HttpErrorCode.PAYLOAD_TOO_LARGE,
+          err,
           ...errMessages
         );
       case 415:
         return new CustomError(
-          UnsupportedMediaErrorType.UNSUPPORTED_MEDIA_TYPE,
+          HttpErrorCode.UNSUPPORTED_MEDIA_TYPE,
+          err,
           ...errMessages
         );
       default:
-        return new CustomError(InternalErrorType.UNEXPECTED, ...errMessages);
+        return new CustomError(
+          HttpErrorCode.INTERNAL_ERROR,
+          err,
+          ...errMessages
+        );
     }
   };
 
-  private respondError = (
+  private getValidationErrorMessages = (err: ValidationError): string[] => {
+    const errorMessages = err.errors.map((e) => {
+      if (err.status < 500) return `${e.path}: ${e.message}`;
+      else {
+        return 'Unexpected error occured';
+      }
+    });
+
+    return errorMessages;
+  };
+
+  private responseError = (
     err: CustomError,
     res: Response<HttpErrorResponse>
   ) => {
-    const statusCode = this.getStatusCode(err);
+    const statusCode = err.getHttpStatusCode();
 
     switch (true) {
       case statusCode >= 500:
@@ -149,37 +152,7 @@ export class Middleware {
     res.locals.error = err;
     res.status(statusCode);
     res.send({
-      type: err.type,
       messages: err.messages
     });
-  };
-
-  private getStatusCode = (err: CustomError) => {
-    switch (err.type) {
-      case 'BAD_REQUEST':
-        return 400;
-      case 'UNAUTHORIZED':
-        return 401;
-      case 'FORBIDDEN':
-        return 403;
-      case 'ROUTE_NOT_FOUND':
-        return 404;
-      case 'USER_NOT_FOUND':
-        return 404;
-      case 'REVIEW_NOT_FOUND':
-        return 404;
-      case 'REPLY_NOT_FOUND':
-        return 404;
-      case 'METHOD_NOT_ALLOWED':
-        return 405;
-      case 'NOT_ACCEPTABLE':
-        return 406;
-      case 'PAYLOAD_TOO_LARGE':
-        return 413;
-      case 'UNSUPPORTED_MEDIA_TYPE':
-        return 415;
-      default:
-        return 500;
-    }
   };
 }
