@@ -4,10 +4,8 @@ import {
   PrismaErrorCode,
   isErrorWithCode
 } from '@src/infrastructure/prisma/errors';
-import { RepositoryError } from '@src/infrastructure/repositories/errors';
 import { IsolationLevel } from '@src/infrastructure/repositories/types';
 import { TransactionManager } from '@src/ports/transaction.manager';
-import { getErrorMessage } from '@src/util/error';
 
 export class PrismaTransactionManager implements TransactionManager {
   constructor(private readonly client: PrismaClient) {}
@@ -35,7 +33,7 @@ export class PrismaTransactionManager implements TransactionManager {
           continue;
         }
 
-        throw new RepositoryError(getErrorMessage(error));
+        throw error;
       }
     }
 

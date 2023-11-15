@@ -1,9 +1,12 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 
 import { Profile } from '@src/core/entities/profile.entity';
-import { RepositoryError } from '@src/infrastructure/repositories/errors';
+import { AppErrorCode, CustomError } from '@src/error/errors';
+import {
+  PrismaErrorCode,
+  isErrorWithCode
+} from '@src/infrastructure/prisma/errors';
 import { ProfileRepository } from '@src/ports/profile.repository';
-import { getErrorMessage } from '@src/util/error';
 
 export class PostgresqlProfileRepository implements ProfileRepository {
   constructor(private readonly client: PrismaClient) {}
@@ -12,12 +15,8 @@ export class PostgresqlProfileRepository implements ProfileRepository {
     name: string,
     transactionClient?: Prisma.TransactionClient
   ): Promise<Profile> => {
-    try {
-      const client = transactionClient ?? this.client;
-      return client.profile.create({ data: { name } });
-    } catch (error: unknown) {
-      throw new RepositoryError(getErrorMessage(error));
-    }
+    const client = transactionClient ?? this.client;
+    return client.profile.create({ data: { name } });
   };
 
   public findById = async (
@@ -31,7 +30,18 @@ export class PostgresqlProfileRepository implements ProfileRepository {
       });
       return profile;
     } catch (error: unknown) {
-      throw new RepositoryError(getErrorMessage(error));
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError(
+          AppErrorCode.NOT_FOUND,
+          error,
+          `profile not found by id: ${id})`
+        );
+      }
+
+      throw error;
     }
   };
 
@@ -47,7 +57,18 @@ export class PostgresqlProfileRepository implements ProfileRepository {
         data: { name }
       });
     } catch (error: unknown) {
-      throw new RepositoryError(getErrorMessage(error));
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError(
+          AppErrorCode.NOT_FOUND,
+          error,
+          `profile not found by id: ${id}`
+        );
+      }
+
+      throw error;
     }
   };
 }
