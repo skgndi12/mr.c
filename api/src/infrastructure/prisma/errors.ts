@@ -1,4 +1,6 @@
 export enum PrismaErrorCode {
+  RECORD_NOT_FOUND = '2001',
+  UNIQUE_CONSTRAINT_VIOLATION = '2002',
   TRANSACTION_CONFLICT = 'P2034'
 }
 

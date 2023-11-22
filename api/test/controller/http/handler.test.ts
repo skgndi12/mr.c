@@ -5,7 +5,6 @@ import http from 'http';
 import request from 'supertest';
 import { Logger } from 'winston';
 
-import { MethodNotAllowedErrorType } from '@src/controller/http/errors';
 import { methodNotAllowed } from '@src/controller/http/handler';
 import { Middleware } from '@src/controller/http/middleware';
 
@@ -96,7 +95,6 @@ describe('Test handler', () => {
 
   it('should 405 when POST method for the route is not allowed', async () => {
     const expectedResponse = {
-      type: MethodNotAllowedErrorType.METHOD_NOT_ALLOWED,
       messages: [`The POST for the "${baseUrl}/test" route is not allowed`]
     };
     const response = await request(testHttpServer.app).post(`${baseUrl}/test`);

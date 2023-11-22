@@ -8,15 +8,8 @@ import request from 'supertest';
 import { Tspec, generateTspec } from 'tspec';
 import { Logger } from 'winston';
 
-import {
-  BadRequestErrorType,
-  CustomError,
-  InternalErrorType,
-  MethodNotAllowedErrorType,
-  NotFoundErrorType,
-  UnauthorizedErrorType
-} from '@src/controller/http/errors';
 import { Middleware } from '@src/controller/http/middleware';
+import { CustomError, HttpErrorCode } from '@src/error/errors';
 
 class TestHttpServer {
   middleware: Middleware;
@@ -145,14 +138,16 @@ class TestController {
 
   public throwSyncCustomError = (req: Request, res: Response) => {
     throw new CustomError(
-      InternalErrorType.UNEXPECTED,
+      HttpErrorCode.INTERNAL_ERROR,
+      new Error('Internal error'),
       'Error from throwSyncCustomError'
     );
   };
 
   public throwAsyncCustomError = async (req: Request, res: Response) => {
     throw new CustomError(
-      InternalErrorType.UNEXPECTED,
+      HttpErrorCode.INTERNAL_ERROR,
+      new Error('Internal error'),
       'Error from throwAsyncCustomError'
     );
   };
@@ -192,7 +187,6 @@ describe('Test middleware', () => {
     );
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
-      type: InternalErrorType.UNEXPECTED,
       messages: ['Error from throwSyncCustomError']
     });
   });
@@ -203,7 +197,6 @@ describe('Test middleware', () => {
     );
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
-      type: InternalErrorType.UNEXPECTED,
       messages: ['Error from throwAsyncCustomError']
     });
   });
@@ -214,8 +207,7 @@ describe('Test middleware', () => {
     );
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
-      type: InternalErrorType.UNEXPECTED,
-      messages: ['Unexpected error occured, error: Error from throwSyncError']
+      messages: ['Unexpected error occured']
     });
   });
 
@@ -225,8 +217,7 @@ describe('Test middleware', () => {
     );
     expect(response.status).toEqual(500);
     expect(response.body).toStrictEqual({
-      type: InternalErrorType.UNEXPECTED,
-      messages: ['Unexpected error occured, error: Error from throwAsyncError']
+      messages: ['Unexpected error occured']
     });
   });
 
@@ -235,7 +226,6 @@ describe('Test middleware', () => {
       `${baseUrl}/throwSyncCustomError?foo=123`
     );
     expect(response.status).toEqual(400);
-    expect(response.body.type).toEqual(BadRequestErrorType.BAD_REQUEST);
   });
 
   it('should 200 when correct authorization header passed', async () => {
@@ -251,7 +241,6 @@ describe('Test middleware', () => {
       `${baseUrl}/authRequired`
     );
     expect(response.status).toEqual(401);
-    expect(response.body.type).toEqual(UnauthorizedErrorType.UNAUTHORIZED);
   });
 
   it('should 404 when no matching route found', async () => {
@@ -259,7 +248,6 @@ describe('Test middleware', () => {
       `${baseUrl}/wrongPath`
     );
     expect(response.status).toEqual(404);
-    expect(response.body.type).toEqual(NotFoundErrorType.ROUTE_NOT_FOUND);
   });
 
   it('should 405 when method not allowed', async () => {
@@ -267,8 +255,5 @@ describe('Test middleware', () => {
       `${baseUrl}/throwSyncCustomError`
     );
     expect(response.status).toEqual(405);
-    expect(response.body.type).toEqual(
-      MethodNotAllowedErrorType.METHOD_NOT_ALLOWED
-    );
   });
 });

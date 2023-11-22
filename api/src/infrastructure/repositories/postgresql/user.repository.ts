@@ -1,9 +1,12 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 
 import { User } from '@src/core/entities/user.entity';
-import { RepositoryError } from '@src/infrastructure/repositories/errors';
+import { AppErrorCode, CustomError } from '@src/error/errors';
+import {
+  PrismaErrorCode,
+  isErrorWithCode
+} from '@src/infrastructure/prisma/errors';
 import { UserRepository } from '@src/ports/user.repository';
-import { getErrorMessage } from '@src/util/error';
 
 export class PostgresqlUserRepository implements UserRepository {
   constructor(private readonly client: PrismaClient) {}
@@ -13,12 +16,8 @@ export class PostgresqlUserRepository implements UserRepository {
     email: string,
     transactionClient?: Prisma.TransactionClient
   ): Promise<User> => {
-    try {
-      const client = transactionClient ?? this.client;
-      return client.user.create({ data: { name, email } });
-    } catch (error: unknown) {
-      throw new RepositoryError(getErrorMessage(error));
-    }
+    const client = transactionClient ?? this.client;
+    return client.user.create({ data: { name, email } });
   };
 
   public findById = async (
@@ -29,7 +28,18 @@ export class PostgresqlUserRepository implements UserRepository {
       const client = transactionClient ?? this.client;
       return client.user.findFirstOrThrow({ where: { id } });
     } catch (error: unknown) {
-      throw new RepositoryError(getErrorMessage(error));
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError(
+          AppErrorCode.NOT_FOUND,
+          error,
+          `user not found by id: ${id})`
+        );
+      }
+
+      throw error;
     }
   };
 
@@ -46,7 +56,18 @@ export class PostgresqlUserRepository implements UserRepository {
         data: { name, email }
       });
     } catch (error: unknown) {
-      throw new RepositoryError(getErrorMessage(error));
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError(
+          AppErrorCode.NOT_FOUND,
+          error,
+          `user not found by id: ${id})`
+        );
+      }
+
+      throw error;
     }
   };
 }
