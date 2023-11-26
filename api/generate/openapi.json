@@ -58,6 +58,43 @@
         }
       }
     },
+    "/api/v1/dev/server-time": {
+      "get": {
+        "operationId": "DevApiSpec_get_/server-time",
+        "tags": [
+          "Development"
+        ],
+        "summary": "Server Time",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerTimeV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz/liveness": {
       "get": {
         "operationId": "HealthApiSpec_get_/liveness",
@@ -125,6 +162,18 @@
           }
         },
         "additionalProperties": false
+      },
+      "ServerTimeV1Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "message"
+        ]
       },
       "LivenessResponse": {
         "type": "object",
