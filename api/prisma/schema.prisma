@@ -7,17 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    String @id @default(uuid())
-  name  String @db.VarChar(64)
-  email String @db.VarChar(64)
+enum Idp {
+  GOOGLE
+}
 
+enum AccessLevel {
+  USER
+  DEVELOPER
+  ADMIN
+}
+
+model User {
+  id          String      @id @default(uuid())
+  nickname    String      @db.VarChar
+  tag         String      @db.Char(5)
+  idp         Idp
+  email       String      @unique @db.VarChar
+  accessLevel AccessLevel @default(USER) @map("access_level")
+  createdAt   DateTime    @map("created_at") @db.Timestamptz
+  updatedAt   DateTime    @map("updated_at") @db.Timestamptz
+
+  @@unique([nickname, tag])
   @@map("users")
 }
 
-model Profile {
-  id   String @id @default(uuid())
-  name String @db.VarChar(64)
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Char(36)
+  title     String   @db.VarChar
+  movieName String   @map("movie_name") @db.VarChar
+  content   String   @db.VarChar
+  createdAt DateTime @map("created_at") @db.Timestamptz
+  updatedAt DateTime @map("updated_at") @db.Timestamptz
 
-  @@map("profiles")
+  @@map("reviews")
+}
+
+model Reply {
+  id        Int      @id @default(autoincrement())
+  reviewId  Int      @map("review_id") @db.Integer
+  userId    String   @map("user_id") @db.Char(36)
+  content   String   @db.VarChar
+  createdAt DateTime @map("created_at") @db.Timestamptz
+  updatedAt DateTime @map("updated_at") @db.Timestamptz
+
+  @@map("replies")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Char(36)
+  movieName String   @map("movie_name") @db.VarChar
+  content   String   @db.VarChar
+  createdAt DateTime @map("created_at") @db.Timestamptz
+  updatedAt DateTime @map("updated_at") @db.Timestamptz
+
+  @@map("comments")
 }
