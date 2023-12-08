@@ -1,4 +1,4 @@
-import { AsccessLevelEnum, IdpEnum } from '@src/core/types';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 
 export interface User {
   id: string;
@@ -6,7 +6,7 @@ export interface User {
   tag: string;
   idp: IdpEnum;
   email: string;
-  accessLevel: AsccessLevelEnum;
+  accessLevel: AccessLevelEnum;
   createdAt: Date;
   updatedAt: Date;
 }

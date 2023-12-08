@@ -2,7 +2,7 @@ export enum IdpEnum {
   GOOGLE = 'GOOGLE'
 }
 
-export enum AsccessLevelEnum {
+export enum AccessLevelEnum {
   USER = 'USER',
   DEVELOPER = 'DEVELOPER',
   ADMIN = 'ADMIN'
