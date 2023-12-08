@@ -12,3 +12,10 @@ database:
   port: 5435
   user: 'mrc-client'
   password: 'Client123!'
+jwt:
+  expirationHour: 720
+  activeKeyPair: v1
+  keyPairs:
+    - name: v1
+      private: <private_key>
+      public: <public_key>

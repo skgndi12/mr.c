@@ -12,3 +12,47 @@ database:
   port: 5432
   user: 'test'
   password: 'test123!'
+jwt:
+  expirationHour: 1
+  activeKeyPair: test
+  keyPairs:
+    - name: test
+      private: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEpQIBAAKCAQEAsNp22LRZ1VNL+0KI21Cd7XFIF5bdN4fiNjESGMcH8iylL0Pg
+        924lYq/Jtt8wtBAVUn6W87hRqFN4jwrHfcaGd25aTf/MnR9asteSj8+d9K/s8UOL
+        MQMRPjY0ud/NNL4Bn3LubjwLXjEkhV6bC9LeIZSAFiomjjqW2V4rFecffngdtOo8
+        P77P19Rg5snQkLox1ABmVGE9+XWU2Hr1vZ+mh2WqwGmQr/j5Us6QZ8vvKR0oQdmz
+        z9+P/1w/xwEYvZhZyn1hTWvBEufUQYWSb0ve/uKYA36hQt+ou2Y7ITRR0raFePtw
+        iwRfIT1cqeqG6+n+uMiT5kh70P6vQbglfCj91QIDAQABAoIBAGl4H+Bkzh42qt2R
+        dGS20zhDkqbexdbUJsgCw7QbHlYC4hAp/wQQoCMWismQmU8JOG4WKJf4mFo2TXOh
+        Dg+oUZDwMtLJdpFNnZ2CillRi/Xc5QWNLnlwRtw/H3qqSYrmtbkNpbv/+xeVXx5a
+        qUSH4QlNsoWFZbD0p/nB+xf42gNlSO5pOOqP5iXt5wJBbWhpomqFFZuD/+Pf6Uma
+        +YNB6u6/obdS+AaHt3TIUck2CtMgZ49jI+rx87JEpNO2QVeiprTDBlZMyzxTQi3W
+        3tfY5o5Nsu42ZyptZSTacNKgOzKub/7T0p6852j/fOXGQvVRT8baVFAeM9TrPExS
+        p2f/84ECgYEA3eaM/Q+flts3KJBpiTw5kwD5v6vAoZ4oGlJIxlMEjE4vLtruS1Fa
+        YxChOeEmdu9oAk3drxDmtPmNTKXnlv75P2/h0Qi1burEF0wcQN5tUF1blcdgG4kr
+        QVCf+Bwk03lVcPS8YxxeHCpq5NEEKLFImkjbY/X9pqWxQbsPjZOTfxkCgYEAzAfH
+        znohrkWoy1guV/sxZjs6AIwBqM1uWhraXmDc+yVc1nNMKuyL5LKuaJFWSwXWMe2F
+        hUT5BYs3ajtpEboxmQ+V9nCM6jbSSsxSrWe8sOffZj2hTbsJh8/N5rXTK1QaMRD3
+        s1BQINAofxitFxKYWJ60tKAhTlmNMMwfH7Y7WB0CgYEAlN0cbJDUoWHDKUVoZ5at
+        kT8wTTOt8T6m7LGS/OmovW+eG7Ln9kNHffokDy5KnbOSdSlDtTSDcZmQ/4C1UwkO
+        sU4fkhpjjVuV3YND2QjfEPDwhhTRFuf4ysKJ7usCkZRui27EC0F2qTKTr5nBToNQ
+        j6Cc/fyDBA9YUR5rGrGMW9ECgYEAxqKciAynVb9DwhSrqcRIJ7tpkLa9ttWppdeW
+        2WN8QJXzeGTvtqps186Ntggo9wlLq3gPEdxAhIExBh+o/zVCrD1cRnz08+FDgsbB
+        h0kDj0dvW16M99wsPyi00PQcDobmqPZX8R8zo36Erpgbi+byovSAAYoUYu8UYnmX
+        o4wK4pECgYEA2HY5ChDIAwucoN0mHDRsCUDQqopiI7rS9WckH6LnNbB5H9/mKvOK
+        cHgqP1sH8xA9hYK1Gh5LljUHbwp3XAaLZULkDsMgPKG7DpnBN81Jq9avo0k9tl9b
+        ziVXu0bWgX8bIt9cmoG5eP9jx8oCTnR/l7xDxOTsDH1VV91lQjfj9fo=
+        -----END RSA PRIVATE KEY-----
+      public: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsNp22LRZ1VNL+0KI21Cd
+        7XFIF5bdN4fiNjESGMcH8iylL0Pg924lYq/Jtt8wtBAVUn6W87hRqFN4jwrHfcaG
+        d25aTf/MnR9asteSj8+d9K/s8UOLMQMRPjY0ud/NNL4Bn3LubjwLXjEkhV6bC9Le
+        IZSAFiomjjqW2V4rFecffngdtOo8P77P19Rg5snQkLox1ABmVGE9+XWU2Hr1vZ+m
+        h2WqwGmQr/j5Us6QZ8vvKR0oQdmzz9+P/1w/xwEYvZhZyn1hTWvBEufUQYWSb0ve
+        /uKYA36hQt+ou2Y7ITRR0raFePtwiwRfIT1cqeqG6+n+uMiT5kh70P6vQbglfCj9
+        1QIDAQAB
+        -----END PUBLIC KEY-----
+
