@@ -1,11 +1,11 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 
+import { TransactionManager } from '@src/core/ports/transaction.manager';
 import {
   PrismaErrorCode,
   isErrorWithCode
 } from '@src/infrastructure/prisma/errors';
 import { IsolationLevel } from '@src/infrastructure/repositories/types';
-import { TransactionManager } from '@src/ports/transaction.manager';
 
 export class PrismaTransactionManager implements TransactionManager {
   constructor(private readonly client: PrismaClient) {}
