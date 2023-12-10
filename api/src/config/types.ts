@@ -1,3 +1,4 @@
+import { RsaKeyPair } from '@src/jwt/types';
 import { LogFormat, LogLevel } from '@src/logger/types';
 
 export interface Config {
@@ -6,6 +7,7 @@ export interface Config {
   http: ConfigHttp;
   logger: ConfigLogger;
   database: ConfigDatabase;
+  jwt: ConfigJwt;
 }
 
 export interface ConfigTimeout {
@@ -27,4 +29,10 @@ export interface ConfigDatabase {
   port: number;
   user: string;
   password: string;
+}
+
+export interface ConfigJwt {
+  activeKeyPair: string;
+  keyPairs: RsaKeyPair[];
+  expirationHour: number;
 }
