@@ -9,3 +9,6 @@
 
 # Environment variable
 .env.*
+
+# Config
+development.yaml
