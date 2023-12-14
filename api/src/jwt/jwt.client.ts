@@ -54,27 +54,28 @@ export class JwtClient implements JwtHandler {
     try {
       token = verify(tokenString, keyPair.public, this.getVerifyOptions());
     } catch (error: unknown) {
-      throw new CustomError(
-        AppErrorCode.BAD_REQUEST,
-        error,
-        'failed to verify token'
-      );
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        cause: error,
+        message: 'failed to verify token',
+        context: typeof token === 'string' ? { token } : token
+      });
     }
 
     if (!this.isJwt(token)) {
-      throw new CustomError(
-        AppErrorCode.BAD_REQUEST,
-        new Error(`not a valid JWT format: ${token}`),
-        'not a valid JWT format'
-      );
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'not a valid JWT format',
+        context: typeof token === 'string' ? { token } : token
+      });
     }
 
     if (!isAppPayload(token.payload)) {
-      throw new CustomError(
-        AppErrorCode.BAD_REQUEST,
-        new Error(`unexpected app payload format: ${token.payload}`),
-        'unexpected app payload format'
-      );
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'unexpected app payload format',
+        context: { payload: token.payload }
+      });
     }
 
     return convertToAppIdToken(token.payload);
@@ -84,28 +85,27 @@ export class JwtClient implements JwtHandler {
     const token = decode(tokenString, this.getDecodeOptions());
 
     if (!this.isJwt(token)) {
-      throw new CustomError(
-        AppErrorCode.BAD_REQUEST,
-        new Error(`not a valid JWT format: ${token}`),
-        'not a valid JWT format'
-      );
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'not a valid JWT format',
+        context: !token || typeof token === 'string' ? { token } : token
+      });
     }
 
     if (!token.header.kid) {
-      throw new CustomError(
-        AppErrorCode.BAD_REQUEST,
-        new Error('kid does not exist in token'),
-        'kid does not exist in token'
-      );
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'kid does not exist in token'
+      });
     }
 
     const keyPair = this.keyChain.get(token.header.kid);
     if (!keyPair) {
-      throw new CustomError(
-        AppErrorCode.BAD_REQUEST,
-        new Error(`kid(${token.header.kid}) is not found from key chain`),
-        'kid is not found from key chain'
-      );
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'kid is not found from key chain',
+        context: { kid: token.header.kid }
+      });
     }
 
     return keyPair;

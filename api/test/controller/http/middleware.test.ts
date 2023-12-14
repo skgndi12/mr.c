@@ -137,19 +137,19 @@ class TestController {
   }
 
   public throwSyncCustomError = (req: Request, res: Response) => {
-    throw new CustomError(
-      HttpErrorCode.INTERNAL_ERROR,
-      new Error('Internal error'),
-      'Error from throwSyncCustomError'
-    );
+    throw new CustomError({
+      code: HttpErrorCode.INTERNAL_ERROR,
+      cause: new Error('Internal error'),
+      message: 'Error from throwSyncCustomError'
+    });
   };
 
   public throwAsyncCustomError = async (req: Request, res: Response) => {
-    throw new CustomError(
-      HttpErrorCode.INTERNAL_ERROR,
-      new Error('Internal error'),
-      'Error from throwAsyncCustomError'
-    );
+    throw new CustomError({
+      code: HttpErrorCode.INTERNAL_ERROR,
+      cause: new Error('Internal error'),
+      message: 'Error from throwAsyncCustomError'
+    });
   };
 
   public throwSyncError = (req: Request, res: Response) => {

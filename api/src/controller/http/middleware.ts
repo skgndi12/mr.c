@@ -44,11 +44,11 @@ export class Middleware {
     } else if (err instanceof ValidationError) {
       customError = this.convertValidationErrorToCustomError(err);
     } else {
-      customError = new CustomError(
-        HttpErrorCode.INTERNAL_ERROR,
-        err,
-        'Unexpected error occured'
-      );
+      customError = new CustomError({
+        code: HttpErrorCode.INTERNAL_ERROR,
+        cause: err,
+        message: 'Unexpected error occured'
+      });
     }
 
     this.responseError(customError, res);
@@ -61,11 +61,11 @@ export class Middleware {
     next: NextFunction
   ) => {
     this.responseError(
-      new CustomError(
-        HttpErrorCode.NOT_FOUND,
-        new Error('Not found route'),
-        'No matching route found'
-      ),
+      new CustomError({
+        code: HttpErrorCode.NOT_FOUND,
+        cause: new Error('Not found route'),
+        messages: ['No matching route found']
+      }),
       res
     );
   };
@@ -77,43 +77,59 @@ export class Middleware {
 
     switch (err.status) {
       case 400:
-        return new CustomError(HttpErrorCode.BAD_REQUEST, err, ...errMessages);
+        return new CustomError({
+          code: HttpErrorCode.BAD_REQUEST,
+          cause: err,
+          messages: errMessages
+        });
       case 401:
-        return new CustomError(HttpErrorCode.UNAUTHORIZED, err, ...errMessages);
+        return new CustomError({
+          code: HttpErrorCode.UNAUTHORIZED,
+          cause: err,
+          messages: errMessages
+        });
       case 403:
-        return new CustomError(HttpErrorCode.FORBIDDEN, err, ...errMessages);
+        return new CustomError({
+          code: HttpErrorCode.FORBIDDEN,
+          cause: err,
+          messages: errMessages
+        });
       case 404:
-        return new CustomError(HttpErrorCode.NOT_FOUND, err, ...errMessages);
+        return new CustomError({
+          code: HttpErrorCode.NOT_FOUND,
+          cause: err,
+          messages: errMessages
+        });
       case 405:
-        return new CustomError(
-          HttpErrorCode.METHOD_NOT_ALLOWED,
-          err,
-          ...errMessages
-        );
+        return new CustomError({
+          code: HttpErrorCode.METHOD_NOT_ALLOWED,
+          cause: err,
+          messages: errMessages
+        });
       case 406:
-        return new CustomError(
-          HttpErrorCode.NOT_ACCEPTABLE,
-          err,
-          ...errMessages
-        );
+        return new CustomError({
+          code: HttpErrorCode.NOT_ACCEPTABLE,
+          cause: err,
+          messages: errMessages
+        });
       case 413:
-        return new CustomError(
-          HttpErrorCode.PAYLOAD_TOO_LARGE,
-          err,
-          ...errMessages
-        );
+        return new CustomError({
+          code: HttpErrorCode.PAYLOAD_TOO_LARGE,
+          cause: err,
+          messages: errMessages
+        });
       case 415:
-        return new CustomError(
-          HttpErrorCode.UNSUPPORTED_MEDIA_TYPE,
-          err,
-          ...errMessages
-        );
+        return new CustomError({
+          code: HttpErrorCode.UNSUPPORTED_MEDIA_TYPE,
+          cause: err,
+          messages: errMessages
+        });
       default:
-        return new CustomError(
-          HttpErrorCode.INTERNAL_ERROR,
-          err,
-          ...errMessages
-        );
+        return new CustomError({
+          code: HttpErrorCode.INTERNAL_ERROR,
+          cause: err,
+          messages: errMessages
+        });
     }
   };
 

@@ -10,11 +10,10 @@ export const methodNotAllowed = (
   res: Response<HttpErrorResponse>,
   next: NextFunction
 ) => {
-  const error = new CustomError(
-    HttpErrorCode.METHOD_NOT_ALLOWED,
-    new Error('Method not allowed'),
-    `The ${req.method} for the "${req.originalUrl}" route is not allowed`
-  );
+  const error = new CustomError({
+    code: HttpErrorCode.METHOD_NOT_ALLOWED,
+    message: `The ${req.method} for the "${req.originalUrl}" route is not allowed`
+  });
   res.locals.error = error;
   res.status(405).send({
     messages: error.messages
