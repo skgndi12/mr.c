@@ -54,26 +54,26 @@ export function isAppPayload(payload: unknown): payload is AppPayload {
     typeof payload === 'object' &&
     payload !== null &&
     'iss' in payload &&
-    typeof (payload as Record<string, unknown>).iss === 'string' &&
+    typeof payload.iss === 'string' &&
     'iat' in payload &&
-    typeof (payload as Record<string, unknown>).iat === 'number' &&
+    typeof payload.iat === 'number' &&
     'nbf' in payload &&
-    typeof (payload as Record<string, unknown>).nbf === 'number' &&
+    typeof payload.nbf === 'number' &&
     'exp' in payload &&
-    typeof (payload as Record<string, unknown>).exp === 'number' &&
+    typeof payload.exp === 'number' &&
     'userId' in payload &&
-    typeof (payload as Record<string, unknown>).userId === 'string' &&
+    typeof payload.userId === 'string' &&
     'nickname' in payload &&
-    typeof (payload as Record<string, unknown>).nickname === 'string' &&
+    typeof payload.nickname === 'string' &&
     'tag' in payload &&
-    typeof (payload as Record<string, unknown>).tag === 'string' &&
+    typeof payload.tag === 'string' &&
     'idp' in payload &&
-    typeof (payload as Record<string, unknown>).idp === 'string' &&
+    typeof payload.idp === 'string' &&
     isStringEnumValue(payload.idp, IdpEnum) &&
     'email' in payload &&
-    typeof (payload as Record<string, unknown>).email === 'string' &&
+    typeof payload.email === 'string' &&
     'accessLevel' in payload &&
-    typeof (payload as Record<string, unknown>).accessLevel === 'string' &&
+    typeof payload.accessLevel === 'string' &&
     isStringEnumValue(payload.accessLevel, AccessLevelEnum)
   );
 }
