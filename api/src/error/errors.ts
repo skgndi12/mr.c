@@ -19,16 +19,36 @@ export enum HttpErrorCode {
   INTERNAL_ERROR
 }
 
-export class CustomError extends Error {
-  messages: string[];
+interface CustomErrorBuilder {
+  code: AppErrorCode | HttpErrorCode;
+  cause?: unknown;
+  message?: string;
+  messages?: string[];
+  context?: Record<string, any>;
+}
 
-  constructor(
-    public code: AppErrorCode | HttpErrorCode,
-    public origin: unknown,
-    ...messages: string[]
-  ) {
+export class CustomError extends Error {
+  public readonly code: AppErrorCode | HttpErrorCode;
+  public readonly cause?: unknown;
+  public readonly messages: string[];
+  public readonly context?: Record<string, any>;
+
+  constructor(builder: CustomErrorBuilder) {
+    let messages;
+
+    if (builder.message) {
+      messages = [builder.message];
+    } else if (builder.messages) {
+      messages = builder.messages;
+    } else {
+      messages = ['Custom Error'];
+    }
+
     super(messages[0]);
+    this.code = builder.code;
+    this.cause = builder.cause;
     this.messages = messages;
+    this.context = builder.context;
   }
 
   public getHttpStatusCode = () => {
