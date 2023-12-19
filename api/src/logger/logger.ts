@@ -1,3 +1,4 @@
+import { TransformableInfo } from 'logform';
 import {
   Logger,
   LoggerOptions,
@@ -6,7 +7,55 @@ import {
   transports
 } from 'winston';
 
+import { CustomError } from '@src/error/errors';
 import { LogFormat, LoggerConfig } from '@src/logger/types';
+
+function convertErrorPropertiesToObject(target: TransformableInfo) {
+  const errorKeys = [];
+  for (const [key, value] of Object.entries(target)) {
+    if (value instanceof Error) {
+      errorKeys.push(key);
+    }
+  }
+
+  if (errorKeys.length <= 0) return;
+
+  for (const key of errorKeys) {
+    const nestedErrorKeys = [];
+    for (const [nestedKey, nestedValue] of Object.entries(target[key])) {
+      if (nestedValue instanceof Error) {
+        nestedErrorKeys.push(nestedKey);
+      }
+    }
+
+    for (const nestedKey of nestedErrorKeys) {
+      target[key][nestedKey] = Object.assign(
+        {
+          message: target[key][nestedKey].message,
+          stack: target[key][nestedKey].stack
+        },
+        target[key][nestedKey]
+      );
+    }
+
+    if (target[key] instanceof CustomError) {
+      target[key] = Object.assign({ stack: target[key].stack }, target[key]);
+    } else {
+      target[key] = Object.assign(
+        {
+          message: target[key].message,
+          stack: target[key].stack
+        },
+        target[key]
+      );
+    }
+  }
+}
+
+const enumerateErrorFormat = format((info) => {
+  convertErrorPropertiesToObject(info);
+  return info;
+});
 
 // The available log levels are described in the link below.
 // https://github.com/winstonjs/winston#logging-levels
