@@ -10,6 +10,46 @@ import {
 import { CustomError } from '@src/error/errors';
 import { LogFormat, LoggerConfig } from '@src/logger/types';
 
+function convertErrorToObject(target: TransformableInfo) {
+  const nestedErrorKeys = [];
+  for (const [nestedKey, nestedValue] of Object.entries(target)) {
+    if (nestedValue instanceof Error) {
+      nestedErrorKeys.push(nestedKey);
+    }
+  }
+
+  for (const nestedKey of nestedErrorKeys) {
+    target[nestedKey] = Object.assign(
+      {
+        message: target[nestedKey].message,
+        stack: target[nestedKey].stack
+      },
+      target[nestedKey]
+    );
+  }
+
+  if (target instanceof CustomError) {
+    // Object.assign() performs a deep copy for primitive types with depth 0
+    target = Object.assign(
+      {
+        stack: target.stack
+      },
+      target
+    );
+    return target;
+  } else {
+    // Object.assign() performs a deep copy for primitive types with depth 0
+    target = Object.assign(
+      {
+        message: target.message,
+        stack: target.stack
+      },
+      target
+    );
+    return target;
+  }
+}
+
 function convertErrorPropertiesToObject(target: TransformableInfo) {
   const errorKeys = [];
   for (const [key, value] of Object.entries(target)) {
@@ -53,6 +93,12 @@ function convertErrorPropertiesToObject(target: TransformableInfo) {
 }
 
 const enumerateErrorFormat = format((info) => {
+  // info
+  if (info instanceof Error) {
+    return convertErrorToObject(info);
+  }
+
+  // metadata
   convertErrorPropertiesToObject(info);
   return info;
 });
@@ -80,6 +126,7 @@ function getTextLoggerOption(config: LoggerConfig): LoggerOptions {
       deployment: config.deployment
     },
     format: format.combine(
+      enumerateErrorFormat(),
       format.colorize(),
       format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       format.printf(({ level, message, timestamp, ...metadata }) => {
@@ -101,6 +148,7 @@ function getJsonLoggerOption(config: LoggerConfig): LoggerOptions {
       deployment: config.deployment
     },
     format: format.combine(
+      enumerateErrorFormat(),
       format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       format.json()
     ),
