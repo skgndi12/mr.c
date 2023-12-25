@@ -5,9 +5,41 @@
   },
   "openapi": "3.0.3",
   "paths": {
+    "/api/v1/google/sign-in": {
+      "get": {
+        "operationId": "AuthV1ApiSpec_get_/sign-in",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Initiate google sign in",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleSignInV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/dev/greeting": {
       "post": {
-        "operationId": "DevApiSpec_post_/greeting",
+        "operationId": "DevV1ApiSpec_post_/greeting",
         "tags": [
           "Development"
         ],
@@ -60,7 +92,7 @@
     },
     "/api/v1/dev/server-time": {
       "get": {
-        "operationId": "DevApiSpec_get_/server-time",
+        "operationId": "DevV1ApiSpec_get_/server-time",
         "tags": [
           "Development"
         ],
@@ -130,13 +162,8 @@
   },
   "components": {
     "schemas": {
-      "GreetingV1Response": {
+      "GoogleSignInV1Response": {
         "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          }
-        },
         "additionalProperties": false
       },
       "HttpErrorResponse": {
@@ -153,6 +180,15 @@
         "required": [
           "messages"
         ]
+      },
+      "GreetingV1Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "GreetingV1Request": {
         "type": "object",
