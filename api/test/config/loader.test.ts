@@ -7,6 +7,7 @@ import {
   buildHttpConfig,
   buildJwtClientConfig,
   buildLoggerConfig,
+  buildRedisConfig,
   loadConfig
 } from '@src/config/loader';
 
@@ -22,6 +23,11 @@ describe('Test config loader', () => {
         port: 5432,
         user: 'test',
         password: 'test123!'
+      },
+      redis: {
+        host: '127.0.0.1',
+        port: 6381,
+        password: 'mrcRedis'
       },
       jwt: {
         activeKeyPair: 'test',
@@ -96,6 +102,16 @@ describe('Test build database config', () => {
       port: 5432,
       user: 'test',
       password: 'test123!'
+    });
+  });
+});
+
+describe('Test build redis config', () => {
+  it('should build valid redis config from a test.yaml', () => {
+    expect(buildRedisConfig(loadConfig())).toStrictEqual({
+      host: '127.0.0.1',
+      port: 6381,
+      password: 'mrcRedis'
     });
   });
 });

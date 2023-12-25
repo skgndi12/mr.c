@@ -7,6 +7,7 @@ export interface Config {
   http: ConfigHttp;
   logger: ConfigLogger;
   database: ConfigDatabase;
+  redis: ConfigRedis;
   jwt: ConfigJwt;
   google: ConfigGoogle;
   oauth: ConfigOauth;
@@ -30,6 +31,12 @@ export interface ConfigDatabase {
   host: string;
   port: number;
   user: string;
+  password: string;
+}
+
+export interface ConfigRedis {
+  host: string;
+  port: number;
   password: string;
 }
 
