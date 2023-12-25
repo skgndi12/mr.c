@@ -1,6 +1,7 @@
 import config from 'config';
 
 import {
+  buildAuthConfig,
   buildDatabaseConfig,
   buildGoogleClientConfig,
   buildHttpConfig,
@@ -127,6 +128,14 @@ describe('Test build google client config', () => {
         authEndpoint: 'https://accounts.google.com/o/oauth2/auth',
         tokenEndpoint: 'https://oauth2.googleapis.com/token'
       }
+    });
+  });
+});
+
+describe('Test build auth config', () => {
+  it('should build valid auth config from a test.yaml', () => {
+    expect(buildAuthConfig(loadConfig())).toStrictEqual({
+      oauthStateExpirationMinutes: 10
     });
   });
 });
