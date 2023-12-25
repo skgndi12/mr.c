@@ -19,3 +19,14 @@ jwt:
     - name: v1
       private: <private_key>
       public: <public_key>
+google:
+  oauth:
+    clientId: <client_id>
+    clientSecret: <client_secret>
+    redirectPath: /api/v1/google/sign-in/token
+  endpoints:
+    auth: https://accounts.google.com/o/oauth2/auth
+    token: https://oauth2.googleapis.com/token
+oauth:
+  stateExpirationMinutes: 10
+

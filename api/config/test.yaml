@@ -55,4 +55,14 @@ jwt:
         /uKYA36hQt+ou2Y7ITRR0raFePtwiwRfIT1cqeqG6+n+uMiT5kh70P6vQbglfCj9
         1QIDAQAB
         -----END PUBLIC KEY-----
+google:
+  oauth:
+    clientId: test_client_id
+    clientSecret: test_client_secret
+    redirectPath: /api/v1/google/sign-in/token
+  endpoints:
+    auth: https://accounts.google.com/o/oauth2/auth
+    token: https://oauth2.googleapis.com/token
+oauth:
+  stateExpirationMinutes: 10
 

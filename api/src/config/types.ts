@@ -8,6 +8,8 @@ export interface Config {
   logger: ConfigLogger;
   database: ConfigDatabase;
   jwt: ConfigJwt;
+  google: ConfigGoogle;
+  oauth: ConfigOauth;
 }
 
 export interface ConfigTimeout {
@@ -35,4 +37,24 @@ export interface ConfigJwt {
   activeKeyPair: string;
   keyPairs: RsaKeyPair[];
   expirationHour: number;
+}
+
+export interface ConfigGoogle {
+  oauth: ConfigGoogleOauth;
+  endpoints: ConfigGoogleEndpoints;
+}
+
+export interface ConfigGoogleOauth {
+  clientId: string;
+  clientSecret: string;
+  redirectPath: string;
+}
+
+export interface ConfigGoogleEndpoints {
+  auth: string;
+  token: string;
+}
+
+export interface ConfigOauth {
+  stateExpirationMinutes: number;
 }
