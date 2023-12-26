@@ -11,6 +11,7 @@ import {
   ConfigTimeout
 } from '@src/config/types';
 import { HttpConfig } from '@src/controller/http/types';
+import { AuthConfig } from '@src/core/services/auth/types';
 import { GoogleClientConfig } from '@src/infrastructure/google/types';
 import { DatabaseConfig } from '@src/infrastructure/repositories/types';
 import { JwtClientConfig } from '@src/jwt/types';
@@ -74,3 +75,8 @@ export function buildGoogleClientConfig(config: Config): GoogleClientConfig {
   };
 }
 
+export function buildAuthConfig(config: Config): AuthConfig {
+  return {
+    oauthStateExpirationMinutes: config.oauth.stateExpirationMinutes
+  };
+}
