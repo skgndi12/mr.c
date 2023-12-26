@@ -26,11 +26,7 @@ async function main() {
   try {
     jwtClient = new JwtClient(buildJwtClientConfig(config));
   } catch (e) {
-    logger.log({
-      level: 'error',
-      message: 'Failed to initialize JWT client',
-      error: e
-    });
+    logger.error('Failed to initialize JWT client', { error: e });
     process.exit(1);
   }
   const prismaClient = generatePrismaClient(buildDatabaseConfig(config));

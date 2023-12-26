@@ -2,6 +2,7 @@ import config from 'config';
 
 import {
   buildDatabaseConfig,
+  buildGoogleClientConfig,
   buildHttpConfig,
   buildJwtClientConfig,
   buildLoggerConfig,
@@ -33,6 +34,20 @@ describe('Test config loader', () => {
               '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsNp22LRZ1VNL+0KI21Cd\n7XFIF5bdN4fiNjESGMcH8iylL0Pg924lYq/Jtt8wtBAVUn6W87hRqFN4jwrHfcaG\nd25aTf/MnR9asteSj8+d9K/s8UOLMQMRPjY0ud/NNL4Bn3LubjwLXjEkhV6bC9Le\nIZSAFiomjjqW2V4rFecffngdtOo8P77P19Rg5snQkLox1ABmVGE9+XWU2Hr1vZ+m\nh2WqwGmQr/j5Us6QZ8vvKR0oQdmzz9+P/1w/xwEYvZhZyn1hTWvBEufUQYWSb0ve\n/uKYA36hQt+ou2Y7ITRR0raFePtwiwRfIT1cqeqG6+n+uMiT5kh70P6vQbglfCj9\n1QIDAQAB\n-----END PUBLIC KEY-----\n'
           }
         ]
+      },
+      google: {
+        oauth: {
+          clientId: 'test_client_id',
+          clientSecret: 'test_client_secret',
+          redirectPath: '/api/v1/google/sign-in/token'
+        },
+        endpoints: {
+          auth: 'https://accounts.google.com/o/oauth2/auth',
+          token: 'https://oauth2.googleapis.com/token'
+        }
+      },
+      oauth: {
+        stateExpirationMinutes: 10
       }
     });
   });
@@ -98,6 +113,20 @@ describe('Test build jwt client config', () => {
             '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsNp22LRZ1VNL+0KI21Cd\n7XFIF5bdN4fiNjESGMcH8iylL0Pg924lYq/Jtt8wtBAVUn6W87hRqFN4jwrHfcaG\nd25aTf/MnR9asteSj8+d9K/s8UOLMQMRPjY0ud/NNL4Bn3LubjwLXjEkhV6bC9Le\nIZSAFiomjjqW2V4rFecffngdtOo8P77P19Rg5snQkLox1ABmVGE9+XWU2Hr1vZ+m\nh2WqwGmQr/j5Us6QZ8vvKR0oQdmzz9+P/1w/xwEYvZhZyn1hTWvBEufUQYWSb0ve\n/uKYA36hQt+ou2Y7ITRR0raFePtwiwRfIT1cqeqG6+n+uMiT5kh70P6vQbglfCj9\n1QIDAQAB\n-----END PUBLIC KEY-----\n'
         }
       ]
+    });
+  });
+});
+
+describe('Test build google client config', () => {
+  it('should build valid google client config from a test.yaml', () => {
+    expect(buildGoogleClientConfig(loadConfig())).toStrictEqual({
+      oauth: {
+        clientId: 'test_client_id',
+        clientSecret: 'test_client_secret',
+        redirectUri: '127.0.0.1:0/api/v1/google/sign-in/token',
+        authEndpoint: 'https://accounts.google.com/o/oauth2/auth',
+        tokenEndpoint: 'https://oauth2.googleapis.com/token'
+      }
     });
   });
 });
