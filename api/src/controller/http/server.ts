@@ -10,6 +10,9 @@ import { Logger } from 'winston';
 import apiSpecification from '@root/generate/openapi.json';
 import { name, version } from '@root/package.json';
 
+import { AuthService } from '@src/core/services/auth/auth.service';
+
+import { AuthV1Controller } from '@controller/http/auth/auth.v1.controller';
 import { DevV1Controller } from '@controller/http/dev/dev.v1.controller';
 import { HealthController } from '@controller/http/health/health.controller';
 import { Middleware } from '@controller/http/middleware';
@@ -22,7 +25,8 @@ export class HttpServer {
 
   constructor(
     private readonly logger: Logger,
-    private readonly config: HttpConfig
+    private readonly config: HttpConfig,
+    private readonly authService: AuthService
   ) {
     this.middleware = new Middleware(this.logger);
   }
@@ -65,7 +69,10 @@ export class HttpServer {
   };
 
   private getApiRouters = (): express.Router[] => {
-    const routers = [new DevV1Controller().routes()];
+    const routers = [
+      new DevV1Controller().routes(),
+      new AuthV1Controller(this.authService).routes()
+    ];
     return routers;
   };
 
