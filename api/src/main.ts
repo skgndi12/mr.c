@@ -1,12 +1,19 @@
 import {
+  buildAuthConfig,
   buildDatabaseConfig,
+  buildGoogleClientConfig,
   buildHttpConfig,
   buildJwtClientConfig,
   buildLoggerConfig,
+  buildRedisConfig,
   loadConfig
 } from '@src/config/loader';
+import { AuthService } from '@src/core/services/auth/auth.service';
+import { GoogleClient } from '@src/infrastructure/google/google.client';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
+import { generateRedisClient } from '@src/infrastructure/redis/redis.client';
+import { RedisKeyValueRepository } from '@src/infrastructure/repositories/redis/keyValue.repository';
 import { JwtClient } from '@src/jwt/jwt.client';
 import { initializeLogger } from '@src/logger/logger';
 
@@ -31,8 +38,23 @@ async function main() {
   }
   const prismaClient = generatePrismaClient(buildDatabaseConfig(config));
   const prismaTransactionManager = new PrismaTransactionManager(prismaClient);
+  const redisClient = await generateRedisClient(
+    logger,
+    buildRedisConfig(config)
+  );
+  const keyValueRepository = new RedisKeyValueRepository(redisClient);
 
-  const httpServer = new HttpServer(logger, buildHttpConfig(config));
+  const googleClient = new GoogleClient(buildGoogleClientConfig(loadConfig()));
+  const authService = new AuthService(
+    buildAuthConfig(config),
+    keyValueRepository,
+    googleClient
+  );
+  const httpServer = new HttpServer(
+    logger,
+    buildHttpConfig(config),
+    authService
+  );
   await httpServer.start();
   // await httpServer.close();
   // logger.info('Server shutdowned');

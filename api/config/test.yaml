@@ -12,6 +12,10 @@ database:
   port: 5432
   user: 'test'
   password: 'test123!'
+redis:
+  host: '127.0.0.1'
+  port: 6381
+  password: 'mrcRedis'
 jwt:
   expirationHour: 1
   activeKeyPair: test
