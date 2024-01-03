@@ -3,12 +3,17 @@ import 'express-async-errors';
 import { HttpError as ValidationError } from 'express-openapi-validator/dist/framework/types';
 import { Logger } from 'winston';
 
-import { CustomError, HttpErrorCode } from '@src/error/errors';
+import { JwtHandler } from '@src/core/ports/jwt.handler';
+import { AppErrorCode, CustomError, HttpErrorCode } from '@src/error/errors';
 
 import { HttpErrorResponse } from '@controller/http/response';
+import { idTokenCookieName } from '@controller/http/types';
 
 export class Middleware {
-  constructor(public logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly jwtHandler: JwtHandler
+  ) {}
 
   public accessLog = (req: Request, res: Response, next: NextFunction) => {
     const start = new Date().getTime();
@@ -33,7 +38,7 @@ export class Middleware {
   };
 
   public handleError = (
-    err: Error,
+    err: unknown,
     req: Request,
     res: Response<HttpErrorResponse>,
     next: NextFunction
@@ -68,6 +73,17 @@ export class Middleware {
       }),
       res
     );
+  };
+
+  public issuePassport = (req: Request, res: Response, next: NextFunction) => {
+    let passport = this.issuePassportFromHeader(req);
+
+    if (passport === null) {
+      passport = this.issuePassportFromCookie(req);
+    }
+
+    res.locals.passport = passport;
+    next();
   };
 
   private convertValidationErrorToCustomError = (
@@ -170,5 +186,36 @@ export class Middleware {
     res.send({
       messages: err.messages
     });
+  };
+
+  private issuePassportFromHeader = (req: Request) => {
+    const authHeader = req.get('Authorization');
+    if (!authHeader) {
+      return null;
+    }
+
+    const splittedAuthHeader = authHeader.split(' ', 2);
+    if (splittedAuthHeader.length !== 2 || splittedAuthHeader[0] !== 'Bearer') {
+      throw new CustomError({
+        code: AppErrorCode.UNAUTHENTICATED,
+        message: 'Authorization header must be in Bearer format',
+        context: { splittedAuthHeader }
+      });
+    }
+
+    return this.jwtHandler.verifyAppIdToken(splittedAuthHeader[1]);
+  };
+
+  private issuePassportFromCookie = (req: Request) => {
+    const cookie = req.cookies[idTokenCookieName];
+    if (!cookie) {
+      throw new CustomError({
+        code: AppErrorCode.UNAUTHENTICATED,
+        message: 'cookie does not exist',
+        context: { cookie }
+      });
+    }
+
+    return this.jwtHandler.verifyAppIdToken(cookie);
   };
 }

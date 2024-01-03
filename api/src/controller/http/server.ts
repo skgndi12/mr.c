@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import { middleware as OpenApiValidatorMiddleware } from 'express-openapi-validator';
 import { Express } from 'express-serve-static-core';
@@ -10,6 +11,7 @@ import { Logger } from 'winston';
 import apiSpecification from '@root/generate/openapi.json';
 import { name, version } from '@root/package.json';
 
+import { JwtHandler } from '@src/core/ports/jwt.handler';
 import { AuthService } from '@src/core/services/auth/auth.service';
 
 import { AuthV1Controller } from '@controller/http/auth/auth.v1.controller';
@@ -26,9 +28,10 @@ export class HttpServer {
   constructor(
     private readonly logger: Logger,
     private readonly config: HttpConfig,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly jwtHandler: JwtHandler
   ) {
-    this.middleware = new Middleware(this.logger);
+    this.middleware = new Middleware(this.logger, this.jwtHandler);
   }
 
   public start = async (): Promise<void> => {
@@ -37,7 +40,9 @@ export class HttpServer {
     this.app.set('trust proxy', 0);
     this.app.use(express.json());
     await this.buildApiDocument();
+    this.app.use('/api', cookieParser());
     this.app.use('/api', this.middleware.accessLog);
+    this.app.use('/api/v1/dev', this.middleware.issuePassport);
     this.app.use(
       OpenApiValidatorMiddleware({
         apiSpec: path.join(__dirname, '../../../generate/openapi.json'),
@@ -71,7 +76,10 @@ export class HttpServer {
   private getApiRouters = (): express.Router[] => {
     const routers = [
       new DevV1Controller().routes(),
-      new AuthV1Controller(this.authService).routes()
+      new AuthV1Controller(
+        this.authService,
+        this.config.cookieExpirationHours
+      ).routes()
     ];
     return routers;
   };

@@ -92,18 +92,25 @@
           "Test"
         ],
         "summary": "Authorization header required",
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
         "parameters": [],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AuthRequiredResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
               }
             }
           }
@@ -143,6 +150,33 @@
         "additionalProperties": {
           "type": "string"
         }
+      },
+      "AuthRequiredResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "message"
+        ]
+      },
+      "HttpErrorResponse": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "messages"
+        ]
       }
     },
     "securitySchemes": {
