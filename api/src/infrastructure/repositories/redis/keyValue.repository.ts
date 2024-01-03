@@ -25,4 +25,17 @@ export class RedisKeyValueRepository implements KeyValueRepository {
       return result;
     });
   };
+
+  public getThenDelete = async (key: string): Promise<string> => {
+    return await this.redisClient.getDel(key).then((result) => {
+      if (result === null) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'key does not exist',
+          context: { key }
+        });
+      }
+      return result;
+    });
+  };
 }
