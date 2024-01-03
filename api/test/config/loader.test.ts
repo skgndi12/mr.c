@@ -140,7 +140,7 @@ describe('Test build google client config', () => {
       oauth: {
         clientId: 'test_client_id',
         clientSecret: 'test_client_secret',
-        redirectUri: '127.0.0.1:0/api/v1/google/sign-in/token',
+        redirectPath: '/api/v1/google/sign-in/token',
         authEndpoint: 'https://accounts.google.com/o/oauth2/auth',
         tokenEndpoint: 'https://oauth2.googleapis.com/token'
       }
