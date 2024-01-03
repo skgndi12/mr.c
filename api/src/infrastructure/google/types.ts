@@ -9,3 +9,11 @@ interface GoogleOauthConfig {
   authEndpoint: string;
   tokenEndpoint: string;
 }
+
+export interface GoogleOauthTokenResponse {
+  access_token: string;
+  expires_in: string;
+  id_token: string;
+  scope: string;
+  token_type: string;
+}

@@ -37,7 +37,8 @@ describe('Test auth service', () => {
         return encodeURI(
           `${oauthAuthEndpoint}?client_id=${oauthClientId}&nonce=${nonce}&response_type=${response_type}&redirect_uri=${baseUrl}${oauthRedirectPath}&scope=${scope}&state=${state}&access_type=${access_type}&prompt=${prompt}`
         );
-      })
+      }),
+      exchangeAuthCode: jest.fn()
     };
     jest.spyOn(crypto, 'randomUUID').mockReturnValue(state);
   });
