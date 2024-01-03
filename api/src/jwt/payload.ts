@@ -1,5 +1,6 @@
+import { AccessLevel, Idp } from '@prisma/client';
+
 import { AppIdToken } from '@src/core/entities/auth.entity';
-import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { isStringEnumValue } from '@src/util/guard';
 
 export const mrcIssuer = 'movie-reivew-comment';
@@ -12,9 +13,9 @@ export interface AppPayload {
   userId: string;
   nickname: string;
   tag: string;
-  idp: IdpEnum;
+  idp: Idp;
   email: string;
-  accessLevel: AccessLevelEnum;
+  accessLevel: AccessLevel;
 }
 
 export function createAppPayload(
@@ -69,11 +70,11 @@ export function isAppPayload(payload: unknown): payload is AppPayload {
     typeof payload.tag === 'string' &&
     'idp' in payload &&
     typeof payload.idp === 'string' &&
-    isStringEnumValue(payload.idp, IdpEnum) &&
+    isStringEnumValue(payload.idp, Idp) &&
     'email' in payload &&
     typeof payload.email === 'string' &&
     'accessLevel' in payload &&
     typeof payload.accessLevel === 'string' &&
-    isStringEnumValue(payload.accessLevel, AccessLevelEnum)
+    isStringEnumValue(payload.accessLevel, AccessLevel)
   );
 }

@@ -1,10 +1,10 @@
-import { AccessLevelEnum, IdpEnum } from '@src/core/types';
+import { AccessLevel, Idp } from '@prisma/client';
 
 export interface AppIdToken {
   userId: string;
   nickname: string;
   tag: string;
-  idp: IdpEnum;
+  idp: Idp;
   email: string;
-  accessLevel: AccessLevelEnum;
+  accessLevel: AccessLevel;
 }

@@ -1,12 +1,12 @@
-import { AccessLevelEnum, IdpEnum } from '@src/core/types';
+import { AccessLevel, Idp } from '@prisma/client';
 
 export interface User {
   id: string;
   nickname: string;
   tag: string;
-  idp: IdpEnum;
+  idp: Idp;
   email: string;
-  accessLevel: AccessLevelEnum;
+  accessLevel: AccessLevel;
   createdAt: Date;
   updatedAt: Date;
 }
