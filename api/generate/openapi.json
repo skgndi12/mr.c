@@ -7,7 +7,7 @@
   "paths": {
     "/api/v1/google/sign-in": {
       "get": {
-        "operationId": "AuthV1ApiSpec_get_/sign-in",
+        "operationId": "AuthV1ApiSpec_get_/google/sign-in",
         "tags": [
           "Auth"
         ],
@@ -20,6 +20,112 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GoogleSignInV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/google/sign-in/token": {
+      "get": {
+        "operationId": "AuthV1ApiSpec_get_/google/sign-in/token",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Finalize google sign in",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "authuser",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "prompt",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleSignInV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sign-out": {
+      "get": {
+        "operationId": "AuthV1ApiSpec_get_/auth/sign-out",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign out",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignOutV1Response"
                 }
               }
             }
@@ -181,6 +287,10 @@
           "messages"
         ]
       },
+      "SignOutV1Response": {
+        "type": "object",
+        "additionalProperties": false
+      },
       "GreetingV1Response": {
         "type": "object",
         "properties": {
@@ -229,6 +339,11 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "mrcToken"
       }
     }
   }

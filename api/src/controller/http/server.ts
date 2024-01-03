@@ -19,6 +19,7 @@ import { DevV1Controller } from '@controller/http/dev/dev.v1.controller';
 import { HealthController } from '@controller/http/health/health.controller';
 import { Middleware } from '@controller/http/middleware';
 import { HttpConfig } from '@controller/http/types';
+import { idTokenCookieName } from '@controller/http/types';
 
 export class HttpServer {
   middleware: Middleware;
@@ -47,7 +48,8 @@ export class HttpServer {
       OpenApiValidatorMiddleware({
         apiSpec: path.join(__dirname, '../../../generate/openapi.json'),
         validateRequests: true,
-        validateResponses: true
+        validateResponses: true,
+        validateSecurity: false
       })
     );
     this.app.use('/api', this.getApiRouters());
@@ -104,6 +106,11 @@ export class HttpServer {
               type: 'http',
               scheme: 'bearer',
               bearerFormat: 'JWT'
+            },
+            cookieAuth: {
+              type: 'apiKey',
+              in: 'cookie',
+              name: idTokenCookieName
             }
           }
         },

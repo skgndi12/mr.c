@@ -8,6 +8,7 @@ import {
 import { HttpErrorResponse } from '@controller/http/response';
 
 export type DevV1ApiSpec = Tspec.DefineApiSpec<{
+  security: 'jwt';
   basePath: '/api/v1/dev';
   security: 'jwt';
   tags: ['Development'];
