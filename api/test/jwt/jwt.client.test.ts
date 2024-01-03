@@ -74,4 +74,20 @@ describe('Test jwt client', () => {
       client.verifyAppIdToken(maliciousToken);
     }).toThrowError(CustomError);
   });
+
+  it('should successfully decode a token without verification', () => {
+    const givenToken: AppIdToken = {
+      userId: randomUUID(),
+      nickname: '신비로운 시네필 황금 사자',
+      tag: '#MQ3B',
+      idp: IdpEnum.GOOGLE,
+      email: 'user1@gmail.com',
+      accessLevel: AccessLevelEnum.USER
+    };
+
+    const tokenString = client.signAppIdToken(givenToken);
+    const decodedToken = client.decodeTokenWithoutVerify(tokenString);
+
+    expect(decodedToken.payload).toEqual(expect.objectContaining(givenToken));
+  });
 });

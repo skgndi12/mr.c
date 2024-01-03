@@ -81,6 +81,20 @@ export class JwtClient implements JwtHandler {
     return convertToAppIdToken(token.payload);
   };
 
+  public decodeTokenWithoutVerify(tokenString: string): Jwt {
+    const token = decode(tokenString, this.getDecodeOptions());
+
+    if (!this.isJwt(token)) {
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        message: 'not a valid JWT format',
+        context: !token || typeof token === 'string' ? { token } : token
+      });
+    }
+
+    return token;
+  }
+
   private getValidKeyPair = (tokenString: string): RsaKeyPair => {
     const token = decode(tokenString, this.getDecodeOptions());
 
