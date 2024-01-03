@@ -51,7 +51,8 @@ export function buildHttpConfig(config: Config): HttpConfig {
   return {
     env: config.env,
     host: config.http.host,
-    port: config.http.port
+    port: config.http.port,
+    cookieExpirationHours: config.jwt.expirationHour
   };
 }
 

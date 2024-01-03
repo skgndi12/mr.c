@@ -90,7 +90,8 @@ describe('Test build http config', () => {
     expect(buildHttpConfig(loadConfig())).toStrictEqual({
       env: 'test',
       host: '127.0.0.1',
-      port: 0
+      port: 0,
+      cookieExpirationHours: 1
     });
   });
 });
