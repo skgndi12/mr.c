@@ -13,7 +13,7 @@ describe('Test google client', () => {
       oauth: {
         clientId: 'test_client_id',
         clientSecret: 'test_client_secret',
-        redirectUri: '127.0.0.1:0/api/v1/google/sign-in/token',
+        redirectPath: '/api/v1/google/sign-in/token',
         authEndpoint: 'https://accounts.google.com/o/oauth2/auth',
         tokenEndpoint: 'https://oauth2.googleapis.com/token'
       }
@@ -21,20 +21,24 @@ describe('Test google client', () => {
     client = new GoogleClient(config);
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should build valid OIDC request', () => {
-    const givenProtocol = 'http';
+    const givenBaseUrl = 'http://localhost:8080';
     const givenState = randomUUID();
     const expectedQueyObject = {
       client_id: config.oauth.clientId,
       response_type: 'code',
-      redirect_uri: `${givenProtocol}://${config.oauth.redirectUri}`,
+      redirect_uri: `${givenBaseUrl}${config.oauth.redirectPath}`,
       scope: 'openid email',
       state: givenState,
       access_type: 'online',
       prompt: 'consent select_account'
     };
 
-    const result = client.buildOidcRequest(givenProtocol, givenState);
+    const result = client.buildOidcRequest(givenBaseUrl, givenState);
     const [authEndpoint, queryString] = result.split('?');
 
     expect(authEndpoint).toEqual(config.oauth.authEndpoint);

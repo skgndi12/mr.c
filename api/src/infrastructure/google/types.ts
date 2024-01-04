@@ -5,7 +5,7 @@ export interface GoogleClientConfig {
 interface GoogleOauthConfig {
   clientId: string;
   clientSecret: string;
-  redirectUri: string;
+  redirectPath: string;
   authEndpoint: string;
   tokenEndpoint: string;
 }

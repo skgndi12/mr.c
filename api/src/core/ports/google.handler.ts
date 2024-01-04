@@ -1,3 +1,3 @@
 export interface GoogleHandler {
-  buildOidcRequest(protocol: string, state: string): string;
+  buildOidcRequest(baseUrl: string, state: string): string;
 }

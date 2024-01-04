@@ -11,17 +11,17 @@ export class AuthService {
     private readonly googleHandler: GoogleHandler
   ) {}
 
-  public initiateGoogleSignIn = (
-    protocol: string,
+  public initiateGoogleSignIn = async (
+    baseUrl: string,
     referrer: string | null
-  ): string => {
+  ): Promise<string> => {
     const state = randomUUID();
     const stateTokenString = JSON.stringify({ state, referrer });
-    this.keyValueRepository.set(
+    await this.keyValueRepository.set(
       state,
       stateTokenString,
       this.config.oauthStateExpirationMinutes * 60
     );
-    return this.googleHandler.buildOidcRequest(protocol, state);
+    return this.googleHandler.buildOidcRequest(baseUrl, state);
   };
 }

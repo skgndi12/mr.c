@@ -81,7 +81,7 @@ export function buildGoogleClientConfig(config: Config): GoogleClientConfig {
     oauth: {
       clientId: config.google.oauth.clientId,
       clientSecret: config.google.oauth.clientSecret,
-      redirectUri: `${config.http.host}:${config.http.port}${config.google.oauth.redirectPath}`,
+      redirectPath: config.google.oauth.redirectPath,
       authEndpoint: config.google.endpoints.auth,
       tokenEndpoint: config.google.endpoints.token
     }
