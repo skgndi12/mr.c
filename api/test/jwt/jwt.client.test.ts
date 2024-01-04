@@ -1,7 +1,7 @@
+import { AccessLevel, Idp } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 import { AppIdToken } from '@src/core/entities/auth.entity';
-import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { CustomError } from '@src/error/errors';
 import { JwtClient } from '@src/jwt/jwt.client';
 
@@ -38,9 +38,9 @@ describe('Test jwt client', () => {
       userId: randomUUID(),
       nickname: '신비로운 시네필 황금 사자',
       tag: '#MQ3B',
-      idp: IdpEnum.GOOGLE,
+      idp: Idp.GOOGLE,
       email: 'user1@gmail.com',
-      accessLevel: AccessLevelEnum.USER
+      accessLevel: AccessLevel.USER
     };
 
     const tokenString = client.signAppIdToken(givenToken);
@@ -54,15 +54,15 @@ describe('Test jwt client', () => {
       userId: randomUUID(),
       nickname: '신비로운 시네필 황금 사자',
       tag: '#MQ3B',
-      idp: IdpEnum.GOOGLE,
+      idp: Idp.GOOGLE,
       email: 'user1@gmail.com',
-      accessLevel: AccessLevelEnum.USER
+      accessLevel: AccessLevel.USER
     };
 
     const tokenString = client.signAppIdToken(givenToken);
     const [encodedHeader, encodedPayload, signature] = tokenString.split('.');
     const maliciousPayload = decodePayload(encodedPayload);
-    maliciousPayload.accessLevel = AccessLevelEnum.ADMIN;
+    maliciousPayload.accessLevel = AccessLevel.ADMIN;
     const maliciousToken =
       encodedHeader +
       '.' +
@@ -80,9 +80,9 @@ describe('Test jwt client', () => {
       userId: randomUUID(),
       nickname: '신비로운 시네필 황금 사자',
       tag: '#MQ3B',
-      idp: IdpEnum.GOOGLE,
+      idp: Idp.GOOGLE,
       email: 'user1@gmail.com',
-      accessLevel: AccessLevelEnum.USER
+      accessLevel: AccessLevel.USER
     };
 
     const tokenString = client.signAppIdToken(givenToken);
