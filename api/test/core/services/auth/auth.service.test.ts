@@ -29,7 +29,8 @@ describe('Test auth service', () => {
   beforeEach(() => {
     keyValueRepository = {
       set: jest.fn(),
-      get: jest.fn()
+      get: jest.fn(),
+      getThenDelete: jest.fn()
     };
     googleHandler = {
       buildOidcRequest: jest.fn(() => {
