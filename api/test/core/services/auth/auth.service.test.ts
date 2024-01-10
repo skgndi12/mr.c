@@ -2,7 +2,10 @@ import * as crypto from 'crypto';
 import { parse } from 'querystring';
 
 import { GoogleHandler } from '@src/core/ports/google.handler';
+import { JwtHandler } from '@src/core/ports/jwt.handler';
 import { KeyValueRepository } from '@src/core/ports/keyValue.repository';
+import { TransactionManager } from '@src/core/ports/transaction.manager';
+import { UserRepository } from '@src/core/ports/user.repository';
 import { AuthService } from '@src/core/services/auth/auth.service';
 import { AuthConfig } from '@src/core/services/auth/types';
 
@@ -25,12 +28,27 @@ describe('Test auth service', () => {
   let keyValueRepository: KeyValueRepository;
   let googleHandler: GoogleHandler;
   let authService: AuthService;
+  let userRepository: UserRepository;
+  let jwtHandler: JwtHandler;
+  let txManager: TransactionManager;
 
   beforeEach(() => {
     keyValueRepository = {
       set: jest.fn(),
       get: jest.fn(),
       getThenDelete: jest.fn()
+    };
+    userRepository = {
+      findByEmail: jest.fn(),
+      upsert: jest.fn()
+    };
+    jwtHandler = {
+      signAppIdToken: jest.fn(),
+      verifyAppIdToken: jest.fn(),
+      decodeTokenWithoutVerify: jest.fn()
+    };
+    txManager = {
+      runInTransaction: jest.fn()
     };
     googleHandler = {
       buildOidcRequest: jest.fn(() => {
@@ -47,6 +65,9 @@ describe('Test auth service', () => {
     authService = new AuthService(
       authConfig,
       keyValueRepository,
+      userRepository,
+      jwtHandler,
+      txManager,
       googleHandler
     );
     const givenReferrer = 'http://127.0.0.1/home';
