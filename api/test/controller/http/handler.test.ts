@@ -7,6 +7,7 @@ import { Logger } from 'winston';
 
 import { methodNotAllowed } from '@src/controller/http/handler';
 import { Middleware } from '@src/controller/http/middleware';
+import { JwtHandler } from '@src/core/ports/jwt.handler';
 
 // TODO: https://github.com/MovieReviewComment/Mr.C/issues/49
 class TestHttpServer {
@@ -14,8 +15,11 @@ class TestHttpServer {
   server!: http.Server;
   app!: Express;
 
-  constructor(private readonly logger: Logger) {
-    this.middleware = new Middleware(this.logger);
+  constructor(
+    private readonly logger: Logger,
+    private readonly jwtHandler: JwtHandler
+  ) {
+    this.middleware = new Middleware(this.logger, this.jwtHandler);
   }
 
   public start = (): Promise<void> => {
@@ -70,12 +74,17 @@ class TestController {
 
 describe('Test handler', () => {
   let mockLogger: Partial<Logger>;
+  let mockJwtHandler: Partial<JwtHandler>;
   let testHttpServer: TestHttpServer;
   let baseUrl: string;
 
   beforeAll(async () => {
     mockLogger = {};
-    testHttpServer = new TestHttpServer(mockLogger as Logger);
+    mockJwtHandler = {};
+    testHttpServer = new TestHttpServer(
+      mockLogger as Logger,
+      mockJwtHandler as JwtHandler
+    );
     baseUrl = '/api/v1/dev';
     await testHttpServer.start();
   });
