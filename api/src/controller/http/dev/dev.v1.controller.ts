@@ -1,5 +1,7 @@
 import { Request, Response, Router } from 'express';
 
+import { AppIdToken } from '@src/core/entities/auth.entity';
+
 import { GreetingV1Request } from '@controller/http/dev/request/dev.v1.request';
 import {
   GreetingV1Response,
@@ -26,14 +28,14 @@ export class DevV1Controller {
   };
 
   public greeting = async (
-    req: Request<any, any, GreetingV1Request>,
+    req: Request<any, any, GreetingV1Request, any, AppIdToken>,
     res: Response<GreetingV1Response>
   ) => {
     res.send({ message: 'Hello World!' });
   };
 
   public serverTime = async (
-    req: Request,
+    req: Request<any, any, any, any, AppIdToken>,
     res: Response<ServerTimeV1Response>
   ) => {
     const now = new Date();
