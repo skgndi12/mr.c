@@ -22,9 +22,9 @@ import { HttpConfig } from '@controller/http/types';
 import { idTokenCookieName } from '@controller/http/types';
 
 export class HttpServer {
-  middleware: Middleware;
-  server!: http.Server;
-  app!: Express;
+  private middleware: Middleware;
+  private server!: http.Server;
+  private app!: Express;
 
   constructor(
     private readonly logger: Logger,
@@ -60,6 +60,10 @@ export class HttpServer {
     this.server = this.app.listen(this.config.port, () => {
       this.logger.info(`HTTP server started on ${this.config.port}`);
     });
+  };
+
+  public isListeninig = (): boolean => {
+    return this.server.listening;
   };
 
   public close = (): Promise<void> => {
