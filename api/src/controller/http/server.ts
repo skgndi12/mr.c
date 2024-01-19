@@ -81,7 +81,7 @@ export class HttpServer {
 
   private getApiRouters = (): express.Router[] => {
     const routers = [
-      new DevV1Controller().routes(),
+      new DevV1Controller(this.middleware).routes(),
       new AuthV1Controller(
         this.authService,
         this.config.cookieExpirationHours
