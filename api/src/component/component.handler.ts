@@ -12,6 +12,7 @@ import {
 } from '@src/config/loader';
 import { Config } from '@src/config/types';
 import { AuthService } from '@src/core/services/auth/auth.service';
+import { UserService } from '@src/core/services/user/user.service';
 import { GoogleClient } from '@src/infrastructure/google/google.client';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
@@ -75,11 +76,13 @@ export class ComponentHandler {
       txManager,
       googleClient
     );
+    const userService = new UserService(userRepository, txManager);
 
     this.httpServer = new HttpServer(
       this.logger,
       buildHttpConfig(this.config),
       authService,
+      userService,
       jwtClient
     );
     await this.httpServer.start();
