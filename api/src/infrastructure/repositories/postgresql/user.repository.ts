@@ -13,6 +13,29 @@ import {
 export class PostgresqlUserRepository implements UserRepository {
   constructor(private readonly client: ExtendedPrismaClient) {}
 
+  public findById = async (
+    id: string,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<User> => {
+    try {
+      const client = txClient ?? this.client;
+      const user = await client.user.findFirstOrThrow({ where: { id } });
+      return user.convertToEntity();
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'user not found',
+          context: { id }
+        });
+      }
+      throw error;
+    }
+  };
+
   public findByEmail = async (
     email: string,
     txClient?: ExtendedPrismaTransactionClient
@@ -94,6 +117,28 @@ export class PostgresqlUserRepository implements UserRepository {
         });
       }
 
+      throw error;
+    }
+  };
+
+  public deleteById = async (
+    id: string,
+    txClient?: ExtendedPrismaTransactionClient
+  ) => {
+    try {
+      const client = txClient ?? this.client;
+      await client.user.delete({ where: { id } });
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'failed to delete user',
+          context: { id }
+        });
+      }
       throw error;
     }
   };
