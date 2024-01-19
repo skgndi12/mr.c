@@ -67,4 +67,24 @@ export class UserService {
       IsolationLevel.READ_COMMITTED
     );
   };
+
+  public deleteUser = async (
+    requesterIdToken: AppIdToken,
+    requestedUserId: string
+  ): Promise<void> => {
+    if (
+      !requesterIdToken.isAccessLevelAndUserIdAuthorized(
+        new AccessLevelEnum(AccessLevel.ADMIN),
+        requestedUserId
+      )
+    ) {
+      throw new CustomError({
+        code: AppErrorCode.PERMISSIION_DENIED,
+        message: 'insufficient access level to delete user',
+        context: { accessLevel: requesterIdToken.accessLevel }
+      });
+    }
+
+    return await this.userRepository.deleteById(requestedUserId);
+  };
 }
