@@ -2,8 +2,10 @@ import { AccessLevel, Idp } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 import { AppIdToken } from '@src/core/entities/auth.entity';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { CustomError } from '@src/error/errors';
 import { JwtClient } from '@src/jwt/jwt.client';
+import { AppPayload } from '@src/jwt/payload';
 
 function base64UrlEncode(str: string) {
   return Buffer.from(str).toString('base64url');
@@ -38,15 +40,22 @@ describe('Test jwt client', () => {
       userId: randomUUID(),
       nickname: '신비로운 시네필 황금 사자',
       tag: '#MQ3B',
-      idp: Idp.GOOGLE,
+      idp: new IdpEnum(Idp.GOOGLE),
       email: 'user1@gmail.com',
-      accessLevel: AccessLevel.USER
+      accessLevel: new AccessLevelEnum(AccessLevel.USER)
     };
 
     const tokenString = client.signAppIdToken(givenToken);
     const verifiedToken = client.verifyAppIdToken(tokenString);
 
-    expect(verifiedToken).toStrictEqual(givenToken);
+    expect(verifiedToken.userId).toEqual(givenToken.userId);
+    expect(verifiedToken.nickname).toEqual(givenToken.nickname);
+    expect(verifiedToken.tag).toEqual(givenToken.tag);
+    expect(verifiedToken.idp.get()).toEqual(givenToken.idp.get());
+    expect(verifiedToken.email).toEqual(givenToken.email);
+    expect(verifiedToken.accessLevel.get()).toEqual(
+      givenToken.accessLevel.get()
+    );
   });
 
   it('should throw error when verify malicious app id token', () => {
@@ -54,9 +63,9 @@ describe('Test jwt client', () => {
       userId: randomUUID(),
       nickname: '신비로운 시네필 황금 사자',
       tag: '#MQ3B',
-      idp: Idp.GOOGLE,
+      idp: new IdpEnum(Idp.GOOGLE),
       email: 'user1@gmail.com',
-      accessLevel: AccessLevel.USER
+      accessLevel: new AccessLevelEnum(AccessLevel.USER)
     };
 
     const tokenString = client.signAppIdToken(givenToken);
@@ -80,14 +89,20 @@ describe('Test jwt client', () => {
       userId: randomUUID(),
       nickname: '신비로운 시네필 황금 사자',
       tag: '#MQ3B',
-      idp: Idp.GOOGLE,
+      idp: new IdpEnum(Idp.GOOGLE),
       email: 'user1@gmail.com',
-      accessLevel: AccessLevel.USER
+      accessLevel: new AccessLevelEnum(AccessLevel.USER)
     };
 
     const tokenString = client.signAppIdToken(givenToken);
-    const decodedToken = client.decodeTokenWithoutVerify(tokenString);
+    const decodedPayload = client.decodeTokenWithoutVerify(tokenString)
+      .payload as AppPayload;
 
-    expect(decodedToken.payload).toEqual(expect.objectContaining(givenToken));
+    expect(decodedPayload.userId).toEqual(givenToken.userId);
+    expect(decodedPayload.nickname).toEqual(givenToken.nickname);
+    expect(decodedPayload.tag).toEqual(givenToken.tag);
+    expect(decodedPayload.idp).toEqual(givenToken.idp.get());
+    expect(decodedPayload.email).toEqual(givenToken.email);
+    expect(decodedPayload.accessLevel).toEqual(givenToken.accessLevel.get());
   });
 });

@@ -11,6 +11,7 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import { AuthService } from '@src/core/services/auth/auth.service';
 import { AuthConfig } from '@src/core/services/auth/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 
 jest.mock('crypto');
 
@@ -140,9 +141,9 @@ describe('Test auth service', () => {
         id: '57cf27d8-0c74-4963-94a7-47c35741ed06',
         nickname: '도전적인 평론가 연두빛 하마',
         tag: '#AZ7J',
-        idp: Idp.GOOGLE,
+        idp: new IdpEnum(Idp.GOOGLE),
         email: givenEmail,
-        accessLevel: AccessLevel.USER,
+        accessLevel: new AccessLevelEnum(AccessLevel.USER),
         createdAt: currentDate,
         updatedAt: currentDate
       };

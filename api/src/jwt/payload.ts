@@ -1,6 +1,7 @@
 import { AccessLevel, Idp } from '@prisma/client';
 
 import { AppIdToken } from '@src/core/entities/auth.entity';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { isStringEnumValue } from '@src/util/guard';
 
 export const mrcIssuer = 'movie-reivew-comment';
@@ -33,9 +34,9 @@ export function createAppPayload(
     userId: appIdToken.userId,
     nickname: appIdToken.nickname,
     tag: appIdToken.tag,
-    idp: appIdToken.idp,
+    idp: appIdToken.idp.get(),
     email: appIdToken.email,
-    accessLevel: appIdToken.accessLevel
+    accessLevel: appIdToken.accessLevel.get()
   };
 }
 
@@ -44,9 +45,9 @@ export function convertToAppIdToken(appPayload: AppPayload): AppIdToken {
     userId: appPayload.userId,
     nickname: appPayload.nickname,
     tag: appPayload.tag,
-    idp: appPayload.idp,
+    idp: new IdpEnum(appPayload.idp),
     email: appPayload.email,
-    accessLevel: appPayload.accessLevel
+    accessLevel: new AccessLevelEnum(appPayload.accessLevel)
   };
 }
 

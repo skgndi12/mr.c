@@ -1,19 +1,19 @@
-import { AccessLevel, Idp } from '@prisma/client';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 
 export interface AppIdToken {
   userId: string;
   nickname: string;
   tag: string;
-  idp: Idp;
+  idp: IdpEnum;
   email: string;
-  accessLevel: AccessLevel;
+  accessLevel: AccessLevelEnum;
 }
 
 export interface GoogleIdToken {
   iss: string;
   aud: string;
   sub: string;
-  idp: Idp;
   email: string;
-  accessLevel: AccessLevel;
+  iat: number;
+  exp: number;
 }

@@ -1,9 +1,8 @@
-import { AccessLevel } from '@prisma/client';
-
 import { AppIdToken } from '@src/core/entities/auth.entity';
+import { AccessLevelEnum } from '@src/core/types';
 
 export function validateUserAuthorization(
-  requiredLevel: AccessLevel,
+  requiredLevel: AccessLevelEnum,
   requesterIdToken: AppIdToken,
   requestedUserId: string
 ): boolean {
@@ -17,25 +16,11 @@ export function validateUserAuthorization(
 }
 
 export function validateAccessLevel(
-  requiredLevel: AccessLevel,
-  userLevel: AccessLevel
+  requiredLevel: AccessLevelEnum,
+  userLevel: AccessLevelEnum
 ): boolean {
-  const requiredLevelNumber = convertAccessLevelToNumber(requiredLevel);
-  const userLevelNumber = convertAccessLevelToNumber(userLevel);
-
-  if (userLevelNumber < requiredLevelNumber) {
+  if (userLevel.toNumber() < requiredLevel.toNumber()) {
     return false;
   }
   return true;
-}
-
-function convertAccessLevelToNumber(accessLevel: AccessLevel): number {
-  switch (accessLevel) {
-    case AccessLevel.USER:
-      return 1;
-    case AccessLevel.DEVELOPER:
-      return 2;
-    case AccessLevel.ADMIN:
-      return 3;
-  }
 }

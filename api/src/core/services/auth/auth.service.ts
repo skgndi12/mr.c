@@ -15,6 +15,7 @@ import {
 } from '@src/core/ports/transaction.manager';
 import { UserRepository } from '@src/core/ports/user.repository';
 import { AuthConfig, OauthState } from '@src/core/services/auth/types';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { validateGoogleIdToken } from '@src/core/validator';
 import { AppErrorCode, CustomError } from '@src/error/errors';
 import { IsolationLevel } from '@src/infrastructure/repositories/types';
@@ -109,9 +110,9 @@ export class AuthService {
               id: userId,
               nickname: userNickname,
               tag: userTag,
-              idp: Idp.GOOGLE,
+              idp: new IdpEnum(Idp.GOOGLE),
               email: payload.email,
-              accessLevel: AccessLevel.USER,
+              accessLevel: new AccessLevelEnum(AccessLevel.USER),
               createdAt: currentDate,
               updatedAt: currentDate
             };
