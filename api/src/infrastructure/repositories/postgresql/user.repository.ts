@@ -1,5 +1,3 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-
 import { User } from '@src/core/entities/user.entity';
 import { UserRepository } from '@src/core/ports/user.repository';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -7,17 +5,24 @@ import {
   PrismaErrorCode,
   isErrorWithCode
 } from '@src/infrastructure/prisma/errors';
+import {
+  ExtendedPrismaClient,
+  ExtendedPrismaTransactionClient
+} from '@src/infrastructure/prisma/types';
 
 export class PostgresqlUserRepository implements UserRepository {
-  constructor(private readonly client: PrismaClient) {}
+  constructor(private readonly client: ExtendedPrismaClient) {}
 
   public findByEmail = async (
     email: string,
-    txClient?: Prisma.TransactionClient
+    txClient?: ExtendedPrismaTransactionClient
   ): Promise<User> => {
     try {
       const client = txClient ?? this.client;
-      return await client.user.findFirstOrThrow({ where: { email } });
+      const user = await client.user.findFirstOrThrow({
+        where: { email }
+      });
+      return user.convertToEntity();
     } catch (error: unknown) {
       if (
         isErrorWithCode(error) &&
@@ -36,7 +41,7 @@ export class PostgresqlUserRepository implements UserRepository {
   // NOTE: You should satisfy the criteria for the database upsert. https://www.prisma.io/docs/orm/reference/prisma-client-reference#database-upserts
   public upsert = async (
     userData: User,
-    txClient?: Prisma.TransactionClient
+    txClient?: ExtendedPrismaTransactionClient
   ): Promise<User> => {
     const client = txClient ?? this.client;
     let upsertUser;
@@ -47,16 +52,16 @@ export class PostgresqlUserRepository implements UserRepository {
           email: userData.email
         },
         update: {
-          accessLevel: userData.accessLevel,
+          accessLevel: userData.accessLevel.get(),
           updatedAt: userData.updatedAt
         },
         create: {
           id: userData.id,
           nickname: userData.nickname,
           tag: userData.tag,
-          idp: userData.idp,
+          idp: userData.idp.get(),
           email: userData.email,
-          accessLevel: userData.accessLevel,
+          accessLevel: userData.accessLevel.get(),
           createdAt: userData.createdAt,
           updatedAt: userData.updatedAt
         },
@@ -72,9 +77,10 @@ export class PostgresqlUserRepository implements UserRepository {
     }
 
     try {
-      return await client.user.findFirstOrThrow({
+      const foundUser = await client.user.findFirstOrThrow({
         where: { id: upsertUser.id }
       });
+      return foundUser.convertToEntity();
     } catch (error: unknown) {
       if (
         isErrorWithCode(error) &&
