@@ -36,8 +36,10 @@ describe('Test auth service', () => {
       getThenDelete: jest.fn()
     };
     userRepository = {
+      findById: jest.fn(),
       findByEmail: jest.fn(),
-      upsert: jest.fn()
+      upsert: jest.fn(),
+      deleteById: jest.fn()
     };
     jwtHandler = {
       signAppIdToken: jest.fn(),
