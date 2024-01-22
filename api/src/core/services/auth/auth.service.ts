@@ -1,6 +1,7 @@
 import { AccessLevel, Idp } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
+import { AppIdToken } from '@src/core/entities/auth.entity';
 import { User } from '@src/core/entities/user.entity';
 import {
   generateUserNickname,
@@ -124,14 +125,16 @@ export class AuthService {
       IsolationLevel.READ_COMMITTED
     )) as User;
 
-    const appIdToken = this.jwtHandler.signAppIdToken({
-      userId: user.id,
-      nickname: user.nickname,
-      tag: user.tag,
-      idp: user.idp,
-      email: user.email,
-      accessLevel: user.accessLevel
-    });
+    const appIdToken = this.jwtHandler.signAppIdToken(
+      new AppIdToken(
+        user.id,
+        user.nickname,
+        user.tag,
+        user.idp,
+        user.email,
+        user.accessLevel
+      )
+    );
 
     const { referrer } = JSON.parse(stateTokenString) as OauthState;
     if (referrer) {

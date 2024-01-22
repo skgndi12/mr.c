@@ -37,18 +37,21 @@ describe('Test user service', () => {
   });
 
   describe('Test get user', () => {
-    const requesterIdToken = {
-      userId: requesterUserId,
-      accessLevel: new AccessLevelEnum(AccessLevel.DEVELOPER)
-    } as AppIdToken;
-
     beforeAll(() => {
       userRepository.findById = jest.fn(() => Promise.resolve(user));
     });
 
     it('should success when valid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        requesterUserId,
+        'nickname',
+        '#TAGG',
+        new IdpEnum(Idp.GOOGLE),
+        'user1@gmail.com',
+        new AccessLevelEnum(AccessLevel.DEVELOPER)
+      );
       const actualResult = await new UserService(userRepository).getUser(
-        requesterIdToken,
+        givenRequesterIdToken,
         requestedUserId
       );
 
@@ -60,9 +63,16 @@ describe('Test user service', () => {
 
     it('should failure when user authorization is not valid', async () => {
       try {
-        requesterIdToken.accessLevel = new AccessLevelEnum(AccessLevel.USER);
+        const givenRequesterIdToken = new AppIdToken(
+          requesterUserId,
+          'nickname',
+          '#TAGG',
+          new IdpEnum(Idp.GOOGLE),
+          'user1@gmail.com',
+          new AccessLevelEnum(AccessLevel.USER)
+        );
         await new UserService(userRepository).getUser(
-          requesterIdToken,
+          givenRequesterIdToken,
           requestedUserId
         );
       } catch (error: unknown) {

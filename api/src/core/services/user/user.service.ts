@@ -1,6 +1,5 @@
 import { AccessLevel } from '@prisma/client';
 
-import { validateUserAuthorization } from '@src/core/auth.manager';
 import { AppIdToken } from '@src/core/entities/auth.entity';
 import { User } from '@src/core/entities/user.entity';
 import { UserRepository } from '@src/core/ports/user.repository';
@@ -15,16 +14,15 @@ export class UserService {
     requestedUserId: string
   ): Promise<User> => {
     if (
-      !validateUserAuthorization(
+      !requesterIdToken.isAccessLevelAndUserIdAuthorized(
         new AccessLevelEnum(AccessLevel.DEVELOPER),
-        requesterIdToken,
         requestedUserId
       )
     ) {
       throw new CustomError({
         code: AppErrorCode.PERMISSIION_DENIED,
         message: 'insufficient access level to fetch user information',
-        context: { accessLevel: requesterIdToken.accessLevel }
+        context: { accessLevel: requesterIdToken.accessLevel.get() }
       });
     }
 

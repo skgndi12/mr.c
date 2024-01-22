@@ -10,8 +10,8 @@ import { TransactionManager } from '@src/core/ports/transaction.manager';
 import { UserRepository } from '@src/core/ports/user.repository';
 import { AuthService } from '@src/core/services/auth/auth.service';
 import { AuthConfig } from '@src/core/services/auth/types';
-import { AppErrorCode, CustomError } from '@src/error/errors';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
+import { AppErrorCode, CustomError } from '@src/error/errors';
 
 jest.mock('crypto');
 
@@ -87,7 +87,6 @@ describe('Test auth service', () => {
         txManager,
         googleHandler
       );
-      const givenReferrer = 'http://127.0.0.1/home';
       const expectedQueyObject = {
         client_id: oauthClientId,
         response_type,
@@ -200,14 +199,16 @@ describe('Test auth service', () => {
       );
 
       expect(jwtHandler.signAppIdToken).toBeCalledTimes(1);
-      expect(jwtHandler.signAppIdToken).toBeCalledWith({
-        userId: upsertUser.id,
-        nickname: upsertUser.nickname,
-        tag: upsertUser.tag,
-        idp: upsertUser.idp,
-        email: upsertUser.email,
-        accessLevel: upsertUser.accessLevel
-      });
+      expect(jwtHandler.signAppIdToken).toBeCalledWith(
+        expect.objectContaining({
+          userId: upsertUser.id,
+          nickname: upsertUser.nickname,
+          tag: upsertUser.tag,
+          idp: upsertUser.idp,
+          email: upsertUser.email,
+          accessLevel: upsertUser.accessLevel
+        })
+      ); 
       expect(txManager.runInTransaction).toBeCalledTimes(1);
     });
 
@@ -224,10 +225,10 @@ describe('Test auth service', () => {
           jwtHandler,
           txManager,
           googleHandler
-        ).finalizeGoogleSignIn(baseUrl, state, authCode)
+        ).finalizeGoogleSignIn(baseUrl, state, authCode);
       } catch (error: unknown) {
-        expect(error).toBeInstanceOf(CustomError)
-        expect(error).toHaveProperty('code', AppErrorCode.BAD_REQUEST)
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.BAD_REQUEST);
       }
 
       expect(keyValueRepository.getThenDelete).toBeCalledTimes(1);
@@ -269,10 +270,10 @@ describe('Test auth service', () => {
           jwtHandler,
           txManager,
           googleHandler
-        ).finalizeGoogleSignIn(baseUrl, state, authCode)
+        ).finalizeGoogleSignIn(baseUrl, state, authCode);
       } catch (error: unknown) {
-        expect(error).toBeInstanceOf(CustomError)
-        expect(error).toHaveProperty('code', AppErrorCode.INTERNAL_ERROR)
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.INTERNAL_ERROR);
       }
 
       expect(keyValueRepository.getThenDelete).toBeCalledTimes(1);

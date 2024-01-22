@@ -36,37 +36,30 @@ describe('Test jwt client', () => {
   });
 
   it('should verify app id token', () => {
-    const givenToken: AppIdToken = {
-      userId: randomUUID(),
-      nickname: '신비로운 시네필 황금 사자',
-      tag: '#MQ3B',
-      idp: new IdpEnum(Idp.GOOGLE),
-      email: 'user1@gmail.com',
-      accessLevel: new AccessLevelEnum(AccessLevel.USER)
-    };
+    const givenToken = new AppIdToken(
+      randomUUID(),
+      '신비로운 시네필 황금 사자',
+      '#MQ3B',
+      new IdpEnum(Idp.GOOGLE),
+      'user1@gmail.com',
+      new AccessLevelEnum(AccessLevel.USER)
+    );
 
     const tokenString = client.signAppIdToken(givenToken);
     const verifiedToken = client.verifyAppIdToken(tokenString);
 
-    expect(verifiedToken.userId).toEqual(givenToken.userId);
-    expect(verifiedToken.nickname).toEqual(givenToken.nickname);
-    expect(verifiedToken.tag).toEqual(givenToken.tag);
-    expect(verifiedToken.idp.get()).toEqual(givenToken.idp.get());
-    expect(verifiedToken.email).toEqual(givenToken.email);
-    expect(verifiedToken.accessLevel.get()).toEqual(
-      givenToken.accessLevel.get()
-    );
+    expect(JSON.stringify(verifiedToken)).toEqual(JSON.stringify(givenToken));
   });
 
   it('should throw error when verify malicious app id token', () => {
-    const givenToken: AppIdToken = {
-      userId: randomUUID(),
-      nickname: '신비로운 시네필 황금 사자',
-      tag: '#MQ3B',
-      idp: new IdpEnum(Idp.GOOGLE),
-      email: 'user1@gmail.com',
-      accessLevel: new AccessLevelEnum(AccessLevel.USER)
-    };
+    const givenToken = new AppIdToken(
+      randomUUID(),
+      '신비로운 시네필 황금 사자',
+      '#MQ3B',
+      new IdpEnum(Idp.GOOGLE),
+      'user1@gmail.com',
+      new AccessLevelEnum(AccessLevel.USER)
+    );
 
     const tokenString = client.signAppIdToken(givenToken);
     const [encodedHeader, encodedPayload, signature] = tokenString.split('.');
@@ -85,24 +78,28 @@ describe('Test jwt client', () => {
   });
 
   it('should successfully decode a token without verification', () => {
-    const givenToken: AppIdToken = {
-      userId: randomUUID(),
-      nickname: '신비로운 시네필 황금 사자',
-      tag: '#MQ3B',
-      idp: new IdpEnum(Idp.GOOGLE),
-      email: 'user1@gmail.com',
-      accessLevel: new AccessLevelEnum(AccessLevel.USER)
-    };
+    const givenToken = new AppIdToken(
+      randomUUID(),
+      '신비로운 시네필 황금 사자',
+      '#MQ3B',
+      new IdpEnum(Idp.GOOGLE),
+      'user1@gmail.com',
+      new AccessLevelEnum(AccessLevel.USER)
+    );
 
     const tokenString = client.signAppIdToken(givenToken);
     const decodedPayload = client.decodeTokenWithoutVerify(tokenString)
       .payload as AppPayload;
 
-    expect(decodedPayload.userId).toEqual(givenToken.userId);
-    expect(decodedPayload.nickname).toEqual(givenToken.nickname);
-    expect(decodedPayload.tag).toEqual(givenToken.tag);
-    expect(decodedPayload.idp).toEqual(givenToken.idp.get());
-    expect(decodedPayload.email).toEqual(givenToken.email);
-    expect(decodedPayload.accessLevel).toEqual(givenToken.accessLevel.get());
+    expect(decodedPayload).toEqual(
+      expect.objectContaining({
+        userId: givenToken.userId,
+        nickname: givenToken.nickname,
+        tag: givenToken.tag,
+        idp: givenToken.idp.get(),
+        email: givenToken.email,
+        accessLevel: givenToken.accessLevel.get()
+      })
+    );
   });
 });

@@ -41,14 +41,14 @@ export function createAppPayload(
 }
 
 export function convertToAppIdToken(appPayload: AppPayload): AppIdToken {
-  return {
-    userId: appPayload.userId,
-    nickname: appPayload.nickname,
-    tag: appPayload.tag,
-    idp: new IdpEnum(appPayload.idp),
-    email: appPayload.email,
-    accessLevel: new AccessLevelEnum(appPayload.accessLevel)
-  };
+  return new AppIdToken(
+    appPayload.userId,
+    appPayload.nickname,
+    appPayload.tag,
+    new IdpEnum(appPayload.idp),
+    appPayload.email,
+    new AccessLevelEnum(appPayload.accessLevel)
+  );
 }
 
 export function isAppPayload(payload: unknown): payload is AppPayload {
