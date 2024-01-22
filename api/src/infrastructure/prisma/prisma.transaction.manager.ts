@@ -1,17 +1,19 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-
 import { TransactionManager } from '@src/core/ports/transaction.manager';
 import {
   PrismaErrorCode,
   isErrorWithCode
 } from '@src/infrastructure/prisma/errors';
+import {
+  ExtendedPrismaClient,
+  ExtendedPrismaTransactionClient
+} from '@src/infrastructure/prisma/types';
 import { IsolationLevel } from '@src/infrastructure/repositories/types';
 
 export class PrismaTransactionManager implements TransactionManager {
-  constructor(private readonly client: PrismaClient) {}
+  constructor(private readonly client: ExtendedPrismaClient) {}
 
   public runInTransaction = async <T>(
-    callback: (tx: Prisma.TransactionClient) => Promise<T>,
+    callback: (tx: ExtendedPrismaTransactionClient) => Promise<T>,
     isolationLevel: IsolationLevel,
     maxRetries = 3
   ): Promise<T | null> => {

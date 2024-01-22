@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { Logger } from 'winston';
 
 import {
@@ -16,6 +15,7 @@ import { AuthService } from '@src/core/services/auth/auth.service';
 import { GoogleClient } from '@src/infrastructure/google/google.client';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
+import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
 import {
   RedisClient,
   generateRedisClient
@@ -30,7 +30,7 @@ import { HttpServer } from '@controller/http/server';
 export class ComponentHandler {
   private config!: Config;
   private logger!: Logger;
-  private prismaClient!: PrismaClient;
+  private prismaClient!: ExtendedPrismaClient;
   private redisClient!: RedisClient;
   private httpServer!: HttpServer;
   private readonly shutdownSignals = ['SIGINT', 'SIGTERM'];
