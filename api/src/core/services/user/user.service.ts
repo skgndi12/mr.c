@@ -54,7 +54,7 @@ export class UserService {
       });
     }
 
-    return (await this.txManager.runInTransaction(
+    return await this.txManager.runInTransaction(
       async (txClient: TransactionClient): Promise<User> => {
         const userFound = await this.userRepository.findById(
           requestedUserId,
@@ -65,6 +65,6 @@ export class UserService {
         return await this.userRepository.upsert(userFound, txClient);
       },
       IsolationLevel.READ_COMMITTED
-    )) as User;
+    );
   };
 }
