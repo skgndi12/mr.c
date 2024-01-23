@@ -173,7 +173,8 @@ describe('Test auth service', () => {
         };
       });
       jwtHandler.signAppIdToken = jest.fn(() => givenAppIdTokenString);
-      txManager.runInTransaction<User> = jest.fn(() => Promise.resolve(upsertUser));
+      const mockRunInTransaction = jest.fn(() => Promise.resolve(upsertUser));
+      txManager.runInTransaction = mockRunInTransaction as jest.Mock;
 
       const [actualReferrer, actualAppIdToken] = await new AuthService(
         authConfig,
@@ -208,7 +209,7 @@ describe('Test auth service', () => {
           email: upsertUser.email,
           accessLevel: upsertUser.accessLevel
         })
-      ); 
+      );
       expect(txManager.runInTransaction).toBeCalledTimes(1);
     });
 

@@ -90,15 +90,6 @@ describe('Test user service', () => {
   });
 
   describe('Test update user', () => {
-    const givenRequesterIdToken = new AppIdToken(
-      requesterUserId,
-      'nickname',
-      '#TAGG',
-      new IdpEnum(Idp.GOOGLE),
-      'user1@gmail.com',
-      new AccessLevelEnum(AccessLevel.ADMIN)
-    );
-
     const upsertedUser: User = {
       id: user.id,
       nickname: user.nickname,
@@ -112,10 +103,20 @@ describe('Test user service', () => {
     const requestedAccessLevel = AccessLevel.DEVELOPER;
 
     beforeAll(() => {
-      txManager.runInTransaction<User> = jest.fn(() => Promise.resolve(upsertedUser))
+      const mockRunInTransaction = jest.fn(() => Promise.resolve(upsertedUser));
+      txManager.runInTransaction = mockRunInTransaction as jest.Mock;
     });
 
     it('should success when valid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        requesterUserId,
+        'nickname',
+        '#TAGG',
+        new IdpEnum(Idp.GOOGLE),
+        'user1@gmail.com',
+        new AccessLevelEnum(AccessLevel.ADMIN)
+      );
+
       const actualResult = await new UserService(
         userRepository,
         txManager
@@ -151,6 +152,54 @@ describe('Test user service', () => {
       }
 
       expect(txManager.runInTransaction).toBeCalledTimes(0);
+    });
+  });
+
+  describe('Test delete user', () => {
+    beforeAll(() => {
+      userRepository.deleteById = jest.fn(() => Promise.resolve());
+    });
+
+    it('should success when valid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        requesterUserId,
+        'nickname',
+        '#TAGG',
+        new IdpEnum(Idp.GOOGLE),
+        'user1@gmail.com',
+        new AccessLevelEnum(AccessLevel.ADMIN)
+      );
+
+      await new UserService(userRepository, txManager).deleteUser(
+        givenRequesterIdToken,
+        requestedUserId
+      );
+
+      expect(userRepository.deleteById).toBeCalledTimes(1);
+      expect(userRepository.deleteById).toBeCalledWith(requestedUserId);
+    });
+
+    it('should failure when user authorization is not valid', async () => {
+      try {
+        const givenRequesterIdToken = new AppIdToken(
+          requesterUserId,
+          'nickname',
+          '#TAGG',
+          new IdpEnum(Idp.GOOGLE),
+          'user1@gmail.com',
+          new AccessLevelEnum(AccessLevel.USER)
+        );
+
+        await new UserService(userRepository, txManager).deleteUser(
+          givenRequesterIdToken,
+          requestedUserId
+        );
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.PERMISSIION_DENIED);
+      }
+
+      expect(userRepository.deleteById).toBeCalledTimes(0);
     });
   });
 });
