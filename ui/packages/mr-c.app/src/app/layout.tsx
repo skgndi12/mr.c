@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import '@/styles/globals.css';
+import { notoSansKr } from '@/fonts';
 
 export const metadata: Metadata = {
   title: 'Home',
@@ -15,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${notoSansKr.className} antialiased`}>{children}</body>
     </html>
   );
 }
