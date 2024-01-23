@@ -1,4 +1,5 @@
 import { TransactionManager } from '@src/core/ports/transaction.manager';
+import { AppErrorCode, CustomError } from '@src/error/errors';
 import {
   PrismaErrorCode,
   isErrorWithCode
@@ -16,9 +17,9 @@ export class PrismaTransactionManager implements TransactionManager {
     callback: (tx: ExtendedPrismaTransactionClient) => Promise<T>,
     isolationLevel: IsolationLevel,
     maxRetries = 3
-  ): Promise<T | null> => {
+  ): Promise<T> => {
     let retries = 0;
-    let result: T | null = null;
+    let result: T | undefined = undefined;
 
     while (retries < maxRetries) {
       try {
@@ -37,6 +38,14 @@ export class PrismaTransactionManager implements TransactionManager {
 
         throw error;
       }
+    }
+
+    if (result === undefined) {
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        message: 'failed to transaction',
+        context: { callback, isolationLevel }
+      });
     }
 
     return result;

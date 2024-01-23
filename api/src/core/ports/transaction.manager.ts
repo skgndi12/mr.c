@@ -7,5 +7,5 @@ export interface TransactionManager {
     callback: (tx: TransactionClient) => Promise<T>,
     isolationLevel: IsolationLevel,
     maxRetries?: number
-  ): Promise<T | null>;
+  ): Promise<T>;
 }

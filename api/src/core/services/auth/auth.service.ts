@@ -76,7 +76,7 @@ export class AuthService {
       });
     }
 
-    const user = (await this.txManager.runInTransaction(
+    const user = await this.txManager.runInTransaction(
       async (txClient: TransactionClient): Promise<User> => {
         let userFound: User | null;
         let userId: string;
@@ -123,7 +123,7 @@ export class AuthService {
         }
       },
       IsolationLevel.READ_COMMITTED
-    )) as User;
+    );
 
     const appIdToken = this.jwtHandler.signAppIdToken(
       new AppIdToken(
