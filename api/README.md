@@ -40,7 +40,7 @@ Docker 관련 모든 명령어는 `api` 폴더에서 실행하도록 합니다.
 
 ## 명령어 설명 
 ```bash
-npm run migrage-create:down # 마이그레이션 롤백 파일 생성
+npm run migrate-create:down # 마이그레이션 롤백 파일 생성
 npm run migrate-create:up # 마이그레이션 파일 생성
 npm run migrate-apply:rollback # 마이그레이션 롤백
 npm run migrate-apply:all # 모든 마이그레이션 적용 및 ORM 클라이언트 타입 갱신
