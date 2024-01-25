@@ -90,4 +90,60 @@ describe('Test user repository', () => {
       }
     });
   });
+
+  describe('Test find by email', () => {
+    const id = randomUUID();
+    const nickname = generateUserNickname(id);
+    const tag = generateUserTag(id);
+    const idpEnum = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevelEnum = new AccessLevelEnum(AccessLevel.USER);
+    const createdAt = new Date();
+    const idp = idpEnum.get();
+    const accessLevel = accessLevelEnum.get();
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp,
+          email,
+          accessLevel,
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.user.delete({ where: { email } });
+    });
+
+    it('should success when valid', async () => {
+      const user = await userRepository.findByEmail(email);
+      expect(JSON.stringify(user)).toEqual(
+        JSON.stringify({
+          id,
+          nickname,
+          tag,
+          idp: idpEnum,
+          email,
+          accessLevel: accessLevelEnum,
+          createdAt: createdAt,
+          updatedAt: createdAt
+        })
+      );
+    });
+
+    it('should fail when the given email does not match any existing user', async () => {
+      try {
+        await userRepository.findByEmail('user100@gmail.com');
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
 });
