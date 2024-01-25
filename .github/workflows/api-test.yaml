@@ -7,7 +7,7 @@ on:
       - 'develop'
     paths:
       - 'api/**'
-      # - '!api/**.md'
+      - '!api/**.md'
   workflow_dispatch:
 
 jobs:
@@ -32,16 +32,15 @@ jobs:
         with:
           node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
 
-      - name: Install Dependencies
-        working-directory: ./api
-        run: |
-          npm ci
-
       - name: Run Docker Compose
         working-directory: ./api
         run: |
             docker compose --env-file .env -p mrc-api up -d
-            docker ps
+
+      - name: Install Dependencies
+        working-directory: ./api
+        run: |
+          npm ci
 
       - name: Load Environment Variables
         working-directory: ./api
