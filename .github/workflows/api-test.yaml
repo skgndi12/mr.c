@@ -41,6 +41,7 @@ jobs:
         working-directory: ./api
         run: |
             docker compose --env-file .env -p mrc-api up -d
+            docker ps
 
       - name: Load Environment Variables
         working-directory: ./api
