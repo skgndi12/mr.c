@@ -51,7 +51,7 @@ jobs:
       - name: Database Migration
         working-directory: ./api
         run: |
-          npx prisma db push
+          npm run migrate-apply:latest
 
       - name: Generate ORM Client Model
         working-directory: ./api
