@@ -242,4 +242,51 @@ describe('Test user repository', () => {
     });
   });
 
+  describe('Test delete by ID', () => {
+    const id = randomUUID();
+    const nickname = generateUserNickname(id);
+    const tag = generateUserTag(id);
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = randomUUID();
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const createdAt = new Date();
+
+    beforeEach(async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get(),
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.user.delete({ where: { id } });
+    });
+
+    it('should success when valid', async () => {
+      await userRepository.deleteById(id);
+      try {
+        await userRepository.findById(id);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+
+    it('should fail to delete user when given ID does not match any existing user', async () => {
+      try {
+        await userRepository.deleteById(randomUUID());
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
 });
