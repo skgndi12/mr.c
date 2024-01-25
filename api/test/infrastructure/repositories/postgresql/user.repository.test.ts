@@ -146,4 +146,100 @@ describe('Test user repository', () => {
       }
     });
   });
+
+  describe('Test upsert', () => {
+    const id = randomUUID();
+    const nickname = generateUserNickname(id);
+    const tag = generateUserTag(id);
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = randomUUID();
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const createdAt = new Date();
+
+    afterEach(async () => {
+      await prismaClient.user.delete({ where: { id } });
+    });
+
+    it('should success to create user', async () => {
+      const usertToCreate: User = {
+        id,
+        nickname,
+        tag,
+        idp: idp,
+        email,
+        accessLevel: accessLevel,
+        createdAt: createdAt,
+        updatedAt: createdAt
+      };
+      const user = await userRepository.upsert(usertToCreate);
+      expect(JSON.stringify(user)).toEqual(JSON.stringify(usertToCreate));
+    });
+
+    it('should success to update user', async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get(),
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+
+      const updatedAt = new Date();
+      const usertToUpdate: User = {
+        id,
+        nickname,
+        tag,
+        idp: new IdpEnum(Idp.GOOGLE),
+        email,
+        accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
+        createdAt: createdAt,
+        updatedAt: updatedAt
+      };
+      const updatedUser = await userRepository.upsert(usertToUpdate);
+
+      expect(JSON.stringify(updatedUser)).toEqual(
+        JSON.stringify(usertToUpdate)
+      );
+    });
+
+    it('should fail to update the user when the provided data includes information that cannot be updated', async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get(),
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+
+      const updatedAt = new Date();
+      const usertToUpdate: User = {
+        id,
+        nickname: 'randomnickanme',
+        tag,
+        idp: new IdpEnum(Idp.GOOGLE),
+        email,
+        accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
+        createdAt: createdAt,
+        updatedAt: updatedAt
+      };
+      try {
+        await userRepository.upsert(usertToUpdate);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.INTERNAL_ERROR);
+        expect(error).toHaveProperty('context', { id });
+      }
+    });
+  });
+
 });
