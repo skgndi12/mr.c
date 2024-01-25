@@ -1,0 +1,69 @@
+name: Run Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'develop'
+    paths:
+      - 'api/**'
+      - '!api/**.md'
+  workflow_dispatch:
+
+jobs:
+  api-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            api
+          fetch-depth: 1
+
+      - name: Read .nvmrc
+        working-directory: ./api
+        run: |
+          echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        id: nvm
+
+      - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+
+      - name: Install Dependencies
+        working-directory: ./api
+        run: |
+          npm ci
+
+      - name: Run Docker Compose
+        working-directory: ./api
+        run: |
+            docker compose --env-file .env -p mrc-api up -d
+
+      - name: Load Environment Variables
+        working-directory: ./api
+        run: |
+          . ./scripts/load_dotenv.sh 
+
+      - name: Database Migration
+        working-directory: ./api
+        run: |
+          npm run migrate-apply:latest
+
+      - name: Generate ORM Client Model
+        working-directory: ./api
+        run: |
+          npm run generate-models 
+
+      - name: Run API Unit Tests
+        working-directory: ./api
+        run: |
+          npm run test:cov
+
+      - name: Stop and Remove Containers
+        working-directory: ./api
+        run: |
+          docker compose -p mrc-api down
+
