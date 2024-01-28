@@ -264,6 +264,144 @@
           }
         }
       }
+    },
+    "/api/v1/users/{userId}": {
+      "delete": {
+        "operationId": "UserV1ApiSpec_delete_/users/{userId}",
+        "tags": [
+          "User"
+        ],
+        "summary": "Delete user's info",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteUserV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "UserV1ApiSpec_get_/users/{userId}",
+        "tags": [
+          "User"
+        ],
+        "summary": "Get user by Id",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "UserV1ApiSpec_put_/users/{userId}",
+        "tags": [
+          "User"
+        ],
+        "summary": "Update user's access level",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestedAccessLevel": {
+                    "$ref": "#/components/schemas/AccessLevel"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "requestedAccessLevel"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -331,6 +469,99 @@
         "additionalProperties": false,
         "required": [
           "message"
+        ]
+      },
+      "DeleteUserV1Response": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "GetUserV1Response": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "user"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "idp": {
+            "type": "string",
+            "enum": [
+              "GOOGLE"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "accessLevel": {
+            "$ref": "#/components/schemas/AccessLevel"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "accessLevel",
+          "createdAt",
+          "email",
+          "id",
+          "idp",
+          "nickname",
+          "tag",
+          "updatedAt"
+        ]
+      },
+      "AccessLevel": {
+        "enum": [
+          "ADMIN",
+          "DEVELOPER",
+          "USER"
+        ],
+        "type": "string"
+      },
+      "UpdateUserV1Response": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "user"
+        ]
+      },
+      "UpdateUserV1Request": {
+        "type": "object",
+        "properties": {
+          "requestedAccessLevel": {
+            "$ref": "#/components/schemas/AccessLevel"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "requestedAccessLevel"
         ]
       }
     },
