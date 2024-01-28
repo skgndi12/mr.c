@@ -90,4 +90,203 @@ describe('Test user repository', () => {
       }
     });
   });
+
+  describe('Test find by email', () => {
+    const id = randomUUID();
+    const nickname = generateUserNickname(id);
+    const tag = generateUserTag(id);
+    const idpEnum = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevelEnum = new AccessLevelEnum(AccessLevel.USER);
+    const createdAt = new Date();
+    const idp = idpEnum.get();
+    const accessLevel = accessLevelEnum.get();
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp,
+          email,
+          accessLevel,
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.user.delete({ where: { email } });
+    });
+
+    it('should success when valid', async () => {
+      const user = await userRepository.findByEmail(email);
+      expect(JSON.stringify(user)).toEqual(
+        JSON.stringify({
+          id,
+          nickname,
+          tag,
+          idp: idpEnum,
+          email,
+          accessLevel: accessLevelEnum,
+          createdAt: createdAt,
+          updatedAt: createdAt
+        })
+      );
+    });
+
+    it('should fail when the given email does not match any existing user', async () => {
+      try {
+        await userRepository.findByEmail('user100@gmail.com');
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
+
+  describe('Test upsert', () => {
+    const id = randomUUID();
+    const nickname = generateUserNickname(id);
+    const tag = generateUserTag(id);
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = randomUUID();
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const createdAt = new Date();
+
+    afterEach(async () => {
+      await prismaClient.user.delete({ where: { id } });
+    });
+
+    it('should success to create user', async () => {
+      const usertToCreate: User = {
+        id,
+        nickname,
+        tag,
+        idp: idp,
+        email,
+        accessLevel: accessLevel,
+        createdAt: createdAt,
+        updatedAt: createdAt
+      };
+      const user = await userRepository.upsert(usertToCreate);
+      expect(JSON.stringify(user)).toEqual(JSON.stringify(usertToCreate));
+    });
+
+    it('should success to update user', async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get(),
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+
+      const updatedAt = new Date();
+      const usertToUpdate: User = {
+        id,
+        nickname,
+        tag,
+        idp: new IdpEnum(Idp.GOOGLE),
+        email,
+        accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
+        createdAt: createdAt,
+        updatedAt: updatedAt
+      };
+      const updatedUser = await userRepository.upsert(usertToUpdate);
+
+      expect(JSON.stringify(updatedUser)).toEqual(
+        JSON.stringify(usertToUpdate)
+      );
+    });
+
+    it('should fail to update the user when the provided data includes information that cannot be updated', async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get(),
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+
+      const updatedAt = new Date();
+      const usertToUpdate: User = {
+        id,
+        nickname: 'randomnickanme',
+        tag,
+        idp: new IdpEnum(Idp.GOOGLE),
+        email,
+        accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
+        createdAt: createdAt,
+        updatedAt: updatedAt
+      };
+      try {
+        await userRepository.upsert(usertToUpdate);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.INTERNAL_ERROR);
+        expect(error).toHaveProperty('context', { id });
+      }
+    });
+  });
+
+  describe('Test delete by ID', () => {
+    const id = randomUUID();
+    const nickname = generateUserNickname(id);
+    const tag = generateUserTag(id);
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = randomUUID();
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const createdAt = new Date();
+
+    beforeEach(async () => {
+      await prismaClient.user.create({
+        data: {
+          id,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get(),
+          createdAt: createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.user.delete({ where: { id } });
+    });
+
+    it('should success when valid', async () => {
+      await userRepository.deleteById(id);
+      try {
+        await userRepository.findById(id);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+
+    it('should fail to delete user when given ID does not match any existing user', async () => {
+      try {
+        await userRepository.deleteById(randomUUID());
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
 });
