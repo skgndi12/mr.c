@@ -153,7 +153,7 @@ npm run generate-models
 ```bash
 npm run start:dev # 개발 모드로 서버 실행
 
-npm run start:watch # # 서버 변경 사항을 실시간으로 감지하여 자동으로 재실행
+npm run start:watch # 서버 변경 사항을 실시간으로 감지하여 자동으로 재실행
 ```
 
 # 테스트
