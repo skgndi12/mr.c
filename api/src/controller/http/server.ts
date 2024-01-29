@@ -13,6 +13,7 @@ import { name, version } from '@root/package.json';
 
 import { JwtHandler } from '@src/core/ports/jwt.handler';
 import { AuthService } from '@src/core/services/auth/auth.service';
+import { UserService } from '@src/core/services/user/user.service';
 
 import { AuthV1Controller } from '@controller/http/auth/auth.v1.controller';
 import { DevV1Controller } from '@controller/http/dev/dev.v1.controller';
@@ -20,6 +21,7 @@ import { HealthController } from '@controller/http/health/health.controller';
 import { Middleware } from '@controller/http/middleware';
 import { HttpConfig } from '@controller/http/types';
 import { idTokenCookieName } from '@controller/http/types';
+import { UserV1Controller } from '@controller/http/user/user.v1.controller';
 
 export class HttpServer {
   private middleware: Middleware;
@@ -30,6 +32,7 @@ export class HttpServer {
     private readonly logger: Logger,
     private readonly config: HttpConfig,
     private readonly authService: AuthService,
+    private readonly userService: UserService,
     private readonly jwtHandler: JwtHandler
   ) {
     this.middleware = new Middleware(this.logger, this.jwtHandler);
@@ -43,7 +46,6 @@ export class HttpServer {
     await this.buildApiDocument();
     this.app.use('/api', cookieParser());
     this.app.use('/api', this.middleware.accessLog);
-    this.app.use('/api/v1/dev', this.middleware.issuePassport);
     this.app.use(
       OpenApiValidatorMiddleware({
         apiSpec: path.join(__dirname, '../../../generate/openapi.json'),
@@ -81,11 +83,12 @@ export class HttpServer {
 
   private getApiRouters = (): express.Router[] => {
     const routers = [
-      new DevV1Controller().routes(),
+      new DevV1Controller(this.middleware).routes(),
       new AuthV1Controller(
         this.authService,
         this.config.cookieExpirationHours
-      ).routes()
+      ).routes(),
+      new UserV1Controller(this.middleware, this.userService).routes()
     ];
     return routers;
   };

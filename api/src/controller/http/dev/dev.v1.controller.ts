@@ -8,20 +8,23 @@ import {
   ServerTimeV1Response
 } from '@controller/http/dev/response/dev.v1.response';
 import { methodNotAllowed } from '@controller/http/handler';
+import { Middleware } from '@controller/http/middleware';
 
 export class DevV1Controller {
+  constructor(private readonly middleware: Middleware) {}
+
   public routes = (): Router => {
     const router: Router = Router();
     const prefix = '/v1/dev';
 
     router
       .route(`${prefix}/greeting`)
-      .post(this.greeting)
+      .post(this.middleware.issuePassport, this.greeting)
       .all(methodNotAllowed);
 
     router
       .route(`${prefix}/server-time`)
-      .get(this.serverTime)
+      .get(this.middleware.issuePassport, this.serverTime)
       .all(methodNotAllowed);
 
     return router;
