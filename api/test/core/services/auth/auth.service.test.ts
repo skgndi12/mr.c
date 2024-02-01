@@ -1,6 +1,9 @@
 import { AccessLevel, Idp } from '@prisma/client';
 import * as crypto from 'crypto';
+import { DeepMockProxy, mockClear, mockDeep } from 'jest-mock-extended';
 import { parse } from 'querystring';
+
+import extendedPrisma from '@root/test/infrastructure/prisma/test.prisma.client';
 
 import { User } from '@src/core/entities/user.entity';
 import {
@@ -16,8 +19,17 @@ import { AuthService } from '@src/core/services/auth/auth.service';
 import { AuthConfig } from '@src/core/services/auth/types';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
+import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
+import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
+import { PostgresqlUserRepository } from '@src/infrastructure/repositories/postgresql/user.repository';
 
 jest.mock('crypto');
+jest.mock('@root/test/infrastructure/prisma/test.prisma.client', () => ({
+  __esModule: true,
+  default: mockDeep<ExtendedPrismaClient>()
+}));
+
+const prismaMock = extendedPrisma as DeepMockProxy<ExtendedPrismaClient>;
 
 describe('Test auth service', () => {
   const state = '8a5c8a05-0a20-49f9-92a5-a6f83d5617e9';
@@ -61,6 +73,7 @@ describe('Test auth service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockClear(prismaMock);
   });
 
   describe('Test initialize Google sign in', () => {
@@ -142,13 +155,16 @@ describe('Test auth service', () => {
       googleHandler.exchangeAuthCode = jest.fn(() =>
         Promise.resolve(googleIdTokenString)
       );
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
       jest.spyOn(crypto, 'randomUUID').mockReturnValue(userId);
     });
 
-    it('should success when valid', async () => {
+    it('should success and create a user when no matching user exists', async () => {
       const givenAppIdTokenString = 'appIdTokenString';
       const currentDate = new Date();
-      const upsertUser = new User(
+      const userUpserted = new User(
         userId,
         nickname,
         tag,
@@ -183,8 +199,16 @@ describe('Test auth service', () => {
         };
       });
       jwtHandler.signAppIdToken = jest.fn(() => givenAppIdTokenString);
-      const mockRunInTransaction = jest.fn(() => Promise.resolve(upsertUser));
-      txManager.runInTransaction = mockRunInTransaction as jest.Mock;
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      const userFindByEmail = jest.fn(() =>
+        Promise.reject(new CustomError({ code: AppErrorCode.NOT_FOUND }))
+      ) as jest.Mock;
+      const userUpsert = jest.fn(() =>
+        Promise.resolve(userUpserted)
+      ) as jest.Mock;
+      userRepository.findByEmail = userFindByEmail;
+      userRepository.upsert = userUpsert;
 
       const [actualReferrer, actualAppIdToken] = await new AuthService(
         authConfig,
@@ -209,24 +233,130 @@ describe('Test auth service', () => {
         googleIdTokenString
       );
 
+      expect(userRepository.findByEmail).toBeCalledTimes(1);
+      const userFindByEmailArgs = userFindByEmail.mock.calls[0][0];
+      expect(userFindByEmailArgs).toEqual(email);
+
+      expect(userRepository.upsert).toBeCalledTimes(1);
+      const userUpsertArgs = userUpsert.mock.calls[0][0];
+      expect(userUpsertArgs.getData()).toEqual(
+        expect.objectContaining({
+          id: userId,
+          nickname,
+          tag,
+          idp: idp.get(),
+          email,
+          accessLevel: accessLevel.get()
+        })
+      );
+
       expect(jwtHandler.signAppIdToken).toBeCalledTimes(1);
       expect(jwtHandler.signAppIdToken).toBeCalledWith(
         expect.objectContaining({
-          userId: upsertUser.id,
-          nickname: upsertUser.nickname,
-          tag: upsertUser.tag,
-          idp: upsertUser.idp,
-          email: upsertUser.email,
-          accessLevel: upsertUser.accessLevel
+          userId: userUpserted.id,
+          nickname: userUpserted.nickname,
+          tag: userUpserted.tag,
+          idp: userUpserted.idp,
+          email: userUpserted.email,
+          accessLevel: userUpserted.accessLevel
         })
       );
-      expect(txManager.runInTransaction).toBeCalledTimes(1);
+    });
+
+    it('should success and return a valid ID token when a matching user exists', async () => {
+      const givenAppIdTokenString = 'appIdTokenString';
+      const currentDate = new Date();
+      const userFound = new User(
+        userId,
+        nickname,
+        tag,
+        idp,
+        email,
+        accessLevel,
+        currentDate,
+        currentDate
+      );
+      keyValueRepository.getThenDelete = jest.fn(() =>
+        Promise.resolve(JSON.stringify({ state, referrer }))
+      );
+      googleHandler.exchangeAuthCode = jest.fn(() =>
+        Promise.resolve(googleIdTokenString)
+      );
+      jwtHandler.decodeTokenWithoutVerify = jest.fn(() => {
+        return {
+          header: {
+            alg: 'RS256',
+            kid: 'kid',
+            typ: 'JWT'
+          },
+          payload: {
+            iss: 'https://accounts.google.com',
+            aud: 'aud',
+            sub: '103395839580300821622',
+            email,
+            iat: 1704189330,
+            exp: 1704192930
+          },
+          signature: 'randomSignature'
+        };
+      });
+      jwtHandler.signAppIdToken = jest.fn(() => givenAppIdTokenString);
+
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      const userFindByEmail = jest.fn(() =>
+        Promise.resolve(userFound)
+      ) as jest.Mock;
+      userRepository.findByEmail = userFindByEmail;
+      userRepository.upsert = jest.fn();
+
+      const [actualReferrer, actualAppIdToken] = await new AuthService(
+        authConfig,
+        keyValueRepository,
+        userRepository,
+        jwtHandler,
+        txManager,
+        googleHandler
+      ).finalizeGoogleSignIn(baseUrl, state, authCode);
+
+      expect(actualReferrer).toEqual(referrer);
+      expect(actualAppIdToken).toEqual(givenAppIdTokenString);
+
+      expect(keyValueRepository.getThenDelete).toBeCalledTimes(1);
+      expect(keyValueRepository.getThenDelete).toBeCalledWith(state);
+
+      expect(googleHandler.exchangeAuthCode).toBeCalledTimes(1);
+      expect(googleHandler.exchangeAuthCode).toBeCalledWith(baseUrl, authCode);
+
+      expect(jwtHandler.decodeTokenWithoutVerify).toBeCalledTimes(1);
+      expect(jwtHandler.decodeTokenWithoutVerify).toBeCalledWith(
+        googleIdTokenString
+      );
+
+      expect(userRepository.findByEmail).toBeCalledTimes(1);
+      const userFindByEmailArgs = userFindByEmail.mock.calls[0][0];
+      expect(userFindByEmailArgs).toEqual(email);
+
+      expect(userRepository.upsert).toBeCalledTimes(0);
+
+      expect(jwtHandler.signAppIdToken).toBeCalledTimes(1);
+      expect(jwtHandler.signAppIdToken).toBeCalledWith(
+        expect.objectContaining({
+          userId: userFound.id,
+          nickname: userFound.nickname,
+          tag: userFound.tag,
+          idp: userFound.idp,
+          email: userFound.email,
+          accessLevel: userFound.accessLevel
+        })
+      );
     });
 
     it('should fail when the state is not found', async () => {
       keyValueRepository.getThenDelete = jest.fn(() => {
         throw new Error();
       });
+      txManager.runInTransaction = jest.fn();
 
       try {
         await new AuthService(
@@ -272,6 +402,7 @@ describe('Test auth service', () => {
           signature: 'randomSignature'
         };
       });
+      txManager.runInTransaction = jest.fn();
 
       try {
         await new AuthService(

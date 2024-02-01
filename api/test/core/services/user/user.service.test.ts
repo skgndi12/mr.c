@@ -1,4 +1,7 @@
 import { AccessLevel, Idp } from '@prisma/client';
+import { DeepMockProxy, mockClear, mockDeep } from 'jest-mock-extended';
+
+import extendedPrisma from '@root/test/infrastructure/prisma/test.prisma.client';
 
 import { AppIdToken } from '@src/core/entities/auth.entity';
 import { User } from '@src/core/entities/user.entity';
@@ -7,6 +10,16 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import { UserService } from '@src/core/services/user/user.service';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
+import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
+import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
+import { PostgresqlUserRepository } from '@src/infrastructure/repositories/postgresql/user.repository';
+
+jest.mock('@root/test/infrastructure/prisma/test.prisma.client', () => ({
+  __esModule: true,
+  default: mockDeep<ExtendedPrismaClient>()
+}));
+
+const prismaMock = extendedPrisma as DeepMockProxy<ExtendedPrismaClient>;
 
 describe('Test user service', () => {
   const currentDate = new Date();
@@ -39,6 +52,7 @@ describe('Test user service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockClear(prismaMock);
   });
 
   describe('Test get user', () => {
@@ -90,7 +104,7 @@ describe('Test user service', () => {
   });
 
   describe('Test update user', () => {
-    const upsertedUser: User = new User(
+    const userFound = new User(
       user.id,
       user.nickname,
       user.tag,
@@ -100,14 +114,37 @@ describe('Test user service', () => {
       user.createdAt,
       user.updatedAt
     );
+    const updatedAt = new Date();
     const requestedAccessLevel = AccessLevel.DEVELOPER;
+    const userUpdated = new User(
+      userFound.id,
+      userFound.nickname,
+      userFound.tag,
+      userFound.idp,
+      userFound.email,
+      new AccessLevelEnum(requestedAccessLevel),
+      userFound.createdAt,
+      updatedAt
+    );
 
     beforeAll(() => {
-      const mockRunInTransaction = jest.fn(() => Promise.resolve(upsertedUser));
-      txManager.runInTransaction = mockRunInTransaction as jest.Mock;
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
     });
 
     it('should success when valid', async () => {
+      const userFindById = jest.fn(() =>
+        Promise.resolve(userFound)
+      ) as jest.Mock;
+      const userUpsert = jest.fn(() =>
+        Promise.resolve(userUpdated)
+      ) as jest.Mock;
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      userRepository.upsert = userUpsert;
+
       const givenRequesterIdToken = new AppIdToken(
         requesterUserId,
         'nickname',
@@ -126,12 +163,29 @@ describe('Test user service', () => {
         requestedAccessLevel
       );
 
-      expect(actualResult).toStrictEqual(upsertedUser);
+      expect(actualResult).toStrictEqual(userUpdated);
 
-      expect(txManager.runInTransaction).toBeCalledTimes(1);
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(requestedUserId);
+
+      expect(userRepository.upsert).toBeCalledTimes(1);
+      const userUpsertArgs = userUpsert.mock.calls[0][0];
+      expect(userUpsertArgs.getData()).toEqual(
+        expect.objectContaining({
+          id: userFound.id,
+          nickname: userFound.nickname,
+          tag: userFound.tag,
+          idp: userFound.idp.get(),
+          email: userFound.email,
+          accessLevel: requestedAccessLevel
+        })
+      );
     });
 
     it("should failure when requester's access level is not sufficient", async () => {
+      txManager.runInTransaction = jest.fn();
+
       try {
         const givenRequesterIdToken = new AppIdToken(
           requesterUserId,
