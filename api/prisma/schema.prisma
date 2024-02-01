@@ -27,6 +27,7 @@ model User {
   accessLevel AccessLevel @default(USER) @map("access_level")
   createdAt   DateTime    @map("created_at") @db.Timestamptz
   updatedAt   DateTime    @map("updated_at") @db.Timestamptz
+  Comment     Comment[]
 
   @@unique([nickname, tag])
   @@map("users")
@@ -58,6 +59,7 @@ model Reply {
 model Comment {
   id        Int      @id @default(autoincrement())
   userId    String   @map("user_id") @db.Char(36)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   movieName String   @map("movie_name") @db.VarChar
   content   String   @db.VarChar
   createdAt DateTime @map("created_at") @db.Timestamptz
