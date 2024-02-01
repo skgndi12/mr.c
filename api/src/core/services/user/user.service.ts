@@ -60,9 +60,18 @@ export class UserService {
           requestedUserId,
           txClient
         );
-        userFound.accessLevel = new AccessLevelEnum(requestedAccessLevel);
+        const userToUpdate = new User(
+          userFound.id,
+          userFound.nickname,
+          userFound.tag,
+          userFound.idp,
+          userFound.email,
+          new AccessLevelEnum(requestedAccessLevel),
+          userFound.createdAt,
+          userFound.updatedAt
+        );
 
-        return await this.userRepository.upsert(userFound, txClient);
+        return await this.userRepository.upsert(userToUpdate, txClient);
       },
       IsolationLevel.READ_COMMITTED
     );

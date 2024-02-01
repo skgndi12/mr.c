@@ -1,11 +1,11 @@
-import { User } from '@src/core/entities/user.entity';
+import { UserData } from '@src/core/entities/user.entity';
 
 export interface GetUserV1Response {
-  user: User;
+  user: UserData;
 }
 
 export interface UpdateUserV1Response {
-  user: User;
+  user: UserData;
 }
 
 export interface DeleteUserV1Response {}

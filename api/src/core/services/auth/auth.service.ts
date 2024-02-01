@@ -107,16 +107,16 @@ export class AuthService {
             userNickname = generateUserNickname(userId);
             userTag = generateUserTag(userId);
             currentDate = new Date();
-            userToCreate = {
-              id: userId,
-              nickname: userNickname,
-              tag: userTag,
-              idp: new IdpEnum(Idp.GOOGLE),
-              email: payload.email,
-              accessLevel: new AccessLevelEnum(AccessLevel.USER),
-              createdAt: currentDate,
-              updatedAt: currentDate
-            };
+            userToCreate = new User(
+              userId,
+              userNickname,
+              userTag,
+              new IdpEnum(Idp.GOOGLE),
+              payload.email,
+              new AccessLevelEnum(AccessLevel.USER),
+              currentDate,
+              currentDate
+            );
             return await this.userRepository.upsert(userToCreate, txClient);
           default:
             return userFound;

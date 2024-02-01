@@ -45,7 +45,7 @@ export class UserV1Controller {
       req.params.userId
     );
 
-    res.send({ user });
+    res.send({ user: user.getData() });
   };
 
   public updateUser = async (
@@ -64,7 +64,7 @@ export class UserV1Controller {
       req.body.requestedAccessLevel
     );
 
-    res.send({ user: updatedUser });
+    res.send({ user: updatedUser.getData() });
   };
 
   public deleteUser = async (
