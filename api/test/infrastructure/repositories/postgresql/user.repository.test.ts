@@ -161,18 +161,18 @@ describe('Test user repository', () => {
     });
 
     it('should success to create user', async () => {
-      const usertToCreate: User = {
+      const userToCreate = new User(
         id,
         nickname,
         tag,
-        idp: idp,
+        idp,
         email,
-        accessLevel: accessLevel,
-        createdAt: createdAt,
-        updatedAt: createdAt
-      };
-      const user = await userRepository.upsert(usertToCreate);
-      expect(JSON.stringify(user)).toEqual(JSON.stringify(usertToCreate));
+        accessLevel,
+        createdAt,
+        createdAt
+      );
+      const user = await userRepository.upsert(userToCreate);
+      expect(JSON.stringify(user)).toEqual(JSON.stringify(userToCreate));
     });
 
     it('should success to update user', async () => {
@@ -190,21 +190,19 @@ describe('Test user repository', () => {
       });
 
       const updatedAt = new Date();
-      const usertToUpdate: User = {
+      const userToUpdate = new User(
         id,
         nickname,
         tag,
-        idp: new IdpEnum(Idp.GOOGLE),
+        new IdpEnum(Idp.GOOGLE),
         email,
-        accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
-        createdAt: createdAt,
-        updatedAt: updatedAt
-      };
-      const updatedUser = await userRepository.upsert(usertToUpdate);
-
-      expect(JSON.stringify(updatedUser)).toEqual(
-        JSON.stringify(usertToUpdate)
+        new AccessLevelEnum(AccessLevel.ADMIN),
+        createdAt,
+        updatedAt
       );
+      const updatedUser = await userRepository.upsert(userToUpdate);
+
+      expect(JSON.stringify(updatedUser)).toEqual(JSON.stringify(userToUpdate));
     });
 
     it('should fail to update the user when the provided data includes information that cannot be updated', async () => {
@@ -222,18 +220,18 @@ describe('Test user repository', () => {
       });
 
       const updatedAt = new Date();
-      const usertToUpdate: User = {
+      const userToUpdate = new User(
         id,
-        nickname: 'randomnickanme',
+        'randomnickanme',
         tag,
-        idp: new IdpEnum(Idp.GOOGLE),
+        new IdpEnum(Idp.GOOGLE),
         email,
-        accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
-        createdAt: createdAt,
-        updatedAt: updatedAt
-      };
+        new AccessLevelEnum(AccessLevel.ADMIN),
+        createdAt,
+        updatedAt
+      );
       try {
-        await userRepository.upsert(usertToUpdate);
+        await userRepository.upsert(userToUpdate);
       } catch (error: unknown) {
         expect(error).toBeInstanceOf(CustomError);
         expect(error).toHaveProperty('code', AppErrorCode.INTERNAL_ERROR);

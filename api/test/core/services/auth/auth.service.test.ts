@@ -3,6 +3,10 @@ import * as crypto from 'crypto';
 import { parse } from 'querystring';
 
 import { User } from '@src/core/entities/user.entity';
+import {
+  generateUserNickname,
+  generateUserTag
+} from '@src/core/nickname.generator';
 import { GoogleHandler } from '@src/core/ports/google.handler';
 import { JwtHandler } from '@src/core/ports/jwt.handler';
 import { KeyValueRepository } from '@src/core/ports/keyValue.repository';
@@ -127,27 +131,33 @@ describe('Test auth service', () => {
   describe('Test finalize Google sign in', () => {
     const googleIdTokenString = 'idTokenString';
     const authCode = 'randomAuthCode';
+    const userId = '57cf27d8-0c74-4963-94a7-47c35741ed06';
+    const nickname = generateUserNickname(userId);
+    const tag = generateUserTag(userId);
+    const email = 'test@gmail.com';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
 
     beforeAll(() => {
       googleHandler.exchangeAuthCode = jest.fn(() =>
         Promise.resolve(googleIdTokenString)
       );
+      jest.spyOn(crypto, 'randomUUID').mockReturnValue(userId);
     });
 
     it('should success when valid', async () => {
-      const givenEmail = 'test@gmail.com';
       const givenAppIdTokenString = 'appIdTokenString';
       const currentDate = new Date();
-      const upsertUser: User = {
-        id: '57cf27d8-0c74-4963-94a7-47c35741ed06',
-        nickname: '도전적인 평론가 연두빛 하마',
-        tag: '#AZ7J',
-        idp: new IdpEnum(Idp.GOOGLE),
-        email: givenEmail,
-        accessLevel: new AccessLevelEnum(AccessLevel.USER),
-        createdAt: currentDate,
-        updatedAt: currentDate
-      };
+      const upsertUser = new User(
+        userId,
+        nickname,
+        tag,
+        idp,
+        email,
+        accessLevel,
+        currentDate,
+        currentDate
+      );
       keyValueRepository.getThenDelete = jest.fn(() =>
         Promise.resolve(JSON.stringify({ state, referrer }))
       );
@@ -165,7 +175,7 @@ describe('Test auth service', () => {
             iss: 'https://accounts.google.com',
             aud: 'aud',
             sub: '103395839580300821622',
-            email: givenEmail,
+            email,
             iat: 1704189330,
             exp: 1704192930
           },

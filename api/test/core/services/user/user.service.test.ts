@@ -12,16 +12,16 @@ describe('Test user service', () => {
   const currentDate = new Date();
   const requestedUserId = 'randomId';
   const requesterUserId = 'anotherRandomId';
-  const user: User = {
-    id: requestedUserId,
-    nickname: '도전적인 평론가 연두빛 하마',
-    tag: '#AZ7J',
-    idp: new IdpEnum(Idp.GOOGLE),
-    email: 'test@gmail.com',
-    accessLevel: new AccessLevelEnum(AccessLevel.USER),
-    createdAt: currentDate,
-    updatedAt: currentDate
-  };
+  const user = new User(
+    requestedUserId,
+    '도전적인 평론가 연두빛 하마',
+    '#AZ7J',
+    new IdpEnum(Idp.GOOGLE),
+    'test@gmail.com',
+    new AccessLevelEnum(AccessLevel.USER),
+    currentDate,
+    currentDate
+  );
   let userRepository: UserRepository;
   let txManager: TransactionManager;
 
@@ -90,16 +90,16 @@ describe('Test user service', () => {
   });
 
   describe('Test update user', () => {
-    const upsertedUser: User = {
-      id: user.id,
-      nickname: user.nickname,
-      tag: user.tag,
-      idp: user.idp,
-      email: user.email,
-      accessLevel: new AccessLevelEnum(AccessLevel.ADMIN),
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    };
+    const upsertedUser: User = new User(
+      user.id,
+      user.nickname,
+      user.tag,
+      user.idp,
+      user.email,
+      new AccessLevelEnum(AccessLevel.USER),
+      user.createdAt,
+      user.updatedAt
+    );
     const requestedAccessLevel = AccessLevel.DEVELOPER;
 
     beforeAll(() => {
