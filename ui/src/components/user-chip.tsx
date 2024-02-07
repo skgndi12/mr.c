@@ -16,6 +16,7 @@ export default function UserChip({ nickname, tag }: { nickname: string; tag: str
       <div
         className="flex w-fit items-center rounded bg-gray-100 px-1 hover:bg-gray-200"
         onClick={handleClick}
+        data-testid="user-chip"
       >
         <Text weight="medium" nowrap>
           {nickname}
