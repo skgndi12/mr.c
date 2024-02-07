@@ -1,7 +1,8 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { User as UserModel } from '@prisma/client';
+import { Comment as CommentModel, User as UserModel } from '@prisma/client';
 import { Logger } from 'winston';
 
+import { Comment } from '@src/core/entities/comment.entity';
 import { User } from '@src/core/entities/user.entity';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { DatabaseConfig } from '@src/infrastructure/repositories/types';
@@ -31,6 +32,30 @@ export const extension = Prisma.defineExtension({
               new AccessLevelEnum(user.accessLevel),
               user.createdAt,
               user.updatedAt
+            );
+          };
+        }
+      }
+    },
+    comment: {
+      convertToEntity: {
+        needs: {
+          id: true,
+          userId: true,
+          movieName: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true
+        },
+        compute(comment: CommentModel) {
+          return (): Comment => {
+            return new Comment(
+              comment.id,
+              comment.userId,
+              comment.movieName,
+              comment.content,
+              comment.createdAt,
+              comment.updatedAt
             );
           };
         }
