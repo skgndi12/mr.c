@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 
 import { AuthService } from '@src/core/services/auth/auth.service';
 
-import { GoogleSignInTokenV1Query } from '@controller/http/auth/request/auth.v1.request';
+import { GoogleSignInTokenV1QueryParameter } from '@controller/http/auth/request/auth.v1.request';
 import {
   GoogleSignInTokenV1Response,
   GoogleSignInV1Response,
@@ -58,7 +58,7 @@ export class AuthV1Controller {
   };
 
   public googleSignInToken = async (
-    req: Request<any, any, any, GoogleSignInTokenV1Query>,
+    req: Request<any, any, any, GoogleSignInTokenV1QueryParameter>,
     res: Response<GoogleSignInTokenV1Response>
   ) => {
     const host = req.get('X-Forwarded-Host') ?? req.get('Host') ?? req.hostname;

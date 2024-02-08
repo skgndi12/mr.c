@@ -148,6 +148,275 @@
         }
       }
     },
+    "/api/v1/comments/": {
+      "get": {
+        "operationId": "CommentV1ApiSpec_get_/",
+        "tags": [
+          "Comment"
+        ],
+        "summary": "List comments",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nickname",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "movieName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "createdAt",
+                "movieName"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageOffset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommentsV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CommentV1ApiSpec_post_/",
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Create comment",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movieName": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content",
+                  "movieName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comments/{commentId}": {
+      "delete": {
+        "operationId": "CommentV1ApiSpec_delete_/{commentId}",
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Delete comment",
+        "description": "Please provide the comment ID as a string",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCommentV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "CommentV1ApiSpec_put_/{commentId}",
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Update comment",
+        "description": "Please provide the comment ID as a string",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movieName": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content",
+                  "movieName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCommentV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/dev/greeting": {
       "post": {
         "operationId": "DevV1ApiSpec_post_/greeting",
@@ -441,6 +710,178 @@
       "SignOutV1Response": {
         "type": "object",
         "additionalProperties": false
+      },
+      "ListCommentsV1Response": {
+        "type": "object",
+        "properties": {
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentV1Response"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "sortBy": {
+                "$ref": "#/components/schemas/SortBy"
+              },
+              "direction": {
+                "$ref": "#/components/schemas/Direction"
+              },
+              "pageOffset": {
+                "type": "number"
+              },
+              "pageSize": {
+                "type": "number"
+              },
+              "totalPageCount": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "direction",
+              "pageOffset",
+              "pageSize",
+              "sortBy",
+              "totalPageCount"
+            ]
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "nickname": {
+                "type": "string"
+              },
+              "movieName": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comments",
+          "pagination"
+        ]
+      },
+      "CommentV1Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "movieName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "createdAt",
+          "id",
+          "movieName",
+          "nickname",
+          "tag",
+          "updatedAt",
+          "userId"
+        ]
+      },
+      "SortBy": {
+        "enum": [
+          "createdAt",
+          "movieName"
+        ],
+        "type": "string"
+      },
+      "Direction": {
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "type": "string"
+      },
+      "CreateCommentV1Response": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/CommentV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comment"
+        ]
+      },
+      "CreateCommentV1Request": {
+        "type": "object",
+        "properties": {
+          "movieName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "movieName"
+        ]
+      },
+      "DeleteCommentV1Response": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "UpdateCommentV1Response": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/CommentV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comment"
+        ]
+      },
+      "UpdateCommentV1Request": {
+        "type": "object",
+        "properties": {
+          "movieName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "movieName"
+        ]
       },
       "GreetingV1Response": {
         "type": "object",
