@@ -5,6 +5,30 @@ export default function Page() {
     <>
       <h1>This is review board</h1>
       <Link href="/review/1">review #1 detail</Link>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
+      <h1>This is review board</h1>
     </>
   );
 }
