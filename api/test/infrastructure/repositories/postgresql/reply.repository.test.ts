@@ -16,6 +16,7 @@ import {
 } from '@src/core/ports/reply.repository';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
+import { PrismaErrorCode } from '@src/infrastructure/prisma/errors';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
 import { PostgresqlReplyRepository } from '@src/infrastructure/repositories/postgresql/reply.repository';
@@ -413,6 +414,79 @@ describe('Test reply repository', () => {
 
       try {
         await replyRepository.update(params);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
+
+  describe('Test delete by ID', () => {
+    const userId = randomUUID();
+    const reviewId = generateRandomNumber(userId);
+    const content = 'randomContent';
+    const createdAt = new Date();
+    let replyCreated: Reply;
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id: userId,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      await prismaClient.review.create({
+        data: {
+          id: reviewId,
+          userId,
+          title: 'randomTitle',
+          movieName: 'randomMovieName',
+          content,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      const replyResultCreated = await prismaClient.reply.create({
+        data: {
+          reviewId,
+          userId,
+          content,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      replyCreated = replyResultCreated.convertToEntity();
+    });
+
+    afterAll(async () => {
+      await prismaClient.review.delete({ where: { id: reviewId } });
+      await prismaClient.user.delete({ where: { id: userId } });
+    });
+
+    it('should success when valid', async () => {
+      await replyRepository.deleteById(replyCreated.id);
+
+      try {
+        await prismaClient.reply.findFirstOrThrow({
+          where: { id: replyCreated.id }
+        });
+      } catch (error: unknown) {
+        expect(error).toHaveProperty('code', PrismaErrorCode.RECORD_NOT_FOUND);
+      }
+    });
+
+    it('should fail to delete a reply when no existing reply is found for the given ID', async () => {
+      try {
+        await replyRepository.deleteById(replyCreated.id + 1);
       } catch (error: unknown) {
         expect(error).toBeInstanceOf(CustomError);
         expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);

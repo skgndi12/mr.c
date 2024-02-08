@@ -151,4 +151,31 @@ export class PostgresqlReplyRepository implements Partial<ReplyRepository> {
       });
     }
   };
+
+  public deleteById = async (
+    id: number,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<void> => {
+    try {
+      const client = txClient ?? this.client;
+      await client.reply.delete({ where: { id } });
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'reply not found for deletion',
+          context: { id }
+        });
+      }
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to delete reply by ID',
+        context: { id }
+      });
+    }
+  };
 }
