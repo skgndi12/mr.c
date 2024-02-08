@@ -13,6 +13,7 @@ import {
 import { Config } from '@src/config/types';
 import { AuthService } from '@src/core/services/auth/auth.service';
 import { CommentService } from '@src/core/services/comment/comment.service';
+import { ReviewService } from '@src/core/services/review/review.service';
 import { UserService } from '@src/core/services/user/user.service';
 import { GoogleClient } from '@src/infrastructure/google/google.client';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
@@ -23,6 +24,8 @@ import {
   generateRedisClient
 } from '@src/infrastructure/redis/redis.client';
 import { PostgresqlCommentRepository } from '@src/infrastructure/repositories/postgresql/comment.repository';
+import { PostgresqlReplyRepository } from '@src/infrastructure/repositories/postgresql/reply.repository';
+import { PostgresqlReviewRepository } from '@src/infrastructure/repositories/postgresql/review.repository';
 import { PostgresqlUserRepository } from '@src/infrastructure/repositories/postgresql/user.repository';
 import { RedisKeyValueRepository } from '@src/infrastructure/repositories/redis/keyValue.repository';
 import { JwtClient } from '@src/jwt/jwt.client';
@@ -56,6 +59,8 @@ export class ComponentHandler {
     const commentRepository = new PostgresqlCommentRepository(
       this.prismaClient
     );
+    const reviewRepository = new PostgresqlReviewRepository(this.prismaClient);
+    const replyRepository = new PostgresqlReplyRepository(this.prismaClient);
 
     this.redisClient = await generateRedisClient(
       this.logger,
@@ -86,6 +91,12 @@ export class ComponentHandler {
       commentRepository,
       txManager
     );
+    const reviewService = new ReviewService(
+      userRepository,
+      reviewRepository,
+      replyRepository,
+      txManager
+    );
 
     this.httpServer = new HttpServer(
       this.logger,
@@ -93,6 +104,7 @@ export class ComponentHandler {
       authService,
       userService,
       commentService,
+      reviewService,
       jwtClient
     );
     await this.httpServer.start();

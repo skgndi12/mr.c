@@ -14,6 +14,7 @@ import { name, version } from '@root/package.json';
 import { JwtHandler } from '@src/core/ports/jwt.handler';
 import { AuthService } from '@src/core/services/auth/auth.service';
 import { CommentService } from '@src/core/services/comment/comment.service';
+import { ReviewService } from '@src/core/services/review/review.service';
 import { UserService } from '@src/core/services/user/user.service';
 
 import { AuthV1Controller } from '@controller/http/auth/auth.v1.controller';
@@ -21,6 +22,7 @@ import { CommentV1Controller } from '@controller/http/comment/comment.v1.control
 import { DevV1Controller } from '@controller/http/dev/dev.v1.controller';
 import { HealthController } from '@controller/http/health/health.controller';
 import { Middleware } from '@controller/http/middleware';
+import { ReviewV1Controller } from '@controller/http/review/review.v1.controller';
 import { HttpConfig } from '@controller/http/types';
 import { idTokenCookieName } from '@controller/http/types';
 import { UserV1Controller } from '@controller/http/user/user.v1.controller';
@@ -36,6 +38,7 @@ export class HttpServer {
     private readonly authService: AuthService,
     private readonly userService: UserService,
     private readonly commentService: CommentService,
+    private readonly reviewService: ReviewService,
     private readonly jwtHandler: JwtHandler
   ) {
     this.middleware = new Middleware(this.logger, this.jwtHandler);
@@ -93,7 +96,8 @@ export class HttpServer {
         this.config.cookieExpirationHours
       ).routes(),
       new UserV1Controller(this.middleware, this.userService).routes(),
-      new CommentV1Controller(this.middleware, this.commentService).routes()
+      new CommentV1Controller(this.middleware, this.commentService).routes(),
+      new ReviewV1Controller(this.middleware, this.reviewService).routes()
     ];
     return routers;
   };
