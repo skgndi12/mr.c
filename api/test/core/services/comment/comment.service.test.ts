@@ -12,6 +12,7 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import { CommentService } from '@src/core/services/comment/comment.service';
 import {
   CreateCommentDto,
+  DeleteCommentDto,
   GetCommentsDto,
   UpdateCommentDto
 } from '@src/core/services/comment/types';
@@ -463,6 +464,120 @@ describe('Test comment service', () => {
       expect(userFindByIdArgs).toEqual(userId);
 
       expect(commentRepository.update).toBeCalledTimes(0);
+    });
+  });
+
+  describe('Test delete comment', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const requesterIdToken = new AppIdToken(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel
+    );
+    const commentId = 0;
+    const movieName = 'randomMovie';
+    const content = 'randomContent';
+    const createdAt = new Date();
+
+    const userFound = new User(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel,
+      createdAt,
+      createdAt
+    );
+    const commentFound = new Comment(
+      commentId,
+      userId,
+      movieName,
+      content,
+      createdAt,
+      createdAt
+    );
+
+    const userFindById = jest.fn(() => Promise.resolve(userFound)) as jest.Mock;
+    const commentFindById = jest.fn(() =>
+      Promise.resolve(commentFound)
+    ) as jest.Mock;
+    const commentDeleteById = jest.fn(() => Promise.resolve()) as jest.Mock;
+
+    beforeAll(() => {
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      commentRepository = new PostgresqlCommentRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      commentRepository.findById = commentFindById;
+      commentRepository.deleteById = commentDeleteById;
+    });
+
+    it('should success when valid', async () => {
+      const dto: DeleteCommentDto = { requesterIdToken, commentId };
+      await new CommentService(
+        userRepository,
+        commentRepository,
+        txManager
+      ).deleteComment(dto);
+
+      expect(commentRepository.findById).toBeCalledTimes(1);
+      const commentFindByIdArgs = commentFindById.mock.calls[0][0];
+      expect(commentFindByIdArgs).toEqual(commentId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(userId);
+
+      expect(commentRepository.deleteById).toBeCalledTimes(1);
+      const commentDeleteByIdArgs = commentDeleteById.mock.calls[0][0];
+      expect(commentDeleteByIdArgs).toEqual(commentId);
+    });
+
+    it('should fail when access level and user authorization are invalid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        'anotherRandomId',
+        'anotherNickname',
+        '#GGAT',
+        new IdpEnum(Idp.GOOGLE),
+        'user100@gmail.com',
+        new AccessLevelEnum(AccessLevel.USER)
+      );
+      const dto: DeleteCommentDto = {
+        requesterIdToken: givenRequesterIdToken,
+        commentId
+      };
+      try {
+        await new CommentService(
+          userRepository,
+          commentRepository,
+          txManager
+        ).deleteComment(dto);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.PERMISSIION_DENIED);
+      }
+
+      expect(commentRepository.findById).toBeCalledTimes(1);
+      const commentFindByIdArgs = commentFindById.mock.calls[0][0];
+      expect(commentFindByIdArgs).toEqual(commentId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(userId);
+
+      expect(commentRepository.deleteById).toBeCalledTimes(0);
     });
   });
 });

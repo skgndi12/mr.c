@@ -16,6 +16,7 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import {
   CreateCommentDto,
   CreateCommentResponse,
+  DeleteCommentDto,
   GetCommentsDto,
   GetCommentsResponse,
   UpdateCommentDto,
@@ -169,6 +170,38 @@ export class CommentService {
       user,
       comment
     };
+  };
+
+  public deleteComment = async (dto: DeleteCommentDto): Promise<null> => {
+    return await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<null> => {
+        const commentToDelete = await this.commentRepository.findById(
+          dto.commentId,
+          txClient
+        );
+        const userCommenting = await this.userRepository.findById(
+          commentToDelete.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAndUserIdAuthorized(
+            new AccessLevelEnum(AccessLevel.DEVELOPER),
+            userCommenting.id
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to delete comment',
+            context: { dto, comment: commentToDelete, user: userCommenting }
+          });
+        }
+
+        await this.commentRepository.deleteById(dto.commentId, txClient);
+        return null;
+      },
+      IsolationLevel.READ_COMMITTED
+    );
   };
 
   private extractUserIds = (comments: Comment[]): string[] => {
