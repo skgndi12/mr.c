@@ -26,12 +26,11 @@ export class JwtClient implements JwtHandler {
   algorithm: Algorithm = 'RS256';
 
   constructor(private readonly config: JwtClientConfig) {
-    this.keyChain = new Map<string, RsaKeyPair>();
-    config.keyPairs.forEach((keyPair: RsaKeyPair) => {
-      this.keyChain.set(keyPair.name, keyPair);
-    });
+    this.keyChain = Object.fromEntries(
+      this.config.keyPairs.map((keyPair) => [keyPair.name, keyPair])
+    );
 
-    const activeKeyPair = this.keyChain.get(config.activeKeyPair);
+    const activeKeyPair = this.keyChain[config.activeKeyPair];
     if (activeKeyPair) {
       this.activeKeyPair = activeKeyPair;
     } else {
@@ -113,7 +112,7 @@ export class JwtClient implements JwtHandler {
       });
     }
 
-    const keyPair = this.keyChain.get(token.header.kid);
+    const keyPair = this.keyChain[token.header.kid];
     if (!keyPair) {
       throw new CustomError({
         code: AppErrorCode.BAD_REQUEST,

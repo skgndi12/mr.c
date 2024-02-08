@@ -10,4 +10,6 @@ export interface RsaKeyPair {
   public: string;
 }
 
-export type RsaKeyChain = Map<string, RsaKeyPair>;
+export type RsaKeyChain = {
+  [id: string]: RsaKeyPair;
+};
