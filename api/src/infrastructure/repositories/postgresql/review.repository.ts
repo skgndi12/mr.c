@@ -5,7 +5,8 @@ import {
   CreateReviewParams,
   FindManyAndCountResponse,
   FindReviewsParams,
-  ReviewRepository
+  ReviewRepository,
+  UpdateReviewParams
 } from '@src/core/ports/review.repository';
 import { Direction, SortBy } from '@src/core/services/review/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -171,6 +172,58 @@ export class PostgresqlReviewRepository implements Partial<ReviewRepository> {
         code: AppErrorCode.INTERNAL_ERROR,
         cause: error,
         message: 'failed to find many reviews and count',
+        context: { params }
+      });
+    }
+  };
+
+  public update = async (
+    params: UpdateReviewParams,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<Review> => {
+    const updatedAt = new Date();
+    try {
+      const client = txClient ?? this.client;
+      const reviewUpdated = await client.review.update({
+        where: { id: params.id },
+        data: {
+          title: params.title,
+          movieName: params.movieName,
+          content: params.content,
+          updatedAt
+        },
+        include: {
+          _count: {
+            select: { Reply: true }
+          }
+        }
+      });
+
+      return this.convertToEntity(
+        reviewUpdated.id,
+        reviewUpdated.userId,
+        reviewUpdated.title,
+        reviewUpdated.movieName,
+        reviewUpdated.content,
+        reviewUpdated._count.Reply,
+        reviewUpdated.createdAt,
+        reviewUpdated.updatedAt
+      );
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'review not found for update',
+          context: { params }
+        });
+      }
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to update review',
         context: { params }
       });
     }
