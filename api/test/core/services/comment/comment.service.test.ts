@@ -12,7 +12,8 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import { CommentService } from '@src/core/services/comment/comment.service';
 import {
   CreateCommentDto,
-  GetCommentsDto
+  GetCommentsDto,
+  UpdateCommentDto
 } from '@src/core/services/comment/types';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -312,6 +313,156 @@ describe('Test comment service', () => {
 
       expect(userRepository.findByIds).toBeCalledTimes(0);
       expect(commentRepository.findManyAndCount).toBeCalledTimes(0);
+    });
+  });
+
+  describe('Test update comment', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const requesterIdToken = new AppIdToken(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel
+    );
+    const commentId = 0;
+    const movieName = 'randomMovie';
+    const content = 'randomContent';
+    const createdAt = new Date();
+
+    const updatedMovieName = 'updatedMovie';
+    const updatedContent = 'updatedContent';
+    const updatedAt = new Date();
+
+    const userFound = new User(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel,
+      createdAt,
+      createdAt
+    );
+    const commentFound = new Comment(
+      commentId,
+      userId,
+      movieName,
+      content,
+      createdAt,
+      createdAt
+    );
+    const commentUpdated = new Comment(
+      commentId,
+      userId,
+      updatedMovieName,
+      updatedContent,
+      createdAt,
+      updatedAt
+    );
+
+    const userFindById = jest.fn(() => Promise.resolve(userFound)) as jest.Mock;
+    const commentFindById = jest.fn(() =>
+      Promise.resolve(commentFound)
+    ) as jest.Mock;
+    const commentUpdate = jest.fn(() =>
+      Promise.resolve(commentUpdated)
+    ) as jest.Mock;
+
+    beforeAll(() => {
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      commentRepository = new PostgresqlCommentRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      commentRepository.findById = commentFindById;
+      commentRepository.update = commentUpdate;
+    });
+
+    it('should success when valid', async () => {
+      const givenDto: UpdateCommentDto = {
+        requesterIdToken,
+        commentId,
+        movieName: updatedMovieName,
+        content: updatedContent
+      };
+
+      const actualResult = await new CommentService(
+        userRepository,
+        commentRepository,
+        txManager
+      ).updateComment(givenDto);
+
+      expect(JSON.stringify(actualResult.user)).toEqual(
+        JSON.stringify(userFound)
+      );
+      expect(JSON.stringify(actualResult.comment)).toEqual(
+        JSON.stringify(commentUpdated)
+      );
+
+      expect(commentRepository.findById).toBeCalledTimes(1);
+      const commentFindByIdArgs = commentFindById.mock.calls[0][0];
+      expect(commentFindByIdArgs).toEqual(givenDto.commentId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(givenDto.requesterIdToken.userId);
+
+      expect(commentRepository.update).toBeCalledTimes(1);
+      const commentUpdateArgs = commentUpdate.mock.calls[0][0];
+      expect(commentUpdateArgs).toEqual(
+        expect.objectContaining({
+          id: givenDto.commentId,
+          movieName: givenDto.movieName,
+          content: givenDto.content
+        })
+      );
+    });
+
+    it('should fail when access level and user authorization are invalid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        'anotherRandomId',
+        'anotherNickname',
+        '#GGAT',
+        new IdpEnum(Idp.GOOGLE),
+        'user100@gmail.com',
+        new AccessLevelEnum(AccessLevel.USER)
+      );
+      const givenDto: UpdateCommentDto = {
+        requesterIdToken: givenRequesterIdToken,
+        commentId,
+        movieName: updatedMovieName,
+        content: updatedContent
+      };
+
+      try {
+        await new CommentService(
+          userRepository,
+          commentRepository,
+          txManager
+        ).updateComment(givenDto);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.PERMISSIION_DENIED);
+      }
+
+      expect(commentRepository.findById).toBeCalledTimes(1);
+      const commentFindByIdArgs = commentFindById.mock.calls[0][0];
+      expect(commentFindByIdArgs).toEqual(givenDto.commentId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(userId);
+
+      expect(commentRepository.update).toBeCalledTimes(0);
     });
   });
 });
