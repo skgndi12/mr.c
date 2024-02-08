@@ -24,6 +24,7 @@ import {
   CreateReplyResponse,
   CreateReviewDto,
   CreateReviewResponse,
+  DeleteReplyDto,
   DeleteReviewDto,
   GetRepliesDto,
   GetRepliesResponse,
@@ -394,6 +395,39 @@ export class ReviewService {
       user,
       reply
     };
+  };
+
+  public deleteReply = async (dto: DeleteReplyDto): Promise<null> => {
+    return await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<null> => {
+        const replyToDelete = await this.replyRepository.findById(
+          dto.replyId,
+          txClient
+        );
+        const userReplying = await this.userRepository.findById(
+          replyToDelete.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAndUserIdAuthorized(
+            new AccessLevelEnum(AccessLevel.DEVELOPER),
+            userReplying.id
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to delete reply',
+            context: { dto, reply: replyToDelete, user: userReplying }
+          });
+        }
+
+        await this.replyRepository.deleteById(dto.replyId);
+
+        return null;
+      },
+      IsolationLevel.READ_COMMITTED
+    );
   };
 
   private extractUserIds = (entries: Review[] | Reply[]): string[] => {

@@ -14,6 +14,7 @@ import { ReviewService } from '@src/core/services/review/review.service';
 import {
   CreateReplyDto,
   CreateReviewDto,
+  DeleteReplyDto,
   DeleteReviewDto,
   GetRepliesDto,
   GetReviewsDto,
@@ -24,6 +25,7 @@ import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
 import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
 import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
+import { PostgresqlReplyRepository } from '@src/infrastructure/repositories/postgresql/reply.repository';
 import { PostgresqlReviewRepository } from '@src/infrastructure/repositories/postgresql/review.repository';
 import { PostgresqlUserRepository } from '@src/infrastructure/repositories/postgresql/user.repository';
 
@@ -1124,6 +1126,128 @@ describe('Test review service', () => {
       expect(userFindByIdArgs).toEqual(replyFound.userId);
 
       expect(replyRepository.update).toBeCalledTimes(0);
+    });
+  });
+
+  describe('Test delete reply', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const requesterIdToken = new AppIdToken(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel
+    );
+    const reviewId = 0;
+    const replyId = 1;
+    const content = 'randomContent';
+    const createdAt = new Date();
+
+    const userFound = new User(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel,
+      createdAt,
+      createdAt
+    );
+    const replyFound = new Reply(
+      replyId,
+      reviewId,
+      userId,
+      content,
+      createdAt,
+      createdAt
+    );
+
+    const replyFindById = jest.fn(() =>
+      Promise.resolve(replyFound)
+    ) as jest.Mock;
+    const userFindById = jest.fn(() => Promise.resolve(userFound)) as jest.Mock;
+    const replyDeleteById = jest.fn(() => Promise.resolve()) as jest.Mock;
+
+    beforeAll(() => {
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      reviewRepository = new PostgresqlReviewRepository(prismaMock);
+      replyRepository = new PostgresqlReplyRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      replyRepository.findById = replyFindById;
+      replyRepository.deleteById = replyDeleteById;
+    });
+
+    it('should success when valid', async () => {
+      const givenDto: DeleteReplyDto = {
+        requesterIdToken,
+        reviewId,
+        replyId
+      };
+      await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).deleteReply(givenDto);
+
+      expect(replyRepository.findById).toBeCalledTimes(1);
+      const replyFindByIdArgs = replyFindById.mock.calls[0][0];
+      expect(replyFindByIdArgs).toEqual(givenDto.replyId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(replyFound.userId);
+
+      expect(replyRepository.deleteById).toBeCalledTimes(1);
+      const replyDeleteByIdArgs = replyDeleteById.mock.calls[0][0];
+      expect(replyDeleteByIdArgs).toEqual(givenDto.replyId);
+    });
+
+    it('should fail when access level and user authorization are invalid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        'anotherRandomId',
+        'anotherNickname',
+        '#GGAT',
+        new IdpEnum(Idp.GOOGLE),
+        'user100@gmail.com',
+        new AccessLevelEnum(AccessLevel.USER)
+      );
+      const givenDto: DeleteReplyDto = {
+        requesterIdToken: givenRequesterIdToken,
+        reviewId,
+        replyId
+      };
+      try {
+        await new ReviewService(
+          userRepository,
+          reviewRepository,
+          replyRepository,
+          txManager
+        ).deleteReply(givenDto);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.PERMISSIION_DENIED);
+      }
+
+      expect(replyRepository.findById).toBeCalledTimes(1);
+      const replyFindByIdArgs = replyFindById.mock.calls[0][0];
+      expect(replyFindByIdArgs).toEqual(givenDto.replyId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(replyFound.userId);
+
+      expect(replyRepository.deleteById).toBeCalledTimes(0);
     });
   });
 });
