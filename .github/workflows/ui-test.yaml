@@ -37,3 +37,101 @@ jobs:
         working-directory: ./ui
         run: |
           npm run test
+
+  storybook-preview:
+    runs-on: ubuntu-22.04
+    outputs:
+      url: ${{ steps.deploy-preview.outputs.deploy-url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            ui
+          fetch-depth: 1
+
+      - name: Read .nvmrc
+        working-directory: ./ui
+        run: |
+          echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        id: nvm
+
+      - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./ui
+        run: |
+          npm ci
+
+      - name: Build Storybook
+        working-directory: ./ui
+        run: |
+          npm run build-storybook --quiet
+
+      - name: Deploy preview to Netlify
+        id: deploy-preview
+        uses: nwtgck/actions-netlify@v2.1
+        with:
+          publish-dir: './ui/storybook-static'
+          production-branch: develop
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: 'Deploy Storybook Preview'
+          enable-github-deployment: false
+          enable-pull-request-comment: false
+          enable-commit-comment: false
+          overwrites-pull-request-comment: false
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 1
+
+      - name: Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Storybook preview: [${{ steps.deploy-preview.outputs.deploy-url }}](${{ steps.deploy-preview.outputs.deploy-url }})'
+            })
+
+  interaction-test:
+    runs-on: ubuntu-22.04
+    needs: storybook-preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            ui
+          fetch-depth: 1
+
+      - name: Read .nvmrc
+        working-directory: ./ui
+        run: |
+          echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        id: nvm
+
+      - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./ui
+        run: npm ci
+
+      - name: Install Playwright
+        working-directory: ./ui
+        run: npx playwright install --with-deps
+
+      - name: Run Storybook tests
+        working-directory: ./ui
+        run: npm run test-storybook
+        env:
+          TARGET_URL: '${{ needs.storybook-preview.outputs.url }}'
