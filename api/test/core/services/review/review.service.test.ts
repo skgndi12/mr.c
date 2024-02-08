@@ -11,8 +11,12 @@ import { ReviewRepository } from '@src/core/ports/review.repository';
 import { TransactionManager } from '@src/core/ports/transaction.manager';
 import { UserRepository } from '@src/core/ports/user.repository';
 import { ReviewService } from '@src/core/services/review/review.service';
-import { CreateReviewDto } from '@src/core/services/review/types';
+import {
+  CreateReviewDto,
+  GetReviewsDto
+} from '@src/core/services/review/types';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
+import { AppErrorCode, CustomError } from '@src/error/errors';
 import { PrismaTransactionManager } from '@src/infrastructure/prisma/prisma.transaction.manager';
 import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
 import { PostgresqlReviewRepository } from '@src/infrastructure/repositories/postgresql/review.repository';
@@ -24,6 +28,12 @@ jest.mock('@root/test/infrastructure/prisma/test.prisma.client', () => ({
 }));
 
 const prismaMock = extendedPrisma as DeepMockProxy<ExtendedPrismaClient>;
+
+function calculateTotalPageCount(count: number, pageSize?: number) {
+  const givenPageSize = pageSize ?? 10;
+  const additionalPageCount = count % givenPageSize !== 0 ? 1 : 0;
+  return Math.floor(count / givenPageSize) + additionalPageCount;
+}
 
 describe('Test review service', () => {
   let userRepository: UserRepository;
@@ -238,6 +248,191 @@ describe('Test review service', () => {
       expect(reviewRepository.findById).toBeCalledTimes(1);
       const reviewFindByIdArgs = reviewFindById.mock.calls[0][0];
       expect(reviewFindByIdArgs).toEqual(reviewId);
+    });
+  });
+
+  describe('Test get reviews', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const title = 'randomTitle';
+    const movieName = 'randomMovie';
+    const content = 'randomContent';
+    const currentDate = new Date();
+    const users: User[] = [];
+    const reviews: Review[] = [];
+    const reviewCount = 10;
+
+    const userFindByIds = jest.fn(() => Promise.resolve(users)) as jest.Mock;
+    const reviewFindManyCount = jest.fn(() =>
+      Promise.resolve({ reviews, reviewCount })
+    ) as jest.Mock;
+
+    beforeAll(() => {
+      users.push(
+        new User(
+          userId,
+          nickname,
+          tag,
+          idp,
+          email,
+          accessLevel,
+          currentDate,
+          currentDate
+        )
+      );
+
+      for (let i = 1; i <= reviewCount; i++) {
+        reviews.push(
+          new Review(
+            i,
+            userId,
+            title,
+            movieName,
+            content,
+            0,
+            currentDate,
+            currentDate
+          )
+        );
+      }
+
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      reviewRepository = new PostgresqlReviewRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findByIds = userFindByIds;
+      reviewRepository.findManyAndCount = reviewFindManyCount;
+    });
+
+    it('should success when page size is not provided', async () => {
+      const givenDto: GetReviewsDto = {
+        nickname,
+        title,
+        movieName
+      };
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).getReviews(givenDto);
+      const totalPageCount = calculateTotalPageCount(reviewCount);
+
+      expect(actualResult.pagination).toEqual({
+        sortBy: 'createdAt',
+        direction: 'desc',
+        pageOffset: 1,
+        pageSize: 10,
+        totalEntryCount: reviewCount,
+        totalPageCount
+      });
+      expect(JSON.stringify(actualResult.users)).toEqual(JSON.stringify(users));
+      for (let i = 0; i <= 10; i++) {
+        expect(JSON.stringify(actualResult.reviews[i])).toEqual(
+          JSON.stringify(reviews[i])
+        );
+      }
+
+      expect(userRepository.findByIds).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindByIds.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual([userId]);
+
+      expect(reviewRepository.findManyAndCount).toBeCalledTimes(1);
+      const reviewFindManyCountArgs = reviewFindManyCount.mock.calls[0][0];
+      expect(reviewFindManyCountArgs).toEqual(
+        expect.objectContaining({
+          nickname: givenDto.nickname,
+          title: givenDto.title,
+          movieName: givenDto.movieName,
+          sortBy: 'createdAt',
+          direction: 'desc',
+          pageOffset: 1,
+          pageSize: 10
+        })
+      );
+    });
+
+    it('should success when a page size is in the range of 1 to 100', async () => {
+      const givenPageSize = 5;
+      const givenDto: GetReviewsDto = {
+        nickname,
+        title,
+        movieName,
+        pageSize: givenPageSize
+      };
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).getReviews(givenDto);
+      const totalPageCount = calculateTotalPageCount(
+        reviewCount,
+        givenPageSize
+      );
+
+      expect(actualResult.pagination).toEqual({
+        sortBy: 'createdAt',
+        direction: 'desc',
+        pageOffset: 1,
+        pageSize: givenPageSize,
+        totalEntryCount: reviewCount,
+        totalPageCount
+      });
+      expect(JSON.stringify(actualResult.users)).toEqual(JSON.stringify(users));
+      for (let i = 0; i <= givenPageSize; i++) {
+        expect(JSON.stringify(actualResult.reviews[i])).toEqual(
+          JSON.stringify(reviews[i])
+        );
+      }
+
+      expect(userRepository.findByIds).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindByIds.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual([userId]);
+
+      expect(reviewRepository.findManyAndCount).toBeCalledTimes(1);
+      const reviewFindManyCountArgs = reviewFindManyCount.mock.calls[0][0];
+      expect(reviewFindManyCountArgs).toEqual(
+        expect.objectContaining({
+          nickname: givenDto.nickname,
+          title: givenDto.title,
+          movieName: givenDto.movieName,
+          sortBy: 'createdAt',
+          direction: 'desc',
+          pageOffset: 1,
+          pageSize: givenPageSize
+        })
+      );
+    });
+
+    it('should fail when page size exceeds 100', async () => {
+      const givenPageSize = 101;
+      const givenDto: GetReviewsDto = {
+        nickname,
+        title,
+        movieName,
+        pageSize: givenPageSize
+      };
+
+      try {
+        await new ReviewService(
+          userRepository,
+          reviewRepository,
+          replyRepository,
+          txManager
+        ).getReviews(givenDto);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.BAD_REQUEST);
+      }
+
+      expect(reviewRepository.findManyAndCount).toBeCalledTimes(0);
     });
   });
 });
