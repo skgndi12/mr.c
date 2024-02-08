@@ -15,6 +15,7 @@ import {
 } from '@src/core/ports/review.repository';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
+import { PrismaErrorCode } from '@src/infrastructure/prisma/errors';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
 import { PostgresqlReviewRepository } from '@src/infrastructure/repositories/postgresql/review.repository';
@@ -659,6 +660,98 @@ describe('Test review repository', () => {
 
       try {
         await reviewRepository.update(params);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
+
+  describe('Test delete by ID', () => {
+    const userId = randomUUID();
+    const content = 'randomContent';
+    const createdAt = new Date();
+    let reviewCreated: Review;
+    const replyCount = 10;
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id: userId,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      const reviewResultCreated = await prismaClient.review.create({
+        data: {
+          userId,
+          title: 'randomTitle',
+          movieName: 'randomMovieName',
+          content,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      reviewCreated = reviewRepository['convertToEntity'](
+        reviewResultCreated.id,
+        reviewResultCreated.userId,
+        reviewResultCreated.title,
+        reviewResultCreated.movieName,
+        reviewResultCreated.content,
+        0,
+        reviewResultCreated.createdAt,
+        reviewResultCreated.updatedAt
+      );
+
+      for (let i = 1; i <= replyCount; i++) {
+        await prismaClient.reply.create({
+          data: {
+            reviewId: reviewResultCreated.id,
+            userId,
+            content,
+            createdAt,
+            updatedAt: createdAt
+          }
+        });
+      }
+    });
+
+    afterAll(async () => {
+      await prismaClient.review.delete({
+        where: { id: reviewCreated.id }
+      });
+      await prismaClient.user.delete({ where: { id: userId } });
+    });
+
+    it('should success when valid', async () => {
+      await reviewRepository.deleteById(reviewCreated.id);
+
+      try {
+        await prismaClient.review.findFirstOrThrow({
+          where: { id: reviewCreated.id }
+        });
+      } catch (error: unknown) {
+        expect(error).toHaveProperty('code', PrismaErrorCode.RECORD_NOT_FOUND);
+      }
+
+      const replies = await prismaClient.reply.findMany({
+        where: { reviewId: reviewCreated.id }
+      });
+
+      expect(replies).toEqual([]);
+    });
+
+    it('should fail to delete a review when no existing review is found for the given ID', async () => {
+      try {
+        await reviewRepository.deleteById(reviewCreated.id + 1);
       } catch (error: unknown) {
         expect(error).toBeInstanceOf(CustomError);
         expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);

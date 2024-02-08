@@ -30,7 +30,7 @@ type SortingCriteria = {
   direction: Direction;
 };
 
-export class PostgresqlReviewRepository implements Partial<ReviewRepository> {
+export class PostgresqlReviewRepository implements ReviewRepository {
   constructor(private readonly client: ExtendedPrismaClient) {}
 
   public create = async (
@@ -225,6 +225,33 @@ export class PostgresqlReviewRepository implements Partial<ReviewRepository> {
         cause: error,
         message: 'failed to update review',
         context: { params }
+      });
+    }
+  };
+
+  public deleteById = async (
+    id: number,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<void> => {
+    try {
+      const client = txClient ?? this.client;
+      await client.review.delete({ where: { id } });
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'review not found for deletion',
+          context: { id }
+        });
+      }
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to delete review by ID',
+        context: { id }
       });
     }
   };
