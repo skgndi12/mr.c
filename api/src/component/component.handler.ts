@@ -12,6 +12,7 @@ import {
 } from '@src/config/loader';
 import { Config } from '@src/config/types';
 import { AuthService } from '@src/core/services/auth/auth.service';
+import { CommentService } from '@src/core/services/comment/comment.service';
 import { UserService } from '@src/core/services/user/user.service';
 import { GoogleClient } from '@src/infrastructure/google/google.client';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
@@ -21,6 +22,7 @@ import {
   RedisClient,
   generateRedisClient
 } from '@src/infrastructure/redis/redis.client';
+import { PostgresqlCommentRepository } from '@src/infrastructure/repositories/postgresql/comment.repository';
 import { PostgresqlUserRepository } from '@src/infrastructure/repositories/postgresql/user.repository';
 import { RedisKeyValueRepository } from '@src/infrastructure/repositories/redis/keyValue.repository';
 import { JwtClient } from '@src/jwt/jwt.client';
@@ -51,6 +53,9 @@ export class ComponentHandler {
     );
     const txManager = new PrismaTransactionManager(this.prismaClient);
     const userRepository = new PostgresqlUserRepository(this.prismaClient);
+    const commentRepository = new PostgresqlCommentRepository(
+      this.prismaClient
+    );
 
     this.redisClient = await generateRedisClient(
       this.logger,
@@ -76,12 +81,18 @@ export class ComponentHandler {
       googleClient
     );
     const userService = new UserService(userRepository, txManager);
+    const commentService = new CommentService(
+      userRepository,
+      commentRepository,
+      txManager
+    );
 
     this.httpServer = new HttpServer(
       this.logger,
       buildHttpConfig(this.config),
       authService,
       userService,
+      commentService,
       jwtClient
     );
     await this.httpServer.start();
