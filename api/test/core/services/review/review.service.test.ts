@@ -13,7 +13,8 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import { ReviewService } from '@src/core/services/review/review.service';
 import {
   CreateReviewDto,
-  GetReviewsDto
+  GetReviewsDto,
+  UpdateReviewDto
 } from '@src/core/services/review/types';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -433,6 +434,167 @@ describe('Test review service', () => {
       }
 
       expect(reviewRepository.findManyAndCount).toBeCalledTimes(0);
+    });
+  });
+
+  describe('Test update review', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const requesterIdToken = new AppIdToken(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel
+    );
+    const reviewId = 0;
+    const title = 'randomTitle';
+    const movieName = 'randomMovie';
+    const content = 'randomContent';
+    const createdAt = new Date();
+
+    const titleUpdated = 'updatedTitle';
+    const movieNameUpdated = 'updatedMovie';
+    const contentUpdated = 'updatedContent';
+    const updatedAt = new Date();
+
+    const userFound = new User(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel,
+      createdAt,
+      createdAt
+    );
+    const reviewFound = new Review(
+      reviewId,
+      userId,
+      title,
+      movieName,
+      content,
+      0,
+      createdAt,
+      createdAt
+    );
+    const reviewUpdated = new Review(
+      reviewId,
+      userId,
+      titleUpdated,
+      movieNameUpdated,
+      contentUpdated,
+      0,
+      createdAt,
+      updatedAt
+    );
+
+    const userFindById = jest.fn(() => Promise.resolve(userFound)) as jest.Mock;
+    const reviewFindById = jest.fn(() =>
+      Promise.resolve(reviewFound)
+    ) as jest.Mock;
+    const reviewUpdate = jest.fn(() =>
+      Promise.resolve(reviewUpdated)
+    ) as jest.Mock;
+
+    beforeAll(() => {
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      reviewRepository = new PostgresqlReviewRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      reviewRepository.findById = reviewFindById;
+      reviewRepository.update = reviewUpdate;
+    });
+
+    it('should success when valid', async () => {
+      const givenDto: UpdateReviewDto = {
+        requesterIdToken,
+        reviewId,
+        title: titleUpdated,
+        movieName: movieNameUpdated,
+        content: contentUpdated
+      };
+
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).updateReview(givenDto);
+
+      expect(JSON.stringify(actualResult.user)).toEqual(
+        JSON.stringify(userFound)
+      );
+      expect(JSON.stringify(actualResult.review)).toEqual(
+        JSON.stringify(reviewUpdated)
+      );
+
+      expect(reviewRepository.findById).toBeCalledTimes(1);
+      const reviewFindByIdArgs = reviewFindById.mock.calls[0][0];
+      expect(reviewFindByIdArgs).toEqual(givenDto.reviewId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(reviewFound.userId);
+
+      expect(reviewRepository.update).toBeCalledTimes(1);
+      const reviewUpdateArgs = reviewUpdate.mock.calls[0][0];
+      expect(reviewUpdateArgs).toEqual(
+        expect.objectContaining({
+          id: givenDto.reviewId,
+          title: givenDto.title,
+          movieName: givenDto.movieName,
+          content: givenDto.content
+        })
+      );
+    });
+
+    it('should fail when access level and user authorization are invalid', async () => {
+      const givenRequesterIdToken = new AppIdToken(
+        'anotherRandomId',
+        'anotherNickname',
+        '#GGAT',
+        new IdpEnum(Idp.GOOGLE),
+        'user100@gmail.com',
+        new AccessLevelEnum(AccessLevel.USER)
+      );
+      const givenDto: UpdateReviewDto = {
+        requesterIdToken: givenRequesterIdToken,
+        reviewId,
+        title: titleUpdated,
+        movieName: movieNameUpdated,
+        content: contentUpdated
+      };
+
+      try {
+        await new ReviewService(
+          userRepository,
+          reviewRepository,
+          replyRepository,
+          txManager
+        ).updateReview(givenDto);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.PERMISSIION_DENIED);
+      }
+
+      expect(reviewRepository.findById).toBeCalledTimes(1);
+      const reviewFindByIdArgs = reviewFindById.mock.calls[0][0];
+      expect(reviewFindByIdArgs).toEqual(givenDto.reviewId);
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(reviewFound.userId);
+
+      expect(reviewRepository.update).toBeCalledTimes(0);
     });
   });
 });

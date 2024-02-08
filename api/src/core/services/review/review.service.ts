@@ -6,7 +6,8 @@ import { ReplyRepository } from '@src/core/ports/reply.repository';
 import {
   CreateReviewParams,
   FindReviewsParams,
-  ReviewRepository
+  ReviewRepository,
+  UpdateReviewParams
 } from '@src/core/ports/review.repository';
 import {
   TransactionClient,
@@ -18,7 +19,9 @@ import {
   CreateReviewResponse,
   GetReviewResponse,
   GetReviewsDto,
-  GetReviewsResponse
+  GetReviewsResponse,
+  UpdateReviewDto,
+  UpdateReviewResponse
 } from '@src/core/services/review/types';
 import { AccessLevelEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -155,6 +158,54 @@ export class ReviewService {
     };
   };
 
+  public updateReview = async (
+    dto: UpdateReviewDto
+  ): Promise<UpdateReviewResponse> => {
+    const [user, review] = await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<[User, Review]> => {
+        const reviewToUpdate = await this.reviewRepository.findById(
+          dto.reviewId,
+          txClient
+        );
+        const userReviewing = await this.userRepository.findById(
+          reviewToUpdate.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAndUserIdAuthorized(
+            new AccessLevelEnum(AccessLevel.DEVELOPER),
+            userReviewing.id
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to update review',
+            context: { dto, review: reviewToUpdate, user: userReviewing }
+          });
+        }
+
+        const params: UpdateReviewParams = {
+          id: dto.reviewId,
+          title: dto.title,
+          movieName: dto.movieName,
+          content: dto.content
+        };
+        const reviewUpdated = await this.reviewRepository.update(
+          params,
+          txClient
+        );
+
+        return [userReviewing, reviewUpdated];
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+
+    return {
+      user,
+      review
+    };
+  };
   private extractUserIds = (entries: Review[] | Reply[]): string[] => {
     const userIds: string[] = [];
     entries.forEach((entry) => {
