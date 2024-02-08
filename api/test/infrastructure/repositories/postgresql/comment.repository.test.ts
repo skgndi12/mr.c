@@ -186,7 +186,7 @@ describe('Test comment repository', () => {
       for (let i = 1; i <= commentCount; i++) {
         const createdAt = new Date(currentDate.getTime() + i * 1000);
 
-        if (i >= 1 && i <= 4) {
+        if (i <= 4) {
           comments.push(
             new Comment(
               i,
@@ -197,7 +197,7 @@ describe('Test comment repository', () => {
               createdAt
             )
           );
-        } else if (i >= 5 && i <= 8) {
+        } else if (i <= 8) {
           comments.push(
             new Comment(
               i,
