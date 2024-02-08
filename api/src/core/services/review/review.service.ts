@@ -5,7 +5,8 @@ import { User } from '@src/core/entities/user.entity';
 import {
   CreateReplyParams,
   FindRepliesParams,
-  ReplyRepository
+  ReplyRepository,
+  UpdateReplyParams
 } from '@src/core/ports/reply.repository';
 import {
   CreateReviewParams,
@@ -29,6 +30,8 @@ import {
   GetReviewResponse,
   GetReviewsDto,
   GetReviewsResponse,
+  UpdateReplyDto,
+  UpdateReplyResponse,
   UpdateReviewDto,
   UpdateReviewResponse
 } from '@src/core/services/review/types';
@@ -343,6 +346,53 @@ export class ReviewService {
       users,
       replies,
       pagination
+    };
+  };
+
+  public updateReply = async (
+    dto: UpdateReplyDto
+  ): Promise<UpdateReplyResponse> => {
+    const [user, reply] = await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<[User, Reply]> => {
+        const replyToUpdate = await this.replyRepository.findById(
+          dto.replyId,
+          txClient
+        );
+        const userReplying = await this.userRepository.findById(
+          replyToUpdate.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAndUserIdAuthorized(
+            new AccessLevelEnum(AccessLevel.DEVELOPER),
+            userReplying.id
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to update reply',
+            context: { dto, reply: replyToUpdate, user: userReplying }
+          });
+        }
+
+        const params: UpdateReplyParams = {
+          id: dto.replyId,
+          content: dto.content
+        };
+        const replyUpdated = await this.replyRepository.update(
+          params,
+          txClient
+        );
+
+        return [userReplying, replyUpdated];
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+
+    return {
+      user,
+      reply
     };
   };
 
