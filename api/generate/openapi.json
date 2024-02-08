@@ -309,7 +309,6 @@
           "Comment"
         ],
         "summary": "Delete comment",
-        "description": "Please provide the comment ID as a string",
         "security": [
           {
             "jwt": []
@@ -321,7 +320,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -354,7 +353,6 @@
           "Comment"
         ],
         "summary": "Update comment",
-        "description": "Please provide the comment ID as a string",
         "security": [
           {
             "jwt": []
@@ -366,7 +364,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -400,6 +398,160 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateCommentV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comments/test": {
+      "get": {
+        "operationId": "CommentV1ApiSpec_get_/test",
+        "tags": [
+          "Comment"
+        ],
+        "summary": "List comments",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nickname",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "movieName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "createdAt",
+                "movieName"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageOffset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommentsV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CommentV1ApiSpec_post_/test",
+        "tags": [
+          "Comment"
+        ],
+        "summary": "Create comment",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movieName": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content",
+                  "movieName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentV1Response"
                 }
               }
             }

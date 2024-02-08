@@ -6,6 +6,14 @@ export type SortBy = 'createdAt' | 'movieName';
 
 export type Direction = 'asc' | 'desc';
 
+export type CommentsPaginationResponse = {
+  sortBy: SortBy;
+  direction: Direction;
+  pageOffset: number;
+  pageSize: number;
+  totalPageCount: number;
+};
+
 export type CreateCommentResponse = {
   user: User;
   comment: Comment;
@@ -14,7 +22,7 @@ export type CreateCommentResponse = {
 export type GetCommentsResponse = {
   users: User[];
   comments: Comment[];
-  totalPageCount: number;
+  pagination: CommentsPaginationResponse;
 };
 
 export type UpdateCommentResponse = {

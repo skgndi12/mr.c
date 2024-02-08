@@ -105,7 +105,7 @@ export class JwtClient implements JwtHandler {
       });
     }
 
-    if (!token.header.kid) {
+    if (token.header.kid === undefined) {
       throw new CustomError({
         code: AppErrorCode.BAD_REQUEST,
         message: 'kid does not exist in token'
@@ -113,7 +113,7 @@ export class JwtClient implements JwtHandler {
     }
 
     const keyPair = this.keyChain[token.header.kid];
-    if (!keyPair) {
+    if (keyPair === undefined) {
       throw new CustomError({
         code: AppErrorCode.BAD_REQUEST,
         message: 'kid is not found from key chain',

@@ -39,8 +39,7 @@ export type CommentV1ApiSpec = Tspec.DefineApiSpec<{
     '/{commentId}': {
       put: {
         summary: 'Update comment';
-        description: 'Please provide the comment ID as a string';
-        path: { commentId: string };
+        path: { commentId: number };
         body: UpdateCommentV1Request;
         responses: {
           200: UpdateCommentV1Response;
@@ -49,10 +48,27 @@ export type CommentV1ApiSpec = Tspec.DefineApiSpec<{
       };
       delete: {
         summary: 'Delete comment';
-        description: 'Please provide the comment ID as a string';
-        path: { commentId: string };
+        path: { commentId: number };
         responses: {
           200: DeleteCommentV1Response;
+          default: HttpErrorResponse;
+        };
+      };
+    };
+    '/test': {
+      post: {
+        summary: 'Create comment';
+        body: CreateCommentV1Request;
+        responses: {
+          200: CreateCommentV1Response;
+          default: HttpErrorResponse;
+        };
+      };
+      get: {
+        summary: 'List comments';
+        query: ListCommentsV1QueryParameter;
+        responses: {
+          200: ListCommentsV1Response;
           default: HttpErrorResponse;
         };
       };
