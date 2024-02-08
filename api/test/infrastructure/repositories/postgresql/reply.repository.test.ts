@@ -4,13 +4,16 @@ import seedrandom from 'seedrandom';
 import { Logger } from 'winston';
 
 import { Reply } from '@src/core/entities/review.entity';
+import { User } from '@src/core/entities/user.entity';
 import {
   generateUserNickname,
   generateUserTag
 } from '@src/core/nickname.generator';
 import {
   CreateReplyParams,
+  FindRepliesParams
 } from '@src/core/ports/reply.repository';
+import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
@@ -156,6 +159,171 @@ describe('Test reply repository', () => {
         expect(error).toBeInstanceOf(CustomError);
         expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
       }
+    });
+  });
+
+  describe('Test find many and count', () => {
+    const users: User[] = [];
+    const userCount = 2;
+    let reviewId: number;
+    const replyCount = 20;
+    const replies: Reply[] = [];
+    const content = 'randomContent';
+
+    beforeAll(async () => {
+      const currentDate = new Date();
+
+      for (let i = 1; i <= userCount; i++) {
+        const userId = randomUUID();
+
+        users.push(
+          new User(
+            userId,
+            generateUserNickname(userId),
+            generateUserTag(userId),
+            new IdpEnum(Idp.GOOGLE),
+            `${userId}@gmail.com`,
+            new AccessLevelEnum(AccessLevel.USER),
+            currentDate,
+            currentDate
+          )
+        );
+      }
+
+      for (const user of users) {
+        await prismaClient.user.create({
+          data: {
+            id: user.id,
+            nickname: user.nickname,
+            tag: user.tag,
+            idp: user.idp.get(),
+            email: user.email,
+            accessLevel: user.accessLevel.get(),
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+          }
+        });
+      }
+
+      reviewId = generateRandomNumber(users[0].id);
+      await prismaClient.review.create({
+        data: {
+          id: reviewId,
+          userId: users[0].id,
+          title: 'randomTitle',
+          movieName: 'randomMovieName',
+          content,
+          createdAt: currentDate,
+          updatedAt: currentDate
+        }
+      });
+
+      for (let i = 1; i <= replyCount; i++) {
+        const createdAt = new Date(currentDate.getTime() + i * 1000);
+
+        if (i <= 10) {
+          replies.push(
+            new Reply(i, reviewId, users[0].id, content, createdAt, createdAt)
+          );
+        } else {
+          replies.push(
+            new Reply(i, reviewId, users[1].id, content, createdAt, createdAt)
+          );
+        }
+      }
+
+      for (const reply of replies) {
+        await prismaClient.reply.create({
+          data: {
+            id: reply.id,
+            reviewId: reply.reviewId,
+            userId: reply.userId,
+            content: reply.content,
+            createdAt: reply.createdAt,
+            updatedAt: reply.updatedAt
+          }
+        });
+      }
+    });
+
+    afterAll(async () => {
+      await prismaClient.review.delete({ where: { id: reviewId } });
+      const userIds = users.map((user) => user.id);
+      await prismaClient.user.deleteMany({
+        where: { id: { in: userIds } }
+      });
+    });
+
+    it('should success when pagination is valid and sorting in descending order', async () => {
+      const params: FindRepliesParams = {
+        reviewId,
+        pageOffset: 1,
+        pageSize: 10,
+        direction: 'desc'
+      };
+      const repliesSorted = replies.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const repliesSpliced = repliesSorted.slice(start, end);
+
+      const actualResult = await replyRepository.findManyAndCount(params);
+
+      expect(actualResult.replyCount).toEqual(replyCount);
+      expect(JSON.stringify(actualResult.replies)).toEqual(
+        JSON.stringify(repliesSpliced)
+      );
+    });
+
+    it('should success when pagination is valid and sorting in ascending order', async () => {
+      const params: FindRepliesParams = {
+        reviewId,
+        pageOffset: 2,
+        pageSize: 10,
+        direction: 'asc'
+      };
+      const repliesSorted = replies.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const repliesSpliced = repliesSorted.slice(start, end);
+
+      const actualResult = await replyRepository.findManyAndCount(params);
+
+      expect(actualResult.replyCount).toEqual(replyCount);
+      expect(JSON.stringify(actualResult.replies)).toEqual(
+        JSON.stringify(repliesSpliced)
+      );
+    });
+
+    it('should return an empty array when the page offset exceeds the available data size range', async () => {
+      const params: FindRepliesParams = {
+        reviewId: reviewId,
+        pageOffset: 10,
+        pageSize: 10,
+        direction: 'asc'
+      };
+
+      const actualResult = await replyRepository.findManyAndCount(params);
+
+      expect(actualResult.replyCount).toEqual(replyCount);
+      expect(JSON.stringify(actualResult.replies)).toEqual(JSON.stringify([]));
+    });
+
+    it('should return an empty array when no data is found for the given review ID', async () => {
+      const params: FindRepliesParams = {
+        reviewId: reviewId + 1,
+        pageOffset: 1,
+        pageSize: 10,
+        direction: 'asc'
+      };
+
+      const actualResult = await replyRepository.findManyAndCount(params);
+
+      expect(actualResult.replyCount).toEqual(0);
+      expect(JSON.stringify(actualResult.replies)).toEqual(JSON.stringify([]));
     });
   });
 });

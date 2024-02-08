@@ -1,6 +1,10 @@
+import { Prisma } from '@prisma/client';
+
 import { Reply } from '@src/core/entities/review.entity';
 import {
   CreateReplyParams,
+  FindManyAndCountResponse,
+  FindRepliesParams,
   ReplyRepository
 } from '@src/core/ports/reply.repository';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -69,6 +73,44 @@ export class PostgresqlReplyRepository implements Partial<ReplyRepository> {
         cause: error,
         message: 'failed to find reply by ID',
         context: { id }
+      });
+    }
+  };
+
+  public findManyAndCount = async (
+    params: FindRepliesParams,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<FindManyAndCountResponse> => {
+    try {
+      const client = txClient ?? this.client;
+      const args: Prisma.ReplyFindManyArgs = {
+        skip: (params.pageOffset - 1) * params.pageSize,
+        take: params.pageSize,
+        where: { reviewId: params.reviewId },
+        orderBy: {
+          createdAt: params.direction
+        }
+      };
+
+      const replyResults = await client.reply.findMany({
+        skip: args.skip,
+        take: args.take,
+        where: args.where,
+        orderBy: args.orderBy
+      });
+      const replyCount = await client.reply.count({ where: args.where });
+      const replies = replyResults.map((reply) => reply.convertToEntity());
+
+      return {
+        replies,
+        replyCount
+      };
+    } catch (error: unknown) {
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to find replies and count',
+        context: { params }
       });
     }
   };
