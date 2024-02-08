@@ -537,6 +537,595 @@
         }
       }
     },
+    "/api/v1/reviews": {
+      "get": {
+        "operationId": "ReviewV1ApiSpec_get_/reviews",
+        "tags": [
+          "Review"
+        ],
+        "summary": "List reviews",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nickname",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "movieName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "createdAt",
+                "movieName"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageOffset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListReviewsV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ReviewV1ApiSpec_post_/reviews",
+        "tags": [
+          "Review"
+        ],
+        "summary": "Create review",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "movieName": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content",
+                  "movieName",
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReviewV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/{reviewId}": {
+      "delete": {
+        "operationId": "ReviewV1ApiSpec_delete_/reviews/{reviewId}",
+        "tags": [
+          "Review"
+        ],
+        "summary": "Delete review",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteReviewV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "ReviewV1ApiSpec_get_/reviews/{reviewId}",
+        "tags": [
+          "Review"
+        ],
+        "summary": "Get review detail",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReviewV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "ReviewV1ApiSpec_put_/reviews/{reviewId}",
+        "tags": [
+          "Review"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "movieName": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content",
+                  "movieName",
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateReviewV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/{reviewId}/replies": {
+      "get": {
+        "operationId": "ReviewV1ApiSpec_get_/reviews/{reviewId}/replies",
+        "tags": [
+          "Review"
+        ],
+        "summary": "List replies",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageOffset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListRepliesV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ReviewV1ApiSpec_post_/reviews/{reviewId}/replies",
+        "tags": [
+          "Review"
+        ],
+        "summary": "Create reply",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReplyV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/{reviewId}/replies/{replyId}": {
+      "delete": {
+        "operationId": "ReviewV1ApiSpec_delete_/reviews/{reviewId}/replies/{replyId}",
+        "tags": [
+          "Review"
+        ],
+        "summary": "Delete reply",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "replyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteReplyV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "ReviewV1ApiSpec_put_/reviews/{reviewId}/replies/{replyId}",
+        "tags": [
+          "Review"
+        ],
+        "summary": "Update reply",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "replyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateReplyV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/users/self": {
       "get": {
         "operationId": "UserV1ApiSpec_get_/self",
@@ -733,6 +1322,9 @@
               "pageSize": {
                 "type": "number"
               },
+              "totalEntryCount": {
+                "type": "number"
+              },
               "totalPageCount": {
                 "type": "number"
               }
@@ -743,6 +1335,7 @@
               "pageOffset",
               "pageSize",
               "sortBy",
+              "totalEntryCount",
               "totalPageCount"
             ]
           },
@@ -921,6 +1514,351 @@
         "additionalProperties": false,
         "required": [
           "message"
+        ]
+      },
+      "ListReviewsV1Response": {
+        "type": "object",
+        "properties": {
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewV1Response"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "sortBy": {
+                "$ref": "#/components/schemas/SortBy_1"
+              },
+              "direction": {
+                "$ref": "#/components/schemas/Direction_1"
+              },
+              "pageOffset": {
+                "type": "number"
+              },
+              "pageSize": {
+                "type": "number"
+              },
+              "totalEntryCount": {
+                "type": "number"
+              },
+              "totalPageCount": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "direction",
+              "pageOffset",
+              "pageSize",
+              "sortBy",
+              "totalEntryCount",
+              "totalPageCount"
+            ]
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "nickname": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "movieName": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "pagination",
+          "reviews"
+        ]
+      },
+      "ReviewV1Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "movieName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "replyCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "createdAt",
+          "id",
+          "movieName",
+          "nickname",
+          "replyCount",
+          "tag",
+          "title",
+          "updatedAt",
+          "userId"
+        ]
+      },
+      "SortBy_1": {
+        "enum": [
+          "createdAt",
+          "movieName"
+        ],
+        "type": "string"
+      },
+      "Direction_1": {
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "type": "string"
+      },
+      "CreateReviewV1Response": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "$ref": "#/components/schemas/ReviewV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "review"
+        ]
+      },
+      "CreateReviewV1Request": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "movieName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "movieName",
+          "title"
+        ]
+      },
+      "DeleteReviewV1Response": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "GetReviewV1Response": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "$ref": "#/components/schemas/ReviewV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "review"
+        ]
+      },
+      "UpdateReviewV1Response": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "$ref": "#/components/schemas/ReviewV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "review"
+        ]
+      },
+      "UpdateReviewV1Request": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "movieName": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "movieName",
+          "title"
+        ]
+      },
+      "ListRepliesV1Response": {
+        "type": "object",
+        "properties": {
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReplyV1Response"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "direction": {
+                "$ref": "#/components/schemas/Direction_1"
+              },
+              "pageOffset": {
+                "type": "number"
+              },
+              "pageSize": {
+                "type": "number"
+              },
+              "totalEntryCount": {
+                "type": "number"
+              },
+              "totalPageCount": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "direction",
+              "pageOffset",
+              "pageSize",
+              "totalEntryCount",
+              "totalPageCount"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "pagination",
+          "replies"
+        ]
+      },
+      "ReplyV1Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "reviewId": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "createdAt",
+          "id",
+          "nickname",
+          "reviewId",
+          "tag",
+          "updatedAt",
+          "userId"
+        ]
+      },
+      "CreateReplyV1Response": {
+        "type": "object",
+        "properties": {
+          "reply": {
+            "$ref": "#/components/schemas/ReplyV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "reply"
+        ]
+      },
+      "CreateReplyV1Request": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content"
+        ]
+      },
+      "DeleteReplyV1Response": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "UpdateReplyV1Response": {
+        "type": "object",
+        "properties": {
+          "reply": {
+            "$ref": "#/components/schemas/ReplyV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "reply"
+        ]
+      },
+      "UpdateReplyV1Request": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content"
         ]
       },
       "GetSelfUserV1Response": {
