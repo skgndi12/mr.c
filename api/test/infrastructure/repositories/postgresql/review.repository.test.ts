@@ -331,5 +331,241 @@ describe('Test review repository', () => {
         JSON.stringify(reviewsSpliced)
       );
     });
+
+    it('should succecss when filtering by nickname, pagination is valid, and sorting by createdAt in ascending order', async () => {
+      const params: FindReviewsParams = {
+        nickname: users[0].nickname,
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'asc'
+      };
+
+      const reviewsFiltered = reviews.filter((review) =>
+        generateUserNickname(review.userId).includes(users[0].nickname)
+      );
+      const reviewsSorted = reviewsFiltered.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should succecss when filtering by title, pagination is valid, and sorting by createdAt in descending order', async () => {
+      const params: FindReviewsParams = {
+        title: titles[1],
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'desc'
+      };
+
+      const reviewsFiltered = reviews.filter((review) =>
+        review.title.toUpperCase().includes(titles[1].toUpperCase())
+      );
+      const reviewsSorted = reviewsFiltered.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should succecss when filtering by movieName, pagination is valid, and sorting by movieName in ascending order', async () => {
+      const params: FindReviewsParams = {
+        movieName: movieNames[2],
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'movieName',
+        direction: 'asc'
+      };
+
+      const reviewsFiltered = reviews.filter((review) =>
+        review.movieName.toLowerCase().includes(movieNames[2].toLowerCase())
+      );
+      const reviewsSorted = reviewsFiltered.sort((a, b) =>
+        a.movieName.localeCompare(b.movieName)
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should succecss when filtering by nickname and title, pagination is valid, and sorting by movieName in descending order', async () => {
+      const params: FindReviewsParams = {
+        nickname: users[3].nickname,
+        title: titles[3],
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'movieName',
+        direction: 'desc'
+      };
+
+      const reviewsFiltered = reviews.filter(
+        (review) =>
+          generateUserNickname(review.userId).includes(users[3].nickname) &&
+          review.title.includes(titles[3])
+      );
+      const reviewsSorted = reviewsFiltered.sort((a, b) =>
+        b.movieName.localeCompare(a.movieName)
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should succecss when filtering by nickname and movieName, pagination is valid, and sorting by createdAt in ascending order', async () => {
+      const params: FindReviewsParams = {
+        nickname: users[3].nickname,
+        movieName: movieNames[3],
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'asc'
+      };
+
+      const reviewsFiltered = reviews.filter(
+        (review) =>
+          generateUserNickname(review.userId).includes(users[3].nickname) &&
+          review.movieName.includes(movieNames[3])
+      );
+      const reviewsSorted = reviewsFiltered.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should succecss when filtering by title and movieName, pagination is valid, and sorting by createdAt in descending order', async () => {
+      const params: FindReviewsParams = {
+        title: titles[1],
+        movieName: movieNames[1],
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'desc'
+      };
+
+      const reviewsFiltered = reviews.filter(
+        (review) =>
+          review.title.toUpperCase().includes(titles[1].toUpperCase()) &&
+          review.movieName.toUpperCase().includes(movieNames[1].toUpperCase())
+      );
+      const reviewsSorted = reviewsFiltered.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should succecss when filtering by nickname and title and movieName, pagination is valid, and sorting by createdAt in ascending order', async () => {
+      const params: FindReviewsParams = {
+        nickname: users[2].nickname,
+        title: titles[2],
+        movieName: movieNames[2],
+        pageOffset: 1,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'asc'
+      };
+
+      const reviewsFiltered = reviews.filter(
+        (review) =>
+          generateUserNickname(review.userId)
+            .toLowerCase()
+            .includes(users[2].nickname.toLowerCase()) &&
+          review.title.toLowerCase().includes(titles[2].toLowerCase()) &&
+          review.movieName.toLowerCase().includes(movieNames[2].toLowerCase())
+      );
+      const reviewsSorted = reviewsFiltered.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+      const start = (params.pageOffset - 1) * params.pageSize;
+      const end = start + params.pageSize;
+      const reviewsSpliced = reviewsSorted.slice(start, end);
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewsSpliced.length);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(
+        JSON.stringify(reviewsSpliced)
+      );
+    });
+
+    it('should return an empty array when the page offset exceeds the available data size range', async () => {
+      const params: FindReviewsParams = {
+        pageOffset: 10,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'asc'
+      };
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(reviewCount);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(JSON.stringify([]));
+    });
+
+    it('should return an empty array when no data matching the condition is found', async () => {
+      const params: FindReviewsParams = {
+        nickname: 'randomNickname',
+        title: 'randomTitle',
+        movieName: 'randomMovie',
+        pageOffset: 10,
+        pageSize: 10,
+        sortBy: 'createdAt',
+        direction: 'asc'
+      };
+
+      const actualResult = await reviewRepository.findManyAndCount(params);
+
+      expect(actualResult.reviewCount).toEqual(0);
+      expect(JSON.stringify(actualResult.reviews)).toEqual(JSON.stringify([]));
+    });
   });
 });
