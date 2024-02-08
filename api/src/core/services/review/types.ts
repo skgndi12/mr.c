@@ -55,6 +55,11 @@ export interface GetRepliesResponse {
   pagination: RepliesPaginationResponse;
 }
 
+export interface UpdateReplyResponse {
+  user: User;
+  reply: Reply;
+}
+
 export interface CreateReviewDto {
   requesterIdToken: AppIdToken;
   title: string;
@@ -105,4 +110,11 @@ export interface GetRepliesDto {
   // pagination
   pageOffset?: number;
   pageSize?: number;
+}
+
+export interface UpdateReplyDto {
+  requesterIdToken: AppIdToken;
+  reviewId: number;
+  replyId: number;
+  content: string;
 }
