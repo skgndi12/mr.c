@@ -17,6 +17,7 @@ import { UserRepository } from '@src/core/ports/user.repository';
 import {
   CreateReviewDto,
   CreateReviewResponse,
+  DeleteReviewDto,
   GetReviewResponse,
   GetReviewsDto,
   GetReviewsResponse,
@@ -206,6 +207,40 @@ export class ReviewService {
       review
     };
   };
+
+  public deleteReview = async (dto: DeleteReviewDto): Promise<null> => {
+    return await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<null> => {
+        const reviewToDelete = await this.reviewRepository.findById(
+          dto.reviewId,
+          txClient
+        );
+        const userReviewing = await this.userRepository.findById(
+          reviewToDelete.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAndUserIdAuthorized(
+            new AccessLevelEnum(AccessLevel.DEVELOPER),
+            userReviewing.id
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to delete review',
+            context: { dto, review: reviewToDelete, user: userReviewing }
+          });
+        }
+
+        await this.reviewRepository.deleteById(dto.reviewId, txClient);
+
+        return null;
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+  };
+
   private extractUserIds = (entries: Review[] | Reply[]): string[] => {
     const userIds: string[] = [];
     entries.forEach((entry) => {
