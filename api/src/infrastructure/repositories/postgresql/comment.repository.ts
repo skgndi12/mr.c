@@ -1,8 +1,13 @@
+import { Prisma } from '@prisma/client';
+
 import { Comment } from '@src/core/entities/comment.entity';
 import {
   CommentRepository,
-  CreateCommentParams
+  CreateCommentParams,
+  FindCommentsParams,
+  FindManyAndCountResponse
 } from '@src/core/ports/comment.repository';
+import { Direction, SortBy } from '@src/core/services/comment/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
 import {
   PrismaErrorCode,
@@ -13,7 +18,17 @@ import {
   ExtendedPrismaTransactionClient
 } from '@src/infrastructure/prisma/types';
 
-// TODO: Remove "Partial" once all methods in the comment repository are implemented.
+type OrderBy =
+  | {
+      movieName: Direction;
+    }
+  | { createdAt: Direction };
+
+type SortingCriteria = {
+  sortBy: SortBy;
+  direction: Direction;
+};
+
 export class PostgresqlCommentRepository implements Partial<CommentRepository> {
   constructor(private readonly client: ExtendedPrismaClient) {}
 
@@ -70,6 +85,69 @@ export class PostgresqlCommentRepository implements Partial<CommentRepository> {
         message: 'failed to find comment by ID',
         context: { id }
       });
+    }
+  };
+
+  public findManyAndCount = async (
+    params: FindCommentsParams,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<FindManyAndCountResponse> => {
+    try {
+      const client = txClient ?? this.client;
+      const args: Prisma.CommentFindManyArgs = {
+        skip: (params.pageOffset - 1) * params.pageSize,
+        take: params.pageSize,
+        where: {
+          AND: [
+            {
+              user: { nickname: { contains: params.nickname } }
+            },
+            {
+              movieName: { contains: params.movieName, mode: 'insensitive' }
+            }
+          ]
+        },
+        orderBy: this.convertToOrderBy(params)
+      };
+
+      const commentResults = await client.comment.findMany({
+        skip: args.skip,
+        take: args.take,
+        where: args.where,
+        orderBy: args.orderBy
+      });
+      const commentCount = await client.comment.count({
+        where: args.where
+      });
+
+      const comments = commentResults.map((commentResult) =>
+        commentResult.convertToEntity()
+      );
+
+      return {
+        comments,
+        commentCount
+      };
+    } catch (error: unknown) {
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        message: 'failed to find comments and count',
+        cause: error,
+        context: { params }
+      });
+    }
+  };
+
+  private convertToOrderBy = (criteria: SortingCriteria): OrderBy => {
+    switch (criteria.sortBy) {
+      case 'movieName':
+        return {
+          movieName: criteria.direction
+        };
+      case 'createdAt':
+        return {
+          createdAt: criteria.direction
+        };
     }
   };
 }
