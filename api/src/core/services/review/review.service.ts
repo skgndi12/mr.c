@@ -2,7 +2,10 @@ import { AccessLevel } from '@prisma/client';
 
 import { Reply, Review } from '@src/core/entities/review.entity';
 import { User } from '@src/core/entities/user.entity';
-import { ReplyRepository } from '@src/core/ports/reply.repository';
+import {
+  CreateReplyParams,
+  ReplyRepository
+} from '@src/core/ports/reply.repository';
 import {
   CreateReviewParams,
   FindReviewsParams,
@@ -15,6 +18,8 @@ import {
 } from '@src/core/ports/transaction.manager';
 import { UserRepository } from '@src/core/ports/user.repository';
 import {
+  CreateReplyDto,
+  CreateReplyResponse,
   CreateReviewDto,
   CreateReviewResponse,
   DeleteReviewDto,
@@ -239,6 +244,49 @@ export class ReviewService {
       },
       IsolationLevel.READ_COMMITTED
     );
+  };
+
+  public createReply = async (
+    dto: CreateReplyDto
+  ): Promise<CreateReplyResponse> => {
+    const [user, reply] = await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<[User, Reply]> => {
+        const userReplying = await this.userRepository.findById(
+          dto.requesterIdToken.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAuthorized(
+            new AccessLevelEnum(AccessLevel.USER)
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to create reply',
+            context: { dto, user: userReplying }
+          });
+        }
+
+        const params: CreateReplyParams = {
+          reviewId: dto.reviewId,
+          userId: dto.requesterIdToken.userId,
+          content: dto.content
+        };
+        const replyCreated = await this.replyRepository.create(
+          params,
+          txClient
+        );
+
+        return [userReplying, replyCreated];
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+
+    return {
+      user,
+      reply
+    };
   };
 
   private extractUserIds = (entries: Review[] | Reply[]): string[] => {

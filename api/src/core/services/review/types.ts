@@ -36,6 +36,11 @@ export interface UpdateReviewResponse {
   review: Review;
 }
 
+export interface CreateReplyResponse {
+  user: User;
+  reply: Reply;
+}
+
 export interface CreateReviewDto {
   requesterIdToken: AppIdToken;
   title: string;
@@ -69,4 +74,10 @@ export interface UpdateReviewDto {
 export interface DeleteReviewDto {
   requesterIdToken: AppIdToken;
   reviewId: number;
+}
+
+export interface CreateReplyDto {
+  requesterIdToken: AppIdToken;
+  reviewId: number;
+  content: string;
 }

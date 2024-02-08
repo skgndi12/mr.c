@@ -12,6 +12,7 @@ import { TransactionManager } from '@src/core/ports/transaction.manager';
 import { UserRepository } from '@src/core/ports/user.repository';
 import { ReviewService } from '@src/core/services/review/review.service';
 import {
+  CreateReplyDto,
   CreateReviewDto,
   DeleteReviewDto,
   GetReviewsDto,
@@ -719,6 +720,98 @@ describe('Test review service', () => {
       expect(userFindByIdArgs).toEqual(reviewFound.userId);
 
       expect(reviewRepository.deleteById).toBeCalledTimes(0);
+    });
+  });
+
+  describe('Test create reply', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const reviewId = 0;
+    const replyId = 1;
+    const content = 'randomContent';
+    const currentDate = new Date();
+    const requesterIdToken = new AppIdToken(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel
+    );
+
+    const userFound = new User(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel,
+      currentDate,
+      currentDate
+    );
+    const replyCreated = new Reply(
+      replyId,
+      reviewId,
+      requesterIdToken.userId,
+      content,
+      currentDate,
+      currentDate
+    );
+
+    const userFindById = jest.fn(() => Promise.resolve(userFound)) as jest.Mock;
+    const replyCreate = jest.fn(() =>
+      Promise.resolve(replyCreated)
+    ) as jest.Mock;
+
+    beforeAll(() => {
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      reviewRepository = new PostgresqlReviewRepository(prismaMock);
+      replyRepository = new PostgresqlReplyRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      replyRepository.create = replyCreate;
+    });
+
+    it('should success when valid', async () => {
+      const givenDto: CreateReplyDto = {
+        requesterIdToken,
+        reviewId,
+        content
+      };
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).createReply(givenDto);
+
+      expect(JSON.stringify(actualResult.user)).toEqual(
+        JSON.stringify(userFound)
+      );
+      expect(JSON.stringify(actualResult.reply)).toEqual(
+        JSON.stringify(replyCreated)
+      );
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(givenDto.requesterIdToken.userId);
+
+      expect(replyRepository.create).toBeCalledTimes(1);
+      const replyCreateArgs = replyCreate.mock.calls[0][0];
+      expect(replyCreateArgs).toEqual(
+        expect.objectContaining({
+          reviewId: givenDto.reviewId,
+          userId: givenDto.requesterIdToken.userId,
+          content: givenDto.content
+        })
+      );
     });
   });
 });
