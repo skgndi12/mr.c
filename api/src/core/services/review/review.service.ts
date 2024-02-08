@@ -14,7 +14,8 @@ import {
 import { UserRepository } from '@src/core/ports/user.repository';
 import {
   CreateReviewDto,
-  CreateReviewResponse
+  CreateReviewResponse,
+  GetReviewResponse
 } from '@src/core/services/review/types';
 import { AccessLevelEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -62,6 +63,26 @@ export class ReviewService {
         );
 
         return [userReviewing, reviewCreated];
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+
+    return {
+      user,
+      review
+    };
+  };
+
+  public getReview = async (id: number): Promise<GetReviewResponse> => {
+    const [user, review] = await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<[User, Review]> => {
+        const review = await this.reviewRepository.findById(id, txClient);
+        const userReviewing = await this.userRepository.findById(
+          review.userId,
+          txClient
+        );
+
+        return [userReviewing, review];
       },
       IsolationLevel.READ_COMMITTED
     );

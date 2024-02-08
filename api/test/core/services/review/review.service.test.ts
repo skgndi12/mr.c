@@ -157,4 +157,87 @@ describe('Test review service', () => {
       );
     });
   });
+
+  describe('Test get review', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const reviewId = 0;
+    const title = 'randomTitle';
+    const movieName = 'randomMovie';
+    const content = 'randomContent';
+    const currentDate = new Date();
+    const requesterIdToken = new AppIdToken(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel
+    );
+
+    const userFound = new User(
+      userId,
+      nickname,
+      tag,
+      idp,
+      email,
+      accessLevel,
+      currentDate,
+      currentDate
+    );
+    const reviewFound = new Review(
+      0,
+      requesterIdToken.userId,
+      title,
+      movieName,
+      content,
+      0,
+      currentDate,
+      currentDate
+    );
+
+    const userFindById = jest.fn(() => Promise.resolve(userFound)) as jest.Mock;
+    const reviewFindById = jest.fn(() =>
+      Promise.resolve(reviewFound)
+    ) as jest.Mock;
+
+    beforeAll(async () => {
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      reviewRepository = new PostgresqlReviewRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findById = userFindById;
+      reviewRepository.findById = reviewFindById;
+    });
+
+    it('should success when valid', async () => {
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).getReview(reviewId);
+
+      expect(JSON.stringify(actualResult.user)).toEqual(
+        JSON.stringify(userFound)
+      );
+      expect(JSON.stringify(actualResult.review)).toEqual(
+        JSON.stringify(reviewFound)
+      );
+
+      expect(userRepository.findById).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindById.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual(userId);
+
+      expect(reviewRepository.findById).toBeCalledTimes(1);
+      const reviewFindByIdArgs = reviewFindById.mock.calls[0][0];
+      expect(reviewFindByIdArgs).toEqual(reviewId);
+    });
+  });
 });
