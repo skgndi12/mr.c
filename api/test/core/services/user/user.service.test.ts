@@ -42,6 +42,7 @@ describe('Test user service', () => {
     userRepository = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByIds: jest.fn(),
       upsert: jest.fn(),
       deleteById: jest.fn()
     };

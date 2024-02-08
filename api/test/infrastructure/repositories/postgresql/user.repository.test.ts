@@ -147,6 +147,49 @@ describe('Test user repository', () => {
     });
   });
 
+  describe('Test user find by ids', () => {
+    const userIds: string[] = [];
+    const users: User[] = [];
+    const userCount = 10;
+
+    beforeAll(async () => {
+      const idp = Idp.GOOGLE;
+      const accessLevel = AccessLevel.USER;
+      const baseEmail = 'user';
+      const createdAt = new Date();
+
+      for (let i = 1; i <= userCount; i++) {
+        const userId = randomUUID();
+
+        const user = await prismaClient.user.create({
+          data: {
+            id: userId,
+            nickname: generateUserNickname(userId),
+            tag: generateUserTag(userId),
+            idp,
+            email: `${baseEmail}${i}@gmail.com`,
+            accessLevel,
+            createdAt,
+            updatedAt: createdAt
+          }
+        });
+        userIds.push(user.id);
+        users.push(user.convertToEntity());
+      }
+    });
+
+    afterAll(async () => {
+      await prismaClient.user.deleteMany({ where: { id: { in: userIds } } });
+    });
+
+    it('should success when valid', async () => {
+      const actualResult = await userRepository.findByIds(userIds);
+
+      expect(actualResult.length).toEqual(userCount);
+      expect(JSON.stringify(actualResult)).toEqual(JSON.stringify(users));
+    });
+  });
+
   describe('Test upsert', () => {
     const id = randomUUID();
     const nickname = generateUserNickname(id);

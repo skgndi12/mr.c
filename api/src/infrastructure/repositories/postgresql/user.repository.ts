@@ -61,6 +61,28 @@ export class PostgresqlUserRepository implements UserRepository {
     }
   };
 
+  public findByIds = async (
+    ids: string[],
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<User[]> => {
+    try {
+      const client = txClient ?? this.client;
+      const userResults = await client.user.findMany({
+        where: { id: { in: ids } }
+      });
+      const users = userResults.map((user) => user.convertToEntity());
+
+      return users;
+    } catch (error: unknown) {
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        message: 'failed to find users',
+        cause: error,
+        context: { ids }
+      });
+    }
+  };
+
   // NOTE: You should satisfy the criteria for the database upsert. https://www.prisma.io/docs/orm/reference/prisma-client-reference#database-upserts
   public upsert = async (
     userData: User,
