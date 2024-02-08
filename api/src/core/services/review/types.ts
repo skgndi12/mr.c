@@ -1,5 +1,5 @@
 import { AppIdToken } from '@src/core/entities/auth.entity';
-import { Review } from '@src/core/entities/review.entity';
+import { Reply, Review } from '@src/core/entities/review.entity';
 import { User } from '@src/core/entities/user.entity';
 
 export type SortBy = 'createdAt' | 'movieName';
