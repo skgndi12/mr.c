@@ -652,7 +652,7 @@ describe('Test review repository', () => {
 
     it('should fail to update a review when no existing review is found with the given ID', async () => {
       const params: UpdateReviewParams = {
-        id: reviewCreated.id,
+        id: reviewCreated.id + 1,
         title: titleUpdated,
         movieName: movieNameUpdated,
         content: contentUpdated

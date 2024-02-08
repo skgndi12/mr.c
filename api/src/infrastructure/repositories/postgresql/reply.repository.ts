@@ -5,7 +5,8 @@ import {
   CreateReplyParams,
   FindManyAndCountResponse,
   FindRepliesParams,
-  ReplyRepository
+  ReplyRepository,
+  UpdateReplyParams
 } from '@src/core/ports/reply.repository';
 import { AppErrorCode, CustomError } from '@src/error/errors';
 import {
@@ -110,6 +111,42 @@ export class PostgresqlReplyRepository implements Partial<ReplyRepository> {
         code: AppErrorCode.INTERNAL_ERROR,
         cause: error,
         message: 'failed to find replies and count',
+        context: { params }
+      });
+    }
+  };
+
+  public update = async (
+    params: UpdateReplyParams,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<Reply> => {
+    const updatedAt = new Date();
+    try {
+      const client = txClient ?? this.client;
+      const replyUpdated = await client.reply.update({
+        where: { id: params.id },
+        data: {
+          content: params.content,
+          updatedAt
+        }
+      });
+
+      return replyUpdated.convertToEntity();
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          message: 'reply not found for deletion',
+          context: { params }
+        });
+      }
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to update reply',
         context: { params }
       });
     }
