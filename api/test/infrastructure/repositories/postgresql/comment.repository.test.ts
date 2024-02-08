@@ -15,6 +15,7 @@ import {
 } from '@src/core/ports/comment.repository';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
+import { PrismaErrorCode } from '@src/infrastructure/prisma/errors';
 import { generatePrismaClient } from '@src/infrastructure/prisma/prisma.client';
 import { ExtendedPrismaClient } from '@src/infrastructure/prisma/types';
 import { PostgresqlCommentRepository } from '@src/infrastructure/repositories/postgresql/comment.repository';
@@ -476,6 +477,66 @@ describe('Test comment repository', () => {
       };
       try {
         await commentRepository.update(params);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
+    });
+  });
+
+  describe('Test delete by ID', () => {
+    const userId = randomUUID();
+    const createdAt = new Date();
+    let commentCreated: Comment;
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id: userId,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+    });
+
+    beforeEach(async () => {
+      const commentResultCreated = await prismaClient.comment.create({
+        data: {
+          userId,
+          movieName: 'randomMovieName',
+          content: 'randomContent',
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      commentCreated = commentResultCreated.convertToEntity();
+    });
+
+    afterAll(async () => {
+      await prismaClient.comment.deleteMany();
+      await prismaClient.user.delete({ where: { id: userId } });
+    });
+
+    it('should success when valid', async () => {
+      await commentRepository.deleteById(commentCreated.id);
+
+      try {
+        await prismaClient.comment.findFirstOrThrow({
+          where: { id: commentCreated.id }
+        });
+      } catch (error: unknown) {
+        expect(error).toHaveProperty('code', PrismaErrorCode.RECORD_NOT_FOUND);
+      }
+    });
+
+    it('should fail to delete a comment when no existing comment is found for the given ID', async () => {
+      try {
+        await commentRepository.deleteById(commentCreated.id + 1);
       } catch (error: unknown) {
         expect(error).toBeInstanceOf(CustomError);
         expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
