@@ -65,3 +65,8 @@ export interface UpdateReviewDto {
   movieName: string;
   content: string;
 }
+
+export interface DeleteReviewDto {
+  requesterIdToken: AppIdToken;
+  reviewId: number;
+}
