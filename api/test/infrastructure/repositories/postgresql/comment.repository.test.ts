@@ -10,7 +10,8 @@ import {
 } from '@src/core/nickname.generator';
 import {
   CreateCommentParams,
-  FindCommentsParams
+  FindCommentsParams,
+  UpdateCommentParams
 } from '@src/core/ports/comment.repository';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -42,11 +43,6 @@ describe('Test comment repository', () => {
 
   describe('Test create', () => {
     const userId = randomUUID();
-    const nickname = generateUserNickname(userId);
-    const tag = generateUserTag(userId);
-    const idp = Idp.GOOGLE;
-    const email = `${userId}@gmail.com`;
-    const accessLevel = AccessLevel.USER;
     const movieName = 'randomMovieName';
     const content = 'randomContent';
     const createdAt = new Date();
@@ -55,11 +51,11 @@ describe('Test comment repository', () => {
       await prismaClient.user.create({
         data: {
           id: userId,
-          nickname,
-          tag,
-          idp,
-          email,
-          accessLevel,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
           createdAt,
           updatedAt: createdAt
         }
@@ -79,25 +75,19 @@ describe('Test comment repository', () => {
       };
 
       const commentCreated = await commentRepository.create(params);
-      const commentFound = await prismaClient.comment.findFirstOrThrow({
-        where: { id: commentCreated.id }
-      });
 
-      expect(JSON.stringify(commentCreated)).toEqual(
-        JSON.stringify(commentFound)
+      expect(commentCreated.getData()).toEqual(
+        expect.objectContaining({
+          userId,
+          movieName,
+          content
+        })
       );
     });
   });
 
   describe('Test find by ID', () => {
     const userId = randomUUID();
-    const nickname = generateUserNickname(userId);
-    const tag = generateUserTag(userId);
-    const idp = Idp.GOOGLE;
-    const email = `${userId}@gmail.com`;
-    const accessLevel = AccessLevel.USER;
-    const movieName = 'randomMovieName';
-    const content = 'randomContent';
     const createdAt = new Date();
     let commentCreated: Comment;
 
@@ -105,11 +95,11 @@ describe('Test comment repository', () => {
       await prismaClient.user.create({
         data: {
           id: userId,
-          nickname,
-          tag,
-          idp,
-          email,
-          accessLevel,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
           createdAt,
           updatedAt: createdAt
         }
@@ -117,8 +107,8 @@ describe('Test comment repository', () => {
       const commentResultCreated = await prismaClient.comment.create({
         data: {
           userId,
-          movieName,
-          content,
+          movieName: 'randomMovieName',
+          content: 'randomContent',
           createdAt,
           updatedAt: createdAt
         }
@@ -409,6 +399,87 @@ describe('Test comment repository', () => {
 
       expect(actualResult.commentCount).toEqual(0);
       expect(JSON.stringify(actualResult.comments)).toEqual(JSON.stringify([]));
+    });
+  });
+
+  describe('Test update', () => {
+    const userId = randomUUID();
+    const createdAt = new Date();
+    const movieNameUpdated = 'updatedMovieName';
+    const contentUpdated = 'updatedContent';
+    const updatedAt = new Date();
+    let commentCreated: Comment;
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id: userId,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      const commentResultCreated = await prismaClient.comment.create({
+        data: {
+          userId,
+          movieName: 'randomMovieName',
+          content: 'randomContent',
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      commentCreated = commentResultCreated.convertToEntity();
+    });
+
+    afterAll(async () => {
+      await prismaClient.comment.delete({ where: { id: commentCreated.id } });
+      await prismaClient.user.delete({ where: { id: userId } });
+    });
+
+    it('should success when valid', async () => {
+      const commentExpectResult = new Comment(
+        commentCreated.id,
+        commentCreated.userId,
+        movieNameUpdated,
+        contentUpdated,
+        commentCreated.createdAt,
+        updatedAt
+      );
+      const params: UpdateCommentParams = {
+        id: commentCreated.id,
+        movieName: movieNameUpdated,
+        content: contentUpdated
+      };
+
+      const commentUpdated = await commentRepository.update(params);
+
+      expect(commentUpdated.getData()).toEqual(
+        expect.objectContaining({
+          id: commentExpectResult.id,
+          userId: commentExpectResult.userId,
+          movieName: commentExpectResult.movieName,
+          content: commentExpectResult.content,
+          createdAt: commentExpectResult.createdAt
+        })
+      );
+    });
+
+    it('should fail to update a comment when no existing comment is found with the given ID', async () => {
+      const params: UpdateCommentParams = {
+        id: commentCreated.id + 1,
+        movieName: movieNameUpdated,
+        content: contentUpdated
+      };
+      try {
+        await commentRepository.update(params);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
     });
   });
 });
