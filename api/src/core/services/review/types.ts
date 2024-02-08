@@ -15,6 +15,14 @@ export interface ReviewsPaginationResponse {
   totalPageCount: number;
 }
 
+export interface RepliesPaginationResponse {
+  direction: Direction;
+  pageOffset: number;
+  pageSize: number;
+  totalEntryCount: number;
+  totalPageCount: number;
+}
+
 export interface CreateReviewResponse {
   user: User;
   review: Review;
@@ -39,6 +47,12 @@ export interface UpdateReviewResponse {
 export interface CreateReplyResponse {
   user: User;
   reply: Reply;
+}
+
+export interface GetRepliesResponse {
+  users: User[];
+  replies: Reply[];
+  pagination: RepliesPaginationResponse;
 }
 
 export interface CreateReviewDto {
@@ -80,4 +94,15 @@ export interface CreateReplyDto {
   requesterIdToken: AppIdToken;
   reviewId: number;
   content: string;
+}
+
+export interface GetRepliesDto {
+  reviewId: number;
+
+  // sort
+  direction?: Direction;
+
+  // pagination
+  pageOffset?: number;
+  pageSize?: number;
 }
