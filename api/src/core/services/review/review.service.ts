@@ -4,6 +4,7 @@ import { Reply, Review } from '@src/core/entities/review.entity';
 import { User } from '@src/core/entities/user.entity';
 import {
   CreateReplyParams,
+  FindRepliesParams,
   ReplyRepository
 } from '@src/core/ports/reply.repository';
 import {
@@ -23,6 +24,8 @@ import {
   CreateReviewDto,
   CreateReviewResponse,
   DeleteReviewDto,
+  GetRepliesDto,
+  GetRepliesResponse,
   GetReviewResponse,
   GetReviewsDto,
   GetReviewsResponse,
@@ -286,6 +289,60 @@ export class ReviewService {
     return {
       user,
       reply
+    };
+  };
+
+  public getReplies = async (
+    dto: GetRepliesDto
+  ): Promise<GetRepliesResponse> => {
+    const direction = dto.direction ?? 'desc';
+    const pageOffset = dto.pageOffset ?? 1;
+    const pageSize = dto.pageSize ?? 10;
+
+    if (!(pageSize >= 1 && pageSize <= 100)) {
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'page size should be between 1 and 100',
+        context: { pageSize }
+      });
+    }
+
+    const [users, replies, replyCount] = await this.txManager.runInTransaction(
+      async (
+        txClient: TransactionClient
+      ): Promise<[User[], Reply[], number]> => {
+        const params: FindRepliesParams = {
+          reviewId: dto.reviewId,
+          direction,
+          pageOffset,
+          pageSize
+        };
+        const { replies, replyCount } =
+          await this.replyRepository.findManyAndCount(params, txClient);
+
+        const userIds = this.extractUserIds(replies);
+        const users = await this.userRepository.findByIds(userIds, txClient);
+
+        return [users, replies, replyCount];
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+
+    const additionalPageCount = replyCount % pageSize !== 0 ? 1 : 0;
+    const totalPageCount =
+      Math.floor(replyCount / pageSize) + additionalPageCount;
+    const pagination = {
+      direction,
+      pageOffset,
+      pageSize,
+      totalEntryCount: replyCount,
+      totalPageCount
+    };
+
+    return {
+      users,
+      replies,
+      pagination
     };
   };
 

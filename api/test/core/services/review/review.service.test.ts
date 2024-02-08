@@ -4,7 +4,7 @@ import { DeepMockProxy, mockClear, mockDeep } from 'jest-mock-extended';
 import extendedPrisma from '@root/test/infrastructure/prisma/test.prisma.client';
 
 import { AppIdToken } from '@src/core/entities/auth.entity';
-import { Review } from '@src/core/entities/review.entity';
+import { Reply, Review } from '@src/core/entities/review.entity';
 import { User } from '@src/core/entities/user.entity';
 import { ReplyRepository } from '@src/core/ports/reply.repository';
 import { ReviewRepository } from '@src/core/ports/review.repository';
@@ -15,6 +15,7 @@ import {
   CreateReplyDto,
   CreateReviewDto,
   DeleteReviewDto,
+  GetRepliesDto,
   GetReviewsDto,
   UpdateReviewDto
 } from '@src/core/services/review/types';
@@ -812,6 +813,165 @@ describe('Test review service', () => {
           content: givenDto.content
         })
       );
+    });
+  });
+
+  describe('Test get replies', () => {
+    const userId = 'randomId';
+    const nickname = 'randomNickname';
+    const tag = '#TAGG';
+    const idp = new IdpEnum(Idp.GOOGLE);
+    const email = 'user1@gmail.com';
+    const accessLevel = new AccessLevelEnum(AccessLevel.USER);
+    const reviewId = 0;
+    const content = 'randomContent';
+    const currentDate = new Date();
+    const users: User[] = [];
+    const replies: Reply[] = [];
+    const replyCount = 10;
+
+    const userFindByIds = jest.fn(() => Promise.resolve(users)) as jest.Mock;
+    const replyFindManyCount = jest.fn(() =>
+      Promise.resolve({ replies, replyCount })
+    ) as jest.Mock;
+
+    beforeAll(() => {
+      users.push(
+        new User(
+          userId,
+          nickname,
+          tag,
+          idp,
+          email,
+          accessLevel,
+          currentDate,
+          currentDate
+        )
+      );
+
+      for (let i = 1; i <= replyCount; i++) {
+        replies.push(
+          new Reply(i, reviewId, userId, content, currentDate, currentDate)
+        );
+      }
+      prismaMock.$transaction.mockImplementation((callback) =>
+        callback(prismaMock)
+      );
+      userRepository = new PostgresqlUserRepository(prismaMock);
+      reviewRepository = new PostgresqlReviewRepository(prismaMock);
+      replyRepository = new PostgresqlReplyRepository(prismaMock);
+      txManager = new PrismaTransactionManager(prismaMock);
+      userRepository.findByIds = userFindByIds;
+      replyRepository.findManyAndCount = replyFindManyCount;
+    });
+
+    it('should success when page size is not provided', async () => {
+      const givenDto: GetRepliesDto = {
+        reviewId
+      };
+
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).getReplies(givenDto);
+      const totalPageCount = calculateTotalPageCount(replyCount);
+
+      expect(actualResult.pagination).toEqual({
+        direction: 'desc',
+        pageOffset: 1,
+        pageSize: 10,
+        totalEntryCount: replyCount,
+        totalPageCount
+      });
+      expect(JSON.stringify(actualResult.users)).toEqual(JSON.stringify(users));
+      for (let i = 0; i <= 10; i++) {
+        expect(JSON.stringify(actualResult.replies[i])).toEqual(
+          JSON.stringify(replies[i])
+        );
+      }
+
+      expect(userRepository.findByIds).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindByIds.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual([userId]);
+
+      expect(replyRepository.findManyAndCount).toBeCalledTimes(1);
+      const replyFindManyCountArgs = replyFindManyCount.mock.calls[0][0];
+      expect(replyFindManyCountArgs).toEqual(
+        expect.objectContaining({
+          reviewId: givenDto.reviewId,
+          direction: 'desc',
+          pageOffset: 1,
+          pageSize: 10
+        })
+      );
+    });
+
+    it('should success when a page size is in the range of 1 to 100', async () => {
+      const givenPageSize = 5;
+      const givenDto: GetRepliesDto = {
+        reviewId,
+        pageSize: givenPageSize
+      };
+      const actualResult = await new ReviewService(
+        userRepository,
+        reviewRepository,
+        replyRepository,
+        txManager
+      ).getReplies(givenDto);
+      const totalPageCount = calculateTotalPageCount(replyCount, givenPageSize);
+
+      expect(actualResult.pagination).toEqual({
+        direction: 'desc',
+        pageOffset: 1,
+        pageSize: givenPageSize,
+        totalEntryCount: replyCount,
+        totalPageCount
+      });
+      expect(JSON.stringify(actualResult.users)).toEqual(JSON.stringify(users));
+      for (let i = 0; i <= 10; i++) {
+        expect(JSON.stringify(actualResult.replies[i])).toEqual(
+          JSON.stringify(replies[i])
+        );
+      }
+
+      expect(userRepository.findByIds).toBeCalledTimes(1);
+      const userFindByIdArgs = userFindByIds.mock.calls[0][0];
+      expect(userFindByIdArgs).toEqual([userId]);
+
+      expect(replyRepository.findManyAndCount).toBeCalledTimes(1);
+      const replyFindManyCountArgs = replyFindManyCount.mock.calls[0][0];
+      expect(replyFindManyCountArgs).toEqual(
+        expect.objectContaining({
+          reviewId: givenDto.reviewId,
+          direction: 'desc',
+          pageOffset: 1,
+          pageSize: givenDto.pageSize
+        })
+      );
+    });
+
+    it('should fail when page size exceeds 100', async () => {
+      const givenPageSize = 101;
+      const givenDto: GetRepliesDto = {
+        reviewId,
+        pageSize: givenPageSize
+      };
+
+      try {
+        await new ReviewService(
+          userRepository,
+          reviewRepository,
+          replyRepository,
+          txManager
+        ).getReplies(givenDto);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.BAD_REQUEST);
+      }
+
+      expect(replyRepository.findManyAndCount).toBeCalledTimes(0);
     });
   });
 });
