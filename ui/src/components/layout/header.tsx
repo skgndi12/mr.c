@@ -9,8 +9,7 @@ export function Header() {
   const isLoggedIn = !!cookies().get('mrcToken');
 
   return (
-    <header className="sticky top-0 flex w-full items-center gap-4 border-b px-6 py-4">
-      <div className="absolute inset-0 -z-10 w-full bg-white/30 backdrop-blur-sm" />
+    <header className="z-20 flex w-full items-center gap-4 border-b bg-white px-6 py-4">
       <div className="block">
         <Link href="/" scroll={false}>
           <Logo />
