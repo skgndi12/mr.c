@@ -22,5 +22,3 @@ export interface GetUserV1Response {
 export interface UpdateUserV1Response {
   user: UserV1Response;
 }
-
-export interface DeleteUserV1Response {}

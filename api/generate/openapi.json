@@ -298,45 +298,6 @@
       }
     },
     "/api/v1/users/{userId}": {
-      "delete": {
-        "operationId": "UserV1ApiSpec_delete_/{userId}",
-        "tags": [
-          "User"
-        ],
-        "summary": "Delete user's information",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteUserV1Response"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
       "get": {
         "operationId": "UserV1ApiSpec_get_/{userId}",
         "tags": [
@@ -567,10 +528,6 @@
           "USER"
         ],
         "type": "string"
-      },
-      "DeleteUserV1Response": {
-        "type": "object",
-        "additionalProperties": false
       },
       "GetUserV1Response": {
         "type": "object",
