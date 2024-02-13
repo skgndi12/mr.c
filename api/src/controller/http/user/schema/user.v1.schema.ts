@@ -3,7 +3,6 @@ import { Tspec } from 'tspec';
 import { HttpErrorResponse } from '@controller/http/response';
 import { UpdateUserV1Request } from '@controller/http/user/request/user.v1.request';
 import {
-  DeleteUserV1Response,
   GetSelfUserV1Response,
   GetUserV1Response,
   UpdateUserV1Response
@@ -37,14 +36,6 @@ export type UserV1ApiSpec = Tspec.DefineApiSpec<{
         body: UpdateUserV1Request;
         responses: {
           200: UpdateUserV1Response;
-          default: HttpErrorResponse;
-        };
-      };
-      delete: {
-        summary: "Delete user's information";
-        path: { userId: string };
-        responses: {
-          200: DeleteUserV1Response;
           default: HttpErrorResponse;
         };
       };

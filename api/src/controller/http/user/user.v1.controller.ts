@@ -11,7 +11,6 @@ import {
   UserV1PathParameter
 } from '@controller/http/user/request/user.v1.request';
 import {
-  DeleteUserV1Response,
   GetSelfUserV1Response,
   GetUserV1Response,
   UpdateUserV1Response,
@@ -39,7 +38,6 @@ export class UserV1Controller {
       .all(this.middleware.issuePassport)
       .get(this.getUser)
       .put(this.updateUser)
-      .delete(this.deleteUser)
       .all(methodNotAllowed);
 
     return router;
@@ -86,15 +84,6 @@ export class UserV1Controller {
     );
 
     res.send({ user: this.buildUserResponse(userUpdated) });
-  };
-
-  public deleteUser = async (
-    req: Request<UserV1PathParameter, any, any, any, AppIdToken>,
-    res: Response<DeleteUserV1Response>
-  ) => {
-    await this.service.deleteUser(res.locals.passport, req.params.userId);
-
-    res.send();
   };
 
   private buildUserResponse = (user: User): UserV1Response => {
