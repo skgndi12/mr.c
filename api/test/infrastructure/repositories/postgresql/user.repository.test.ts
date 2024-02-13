@@ -149,7 +149,7 @@ describe('Test user repository', () => {
 
   describe('Test user find by ids', () => {
     const userIds: string[] = [];
-    const users: User[] = [];
+    const users = new Map<string, User>();
     const userCount = 10;
 
     beforeAll(async () => {
@@ -174,7 +174,7 @@ describe('Test user repository', () => {
           }
         });
         userIds.push(user.id);
-        users.push(user.convertToEntity());
+        users.set(user.id, user.convertToEntity());
       }
     });
 
@@ -186,7 +186,11 @@ describe('Test user repository', () => {
       const actualResult = await userRepository.findByIds(userIds);
 
       expect(actualResult.length).toEqual(userCount);
-      expect(JSON.stringify(actualResult)).toEqual(JSON.stringify(users));
+      for (const user of actualResult) {
+        expect(JSON.stringify(user)).toEqual(
+          JSON.stringify(users.get(user.id))
+        );
+      }
     });
   });
 
