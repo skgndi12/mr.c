@@ -32,6 +32,7 @@ export type AuthV1ApiSpec = Tspec.DefineApiSpec<{
     };
     '/auth/sign-out': {
       get: {
+        security: 'jwt';
         summary: 'Sign out';
         responses: {
           200: SignOutV1Response;
