@@ -34,7 +34,6 @@ export class ComponentHandler {
   private prismaClient!: ExtendedPrismaClient;
   private redisClient!: RedisClient;
   private httpServer!: HttpServer;
-  private readonly shutdownSignals = ['SIGINT', 'SIGTERM'];
 
   public initialize = async () => {
     try {
@@ -89,7 +88,7 @@ export class ComponentHandler {
   };
 
   public installShutdownSignalHandler = () => {
-    this.shutdownSignals.forEach((signal) =>
+    ['SIGINT', 'SIGTERM'].forEach((signal) =>
       process.on(signal, this.gracefulShutdown)
     );
   };
