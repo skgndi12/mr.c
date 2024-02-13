@@ -1,13 +1,15 @@
 import { NavLinks } from '@/components/layout/nav-links';
 import Logo from '@/components/logo';
 import SideBar from '@/components/layout/sidebar';
-import Text from '@/components/atomic/text';
 import Link from 'next/link';
+import { SignButton } from '@/components/layout/sign-button';
+import { cookies } from 'next/headers';
 
 export function Header() {
+  const isLoggedIn = !!cookies().get('mrcToken');
+
   return (
-    <header className="sticky top-0 flex w-full items-center gap-4 border-b px-6 py-4">
-      <div className="absolute inset-0 -z-10 w-full bg-white/30 backdrop-blur-sm" />
+    <header className="z-20 flex w-full items-center gap-4 border-b bg-white px-6 py-4">
       <div className="block">
         <Link href="/" scroll={false}>
           <Logo />
@@ -17,22 +19,11 @@ export function Header() {
         <nav className="hidden items-center gap-4 sm:flex">
           <NavLinks />
         </nav>
-        <SignButton />
+        <SignButton isLoggedIn={isLoggedIn} />
         <nav className="flex items-center sm:hidden">
-          <SideBar SignButton={<SignButton />} />
+          <SideBar SignButton={<SignButton isLoggedIn={isLoggedIn} />} />
         </nav>
       </div>
     </header>
-  );
-}
-
-function SignButton() {
-  return (
-    // TODO: use server action
-    <form className="hover:cursor-pointer">
-      <Text size="lg" weight="medium">
-        Sign In
-      </Text>
-    </form>
   );
 }

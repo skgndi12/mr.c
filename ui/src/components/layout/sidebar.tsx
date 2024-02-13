@@ -17,8 +17,8 @@ export default function Sidebar({ SignButton }: { SignButton: JSX.Element }) {
       </button>
       {isOpen && (
         <>
-          <div className="fixed inset-0 bg-black/20" onClick={() => setIsOpen(false)} />
-          <div className="fixed right-0 top-0 flex h-screen flex-col gap-4 bg-white px-6 py-4">
+          <div className="fixed inset-0 z-20 bg-black/20" onClick={() => setIsOpen(false)} />
+          <div className="fixed right-0 top-0 z-20 flex h-screen flex-col gap-4 bg-white px-6 py-4">
             {/* TODO: h-[52px] is for temporal LOGO size. */}
             <div className="flex h-[52px] items-center gap-4">
               {SignButton}
