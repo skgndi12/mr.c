@@ -9,10 +9,12 @@ import {
   SignOutV1Response
 } from '@controller/http/auth/response/auth.v1.response';
 import { methodNotAllowed } from '@controller/http/handler';
+import { Middleware } from '@controller/http/middleware';
 import { idTokenCookieName } from '@controller/http/types';
 
 export class AuthV1Controller {
   constructor(
+    private readonly middleware: Middleware,
     private readonly service: AuthService,
     private readonly cookieExpirationHours: number
   ) {}
@@ -34,7 +36,7 @@ export class AuthV1Controller {
 
     router
       .route(`${authPrefix}/sign-out`)
-      .get(this.signOut)
+      .get(this.middleware.issuePassport, this.signOut)
       .all(methodNotAllowed);
 
     return router;

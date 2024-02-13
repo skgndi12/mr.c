@@ -9,6 +9,7 @@ import {
 } from '@controller/http/user/response/user.v1.response';
 
 export type UserV1ApiSpec = Tspec.DefineApiSpec<{
+  security: 'jwt';
   basePath: '/api/v1/users';
   tags: ['User'];
   paths: {

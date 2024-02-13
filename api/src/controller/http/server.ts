@@ -85,6 +85,7 @@ export class HttpServer {
     const routers = [
       new DevV1Controller(this.middleware).routes(),
       new AuthV1Controller(
+        this.middleware,
         this.authService,
         this.config.cookieExpirationHours
       ).routes(),

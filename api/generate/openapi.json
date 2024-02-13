@@ -118,6 +118,11 @@
           "Auth"
         ],
         "summary": "Sign out",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -272,6 +277,11 @@
           "User"
         ],
         "summary": "Fetch self user detail",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -304,6 +314,11 @@
           "User"
         ],
         "summary": "Fetch user detail",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -343,6 +358,11 @@
           "User"
         ],
         "summary": "Update user's information",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
         "parameters": [
           {
             "name": "userId",
