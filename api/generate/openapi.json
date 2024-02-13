@@ -265,13 +265,45 @@
         }
       }
     },
-    "/api/v1/users/{userId}": {
-      "delete": {
-        "operationId": "UserV1ApiSpec_delete_/users/{userId}",
+    "/api/v1/users/self": {
+      "get": {
+        "operationId": "UserV1ApiSpec_get_/self",
         "tags": [
           "User"
         ],
-        "summary": "Delete user's info",
+        "summary": "Fetch self user detail",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSelfUserV1Response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{userId}": {
+      "delete": {
+        "operationId": "UserV1ApiSpec_delete_/{userId}",
+        "tags": [
+          "User"
+        ],
+        "summary": "Delete user's information",
         "parameters": [
           {
             "name": "userId",
@@ -306,11 +338,11 @@
         }
       },
       "get": {
-        "operationId": "UserV1ApiSpec_get_/users/{userId}",
+        "operationId": "UserV1ApiSpec_get_/{userId}",
         "tags": [
           "User"
         ],
-        "summary": "Get user by Id",
+        "summary": "Fetch user detail",
         "parameters": [
           {
             "name": "userId",
@@ -345,11 +377,11 @@
         }
       },
       "put": {
-        "operationId": "UserV1ApiSpec_put_/users/{userId}",
+        "operationId": "UserV1ApiSpec_put_/{userId}",
         "tags": [
           "User"
         ],
-        "summary": "Update user's access level",
+        "summary": "Update user's information",
         "parameters": [
           {
             "name": "userId",
@@ -471,15 +503,11 @@
           "message"
         ]
       },
-      "DeleteUserV1Response": {
-        "type": "object",
-        "additionalProperties": false
-      },
-      "GetUserV1Response": {
+      "GetSelfUserV1Response": {
         "type": "object",
         "properties": {
           "user": {
-            "$ref": "#/components/schemas/User"
+            "$ref": "#/components/schemas/UserV1Response"
           }
         },
         "additionalProperties": false,
@@ -487,7 +515,7 @@
           "user"
         ]
       },
-      "User": {
+      "UserV1Response": {
         "type": "object",
         "properties": {
           "id": {
@@ -540,11 +568,27 @@
         ],
         "type": "string"
       },
+      "DeleteUserV1Response": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "GetUserV1Response": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserV1Response"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "user"
+        ]
+      },
       "UpdateUserV1Response": {
         "type": "object",
         "properties": {
           "user": {
-            "$ref": "#/components/schemas/User"
+            "$ref": "#/components/schemas/UserV1Response"
           }
         },
         "additionalProperties": false,

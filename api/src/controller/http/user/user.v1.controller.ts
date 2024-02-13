@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 
 import { AppIdToken } from '@src/core/entities/auth.entity';
+import { User } from '@src/core/entities/user.entity';
 import { UserService } from '@src/core/services/user/user.service';
 
 import { methodNotAllowed } from '@controller/http/handler';
@@ -11,8 +12,10 @@ import {
 } from '@controller/http/user/request/user.v1.request';
 import {
   DeleteUserV1Response,
+  GetSelfUserV1Response,
   GetUserV1Response,
-  UpdateUserV1Response
+  UpdateUserV1Response,
+  UserV1Response
 } from '@controller/http/user/response/user.v1.response';
 
 export class UserV1Controller {
@@ -26,6 +29,12 @@ export class UserV1Controller {
     const prefix = '/v1/users';
 
     router
+      .route(`${prefix}/self`)
+      .all(this.middleware.issuePassport)
+      .get(this.getSelfUser)
+      .all(methodNotAllowed);
+
+    router
       .route(`${prefix}/:userId`)
       .all(this.middleware.issuePassport)
       .get(this.getUser)
@@ -34,6 +43,18 @@ export class UserV1Controller {
       .all(methodNotAllowed);
 
     return router;
+  };
+
+  public getSelfUser = async (
+    req: Request<any, any, any, any, AppIdToken>,
+    res: Response<GetSelfUserV1Response>
+  ) => {
+    const user = await this.service.getUser(
+      res.locals.passport,
+      res.locals.passport.userId
+    );
+
+    res.send({ user: this.buildUserResponse(user) });
   };
 
   public getUser = async (
@@ -45,7 +66,7 @@ export class UserV1Controller {
       req.params.userId
     );
 
-    res.send({ user: user.getData() });
+    res.send({ user: this.buildUserResponse(user) });
   };
 
   public updateUser = async (
@@ -58,13 +79,13 @@ export class UserV1Controller {
     >,
     res: Response<UpdateUserV1Response>
   ) => {
-    const updatedUser = await this.service.updateUser(
+    const userUpdated = await this.service.updateUser(
       res.locals.passport,
       req.params.userId,
       req.body.requestedAccessLevel
     );
 
-    res.send({ user: updatedUser.getData() });
+    res.send({ user: this.buildUserResponse(userUpdated) });
   };
 
   public deleteUser = async (
@@ -74,5 +95,18 @@ export class UserV1Controller {
     await this.service.deleteUser(res.locals.passport, req.params.userId);
 
     res.send();
+  };
+
+  private buildUserResponse = (user: User): UserV1Response => {
+    return {
+      id: user.id,
+      nickname: user.nickname,
+      tag: user.tag,
+      idp: user.idp.get(),
+      email: user.email,
+      accessLevel: user.accessLevel.get(),
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
   };
 }
