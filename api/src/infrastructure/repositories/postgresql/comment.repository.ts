@@ -38,6 +38,7 @@ export class PostgresqlCommentRepository implements Partial<CommentRepository> {
     } catch (error: unknown) {
       throw new CustomError({
         code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
         message: 'failed to create comment',
         context: { params }
       });
@@ -63,7 +64,12 @@ export class PostgresqlCommentRepository implements Partial<CommentRepository> {
           context: { id }
         });
       }
-      throw error;
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to find comment by ID',
+        context: { id }
+      });
     }
   };
 }

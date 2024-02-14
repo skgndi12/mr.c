@@ -28,11 +28,17 @@ export class PostgresqlUserRepository implements UserRepository {
       ) {
         throw new CustomError({
           code: AppErrorCode.NOT_FOUND,
+          cause: error,
           message: 'user not found',
           context: { id }
         });
       }
-      throw error;
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to find user by ID',
+        context: { id }
+      });
     }
   };
 
@@ -53,11 +59,17 @@ export class PostgresqlUserRepository implements UserRepository {
       ) {
         throw new CustomError({
           code: AppErrorCode.NOT_FOUND,
+          cause: error,
           message: 'user not found',
           context: { email }
         });
       }
-      throw error;
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to find user by email',
+        context: { email }
+      });
     }
   };
 
@@ -76,8 +88,8 @@ export class PostgresqlUserRepository implements UserRepository {
     } catch (error: unknown) {
       throw new CustomError({
         code: AppErrorCode.INTERNAL_ERROR,
-        message: 'failed to find users',
         cause: error,
+        message: 'failed to find users',
         context: { ids }
       });
     }
@@ -138,8 +150,12 @@ export class PostgresqlUserRepository implements UserRepository {
           context: { id: upsertUser.id }
         });
       }
-
-      throw error;
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to find upseted user',
+        context: { userData, id: upsertUser.id }
+      });
     }
   };
 
@@ -157,11 +173,16 @@ export class PostgresqlUserRepository implements UserRepository {
       ) {
         throw new CustomError({
           code: AppErrorCode.NOT_FOUND,
-          message: 'failed to delete user',
+          message: 'user not found for deletion',
           context: { id }
         });
       }
-      throw error;
+      throw new CustomError({
+        code: AppErrorCode.NOT_FOUND,
+        cause: error,
+        message: 'failed to delete user',
+        context: { id }
+      });
     }
   };
 }
