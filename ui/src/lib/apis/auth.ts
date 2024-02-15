@@ -1,6 +1,6 @@
 import { User } from '@/lib/definitions/user';
 
-export async function fetchUser() {
+export async function getUserSelf() {
   const response = await fetch('/api/v1/users/self');
 
   if (!response.ok) {

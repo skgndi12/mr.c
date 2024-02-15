@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchSignOut, fetchUser, linkToSignIn } from '@/lib/apis/auth';
+import { fetchSignOut, getUserSelf, linkToSignIn } from '@/lib/apis/auth';
 import { User } from '@/lib/definitions/user';
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
@@ -17,15 +17,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // why void?
-    // we don't handle fetchUser error
-    // becuase failure to fetch user is just considered
+    // we don't handle getUserSelf error
+    // becuase failure to getUserSelf is just considered
     // to be signed out.
-    void fetchUser().then(setUser);
+    void getUserSelf().then(setUser);
   }, []);
 
   const signOut = async () => {
     await fetchSignOut();
-    void fetchUser().then(setUser);
+    void getUserSelf().then(setUser);
   };
 
   const signIn = () => {
