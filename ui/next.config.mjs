@@ -4,7 +4,7 @@ const withBundleAnalzyer = bundleAnalzer({ enabled: process.env.ANALYZE === 'tru
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  rewrites: () => [{ source: '/api/:path*', destination: 'http://localhost:8080/api/:path*' }],
+  rewrites: () => [{ source: '/api/:path*', destination: `${process.env.BACKEND_URL}/api/:path*` }],
 };
 
 export default withBundleAnalzyer(nextConfig);
