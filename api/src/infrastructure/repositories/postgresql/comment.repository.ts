@@ -5,7 +5,8 @@ import {
   CommentRepository,
   CreateCommentParams,
   FindCommentsParams,
-  FindManyAndCountResponse
+  FindManyAndCountResponse,
+  UpdateCommentParams
 } from '@src/core/ports/comment.repository';
 import { Direction, SortBy } from '@src/core/services/comment/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -133,6 +134,44 @@ export class PostgresqlCommentRepository implements Partial<CommentRepository> {
         code: AppErrorCode.INTERNAL_ERROR,
         message: 'failed to find comments and count',
         cause: error,
+        context: { params }
+      });
+    }
+  };
+
+  public update = async (
+    params: UpdateCommentParams,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<Comment> => {
+    const updatedAt = new Date();
+
+    try {
+      const client = txClient ?? this.client;
+      const commentUpdated = await client.comment.update({
+        where: { id: params.id },
+        data: {
+          movieName: params.movieName,
+          content: params.content,
+          updatedAt
+        }
+      });
+      return commentUpdated.convertToEntity();
+    } catch (error: unknown) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === PrismaErrorCode.RECORD_NOT_FOUND
+      ) {
+        throw new CustomError({
+          code: AppErrorCode.NOT_FOUND,
+          cause: error,
+          message: 'comment not found for update',
+          context: { params }
+        });
+      }
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to update comment',
         context: { params }
       });
     }
