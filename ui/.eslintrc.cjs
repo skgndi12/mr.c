@@ -11,7 +11,6 @@ module.exports = {
     'next/core-web-vitals',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked',
     'plugin:storybook/recommended',
   ],
   rules: {},
@@ -21,5 +20,4 @@ module.exports = {
  * References
  * https://typescript-eslint.io/linting/configs/#projects-with-type-checking
  * https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/recommended-type-checked.ts
- * https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/src/configs/stylistic-type-checked.ts
  */
