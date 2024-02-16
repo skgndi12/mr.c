@@ -46,6 +46,6 @@ describe('formatDateToLocal', () => {
 
   test('should throw an Error when date string is not valid', () => {
     const invalidDateStr = 'foo';
-    expect(() => formatDateToLocal(invalidDateStr, 'en-US')).toThrowError(invalidDateStr);
+    expect(() => formatDateToLocal(invalidDateStr, 'en-US')).toThrow(invalidDateStr);
   });
 });
