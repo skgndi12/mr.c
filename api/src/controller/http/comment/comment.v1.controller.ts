@@ -100,13 +100,12 @@ export class CommentV1Controller {
       (acc, user) => acc.set(user.id, user),
       new Map<string, User>()
     );
-
     const commentsResponse = comments.map((comment) => {
       const userCommenting = userMapById.get(comment.userId);
 
       if (userCommenting === undefined) {
         throw new CustomError({
-          code: AppErrorCode.NOT_FOUND,
+          code: AppErrorCode.INTERNAL_ERROR,
           message: 'commenting user not found',
           context: { comment }
         });
