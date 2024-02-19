@@ -1,6 +1,6 @@
 'use client';
 
-import { generatePagination } from '@/lib/utils/generate-pagination';
+import { usePagination } from '@/hooks/use-pagination';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -9,7 +9,6 @@ import {
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Link from 'next/link';
-import { redirect, usePathname, useSearchParams } from 'next/navigation';
 
 function PaginationArrow({
   type = 'single',
@@ -61,7 +60,7 @@ function PaginationNumber({
   isActive: boolean;
 }) {
   const className = clsx('flex h-10 w-10 items-center justify-center rounded-full text-sm', {
-    'z-10 border-gray-200 bg-gray-200 font-bold': isActive,
+    'border-gray-200 bg-gray-200 font-bold': isActive,
     'hover:bg-gray-100': !isActive && position !== 'middle',
     'pointer-events-none text-gray-300': position === 'middle',
   });
@@ -76,22 +75,7 @@ function PaginationNumber({
 }
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get('page')) || 1;
-
-  if (currentPage < 1 || currentPage > totalPages) {
-    redirect(`${pathname}?page=1`);
-    // TODO: handle properly - move this to page.tsx before fetch and redirect to notfound ?
-  }
-
-  const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('page', pageNumber.toString());
-    return `${pathname}?${params.toString()}`;
-  };
-
-  const allPages = generatePagination(currentPage, totalPages);
+  const { allPages, createPageURL, currentPage } = usePagination(totalPages);
 
   return (
     <>
