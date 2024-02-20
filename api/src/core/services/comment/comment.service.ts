@@ -4,7 +4,8 @@ import { Comment } from '@src/core/entities/comment.entity';
 import { User } from '@src/core/entities/user.entity';
 import {
   CommentRepository,
-  CreateCommentParams
+  CreateCommentParams,
+  FindCommentsParams
 } from '@src/core/ports/comment.repository';
 import {
   TransactionClient,
@@ -13,7 +14,9 @@ import {
 import { UserRepository } from '@src/core/ports/user.repository';
 import {
   CreateCommentDto,
-  CreateCommentResponse
+  CreateCommentResponse,
+  GetCommentsDto,
+  GetCommentsResponse
 } from '@src/core/services/comment/types';
 import { AccessLevelEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -67,5 +70,62 @@ export class CommentService {
       user,
       comment
     };
+  };
+
+  public getComments = async (
+    dto: GetCommentsDto
+  ): Promise<GetCommentsResponse> => {
+    const pageSize = dto.pageSize ?? 10;
+
+    if (!(pageSize >= 1 && pageSize <= 100)) {
+      throw new CustomError({
+        code: AppErrorCode.BAD_REQUEST,
+        message: 'page size should be between 1 and 100',
+        context: { pageSize }
+      });
+    }
+
+    const [users, comments, commentCount] =
+      await this.txManager.runInTransaction(
+        async (
+          txClient: TransactionClient
+        ): Promise<[User[], Comment[], number]> => {
+          const params: FindCommentsParams = {
+            nickname: dto.nickname,
+            movieName: dto.movieName,
+            sortBy: dto.sortBy ?? 'createdAt',
+            direction: dto.direction ?? 'desc',
+            pageOffset: dto.pageOffset ?? 1,
+            pageSize
+          };
+          const { comments, commentCount } =
+            await this.commentRepository.findManyAndCount(params, txClient);
+
+          const userIds = this.extractUserIds(comments);
+          const users = await this.userRepository.findByIds(userIds, txClient);
+
+          return [users, comments, commentCount];
+        },
+        IsolationLevel.READ_COMMITTED
+      );
+
+    const additionalPageCount = commentCount % pageSize !== 0 ? 1 : 0;
+    const totalPageCount =
+      Math.floor(commentCount / pageSize) + additionalPageCount;
+
+    return {
+      users,
+      comments,
+      totalPageCount
+    };
+  };
+
+  private extractUserIds = (comments: Comment[]): string[] => {
+    const userIds = comments.map((comment) => {
+      return comment.userId;
+    });
+    const uniqueUserIds = [...new Set(userIds)];
+
+    return uniqueUserIds;
   };
 }
