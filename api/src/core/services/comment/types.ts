@@ -48,3 +48,8 @@ export interface UpdateCommentDto {
   movieName: string;
   content: string;
 }
+
+export interface DeleteCommentDto {
+  requesterIdToken: AppIdToken;
+  commentId: number;
+}
