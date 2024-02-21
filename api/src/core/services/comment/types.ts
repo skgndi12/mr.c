@@ -17,6 +17,11 @@ export type GetCommentsResponse = {
   totalPageCount: number;
 };
 
+export type UpdateCommentResponse = {
+  user: User;
+  comment: Comment;
+};
+
 export interface CreateCommentDto {
   requesterIdToken: AppIdToken;
   movieName: string;
@@ -35,4 +40,11 @@ export interface GetCommentsDto {
   // pagination
   pageOffset?: number;
   pageSize?: number;
+}
+
+export interface UpdateCommentDto {
+  requesterIdToken: AppIdToken;
+  commentId: number;
+  movieName: string;
+  content: string;
 }

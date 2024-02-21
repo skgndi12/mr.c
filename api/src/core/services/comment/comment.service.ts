@@ -5,7 +5,8 @@ import { User } from '@src/core/entities/user.entity';
 import {
   CommentRepository,
   CreateCommentParams,
-  FindCommentsParams
+  FindCommentsParams,
+  UpdateCommentParams
 } from '@src/core/ports/comment.repository';
 import {
   TransactionClient,
@@ -16,7 +17,9 @@ import {
   CreateCommentDto,
   CreateCommentResponse,
   GetCommentsDto,
-  GetCommentsResponse
+  GetCommentsResponse,
+  UpdateCommentDto,
+  UpdateCommentResponse
 } from '@src/core/services/comment/types';
 import { AccessLevelEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -117,6 +120,54 @@ export class CommentService {
       users,
       comments,
       totalPageCount
+    };
+  };
+
+  public updateComment = async (
+    dto: UpdateCommentDto
+  ): Promise<UpdateCommentResponse> => {
+    const [user, comment] = await this.txManager.runInTransaction(
+      async (txClient: TransactionClient): Promise<[User, Comment]> => {
+        const commentToUpdate = await this.commentRepository.findById(
+          dto.commentId,
+          txClient
+        );
+        const userCommenting = await this.userRepository.findById(
+          commentToUpdate.userId,
+          txClient
+        );
+
+        if (
+          !dto.requesterIdToken.isAccessLevelAndUserIdAuthorized(
+            new AccessLevelEnum(AccessLevel.DEVELOPER),
+            userCommenting.id
+          )
+        ) {
+          throw new CustomError({
+            code: AppErrorCode.PERMISSIION_DENIED,
+            message: 'insufficient access level to update comment',
+            context: { dto, comment: commentToUpdate, user: userCommenting }
+          });
+        }
+
+        const params: UpdateCommentParams = {
+          id: dto.commentId,
+          movieName: dto.movieName,
+          content: dto.content
+        };
+        const commentUpdated = await this.commentRepository.update(
+          params,
+          txClient
+        );
+
+        return [userCommenting, commentUpdated];
+      },
+      IsolationLevel.READ_COMMITTED
+    );
+
+    return {
+      user,
+      comment
     };
   };
 
