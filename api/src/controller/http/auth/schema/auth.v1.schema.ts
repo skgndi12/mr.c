@@ -1,6 +1,6 @@
 import { Tspec } from 'tspec';
 
-import { GoogleSignInTokenV1Query } from '@controller/http/auth/request/auth.v1.request';
+import { GoogleSignInTokenV1QueryParameter } from '@controller/http/auth/request/auth.v1.request';
 import {
   GoogleSignInV1Response,
   SignOutV1Response
@@ -23,7 +23,7 @@ export type AuthV1ApiSpec = Tspec.DefineApiSpec<{
     '/google/sign-in/token': {
       get: {
         summary: 'Finalize google sign in';
-        query: GoogleSignInTokenV1Query;
+        query: GoogleSignInTokenV1QueryParameter;
         responses: {
           302: GoogleSignInV1Response;
           default: HttpErrorResponse;

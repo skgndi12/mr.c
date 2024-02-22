@@ -1,4 +1,4 @@
-export type GoogleSignInTokenV1Query = {
+export type GoogleSignInTokenV1QueryParameter = {
   state: string;
   code: string;
   /**@allowReserved */
