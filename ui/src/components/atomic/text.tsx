@@ -4,7 +4,7 @@ export interface TextProps {
   children: string;
   size?: 'sm' | 'base' | 'lg' | 'xl' | '5xl';
   weight?: 'light' | 'normal' | 'medium' | 'bold' | 'black';
-  color?: 'black' | 'gradient';
+  color?: 'black' | 'gradient' | 'gray';
   nowrap?: boolean;
   noselect?: boolean;
 }
@@ -35,6 +35,7 @@ export default function Text({
 
   const colorClass = clsx({
     'text-black': color === 'black',
+    'text-gray-500': color === 'gray',
     'via bg-gradient-to-r from-pink-400 to-yellow-400 bg-clip-text text-transparent':
       color === 'gradient',
   });
