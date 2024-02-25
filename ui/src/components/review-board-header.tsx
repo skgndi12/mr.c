@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 export function ReviewBoardHeader() {
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState(false); // TODO: initialize to true when query is set
 
   return (
     <BoardHeader>

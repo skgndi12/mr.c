@@ -1,10 +1,14 @@
 'use client';
 
+import ChipButton from '@/components/atomic/chip-button';
 import Text from '@/components/atomic/text';
 import { useDropdown } from '@/hooks/use-dropdown';
+import { useSearchMore } from '@/hooks/use-search-more';
 
 export default function UserChip({ nickname, tag }: { nickname: string; tag: string }) {
   const { targetRef, toggleDropdown, isDropdownOpen } = useDropdown<HTMLDivElement>();
+
+  const { saerchMoreReview, saerchMoreComment } = useSearchMore(nickname);
 
   return (
     <div ref={targetRef} className="relative">
@@ -22,10 +26,19 @@ export default function UserChip({ nickname, tag }: { nickname: string; tag: str
       </div>
       {isDropdownOpen && (
         // TODO: replace with a normalized Dropdown with a proper event handler
-        <div className="absolute right-0 top-7 flex items-center rounded-lg border bg-white px-2 py-1 opacity-70 hover:bg-gray-200">
-          <Text color="black" size="sm">
-            작성글 보기
-          </Text>
+        <div className="absolute left-0 top-7 z-10 flex-col items-center space-y-1 rounded-lg border bg-white p-2">
+          <ChipButton
+            onClick={saerchMoreReview}
+            Text={<Text size="sm">작성 리뷰</Text>}
+            rounded="lg"
+            width="full"
+          />
+          <ChipButton
+            onClick={saerchMoreComment}
+            Text={<Text size="sm">작성 코멘트</Text>}
+            rounded="lg"
+            width="full"
+          />
         </div>
       )}
     </div>
