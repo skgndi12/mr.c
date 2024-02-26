@@ -7,6 +7,7 @@ export interface TextProps {
   color?: 'black' | 'gradient' | 'gray';
   nowrap?: boolean;
   noselect?: boolean;
+  lineClamp?: 3 | 5;
 }
 
 export default function Text({
@@ -16,6 +17,7 @@ export default function Text({
   color = 'black',
   nowrap = false,
   noselect = false,
+  lineClamp,
 }: TextProps) {
   const sizeClass = clsx({
     'text-sm': size === 'sm',
@@ -40,13 +42,19 @@ export default function Text({
       color === 'gradient',
   });
 
+  const lineClampClass = clsx({
+    'line-clamp-3': lineClamp === 3,
+    'line-clamp-5': lineClamp === 5,
+  });
+
   return (
     <div
       className={clsx(
-        'm-0 inline-block p-0',
+        'm-0 p-0',
         sizeClass,
         weightClass,
         colorClass,
+        lineClampClass,
         { 'whitespace-nowrap': nowrap },
         { 'select-none': noselect }
       )}
