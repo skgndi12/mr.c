@@ -23,3 +23,7 @@ export interface ListReviewsResponse {
   pagination: Pagination;
   filter?: ReviewFilter;
 }
+
+export interface ListReviewsQuery
+  extends ReviewFilter,
+    Partial<Omit<Pagination, 'totalPageCount'>> {}
