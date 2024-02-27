@@ -79,6 +79,9 @@ export class CommentService {
   public getComments = async (
     dto: GetCommentsDto
   ): Promise<GetCommentsResponse> => {
+    const sortBy = dto.sortBy ?? 'createdAt';
+    const direction = dto.direction ?? 'desc';
+    const pageOffset = dto.pageOffset ?? 1;
     const pageSize = dto.pageSize ?? 10;
 
     if (!(pageSize >= 1 && pageSize <= 100)) {
@@ -97,9 +100,9 @@ export class CommentService {
           const params: FindCommentsParams = {
             nickname: dto.nickname,
             movieName: dto.movieName,
-            sortBy: dto.sortBy ?? 'createdAt',
-            direction: dto.direction ?? 'desc',
-            pageOffset: dto.pageOffset ?? 1,
+            sortBy,
+            direction,
+            pageOffset,
             pageSize
           };
           const { comments, commentCount } =
@@ -116,11 +119,18 @@ export class CommentService {
     const additionalPageCount = commentCount % pageSize !== 0 ? 1 : 0;
     const totalPageCount =
       Math.floor(commentCount / pageSize) + additionalPageCount;
+    const pagination = {
+      sortBy,
+      direction,
+      pageOffset,
+      pageSize,
+      totalPageCount
+    };
 
     return {
       users,
       comments,
-      totalPageCount
+      pagination
     };
   };
 

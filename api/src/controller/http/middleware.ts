@@ -190,7 +190,7 @@ export class Middleware {
 
   private issuePassportFromHeader = (req: Request) => {
     const authHeader = req.get('Authorization');
-    if (!authHeader) {
+    if (authHeader === undefined) {
       return null;
     }
 
@@ -208,7 +208,7 @@ export class Middleware {
 
   private issuePassportFromCookie = (req: Request) => {
     const cookie = req.cookies[idTokenCookieName];
-    if (!cookie) {
+    if (cookie === undefined) {
       throw new CustomError({
         code: AppErrorCode.UNAUTHENTICATED,
         message: 'cookie does not exist',

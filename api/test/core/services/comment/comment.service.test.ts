@@ -219,7 +219,13 @@ describe('Test comment service', () => {
       ).getComments(givenDto);
       const totalPageCount = calculateCommentTotalPageCount(commentCount);
 
-      expect(actualResults.totalPageCount).toEqual(totalPageCount);
+      expect(actualResults.pagination).toEqual({
+        sortBy: 'createdAt',
+        direction: 'desc',
+        pageOffset: 1,
+        pageSize: 10,
+        totalPageCount
+      });
       expect(JSON.stringify(actualResults.users)).toEqual(
         JSON.stringify(users)
       );
@@ -265,7 +271,13 @@ describe('Test comment service', () => {
         givenPageSize
       );
 
-      expect(actualResults.totalPageCount).toEqual(totalPageCount);
+      expect(actualResults.pagination).toEqual({
+        sortBy: 'createdAt',
+        direction: 'desc',
+        pageOffset: 1,
+        pageSize: givenPageSize,
+        totalPageCount
+      });
       expect(JSON.stringify(actualResults.users)).toEqual(
         JSON.stringify(users)
       );
