@@ -1,3 +1,5 @@
+'use client';
+
 import { User } from '@/lib/definitions/user';
 
 export async function getUserSelf() {

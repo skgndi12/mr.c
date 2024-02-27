@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchSignOut, getUserSelf, linkToSignIn } from '@/lib/apis/auth';
+import { fetchSignOut, getUserSelf, linkToSignIn } from '@/lib/apis/auth/client';
 import { User } from '@/lib/definitions/user';
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
