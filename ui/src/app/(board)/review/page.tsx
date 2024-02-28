@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 
 import { ReviewBoardHeader } from '@/components/review-board-header';
 import { ReviewCardsList } from '@/components/review-cards-list';
+import { ReviewCardsListSkeleton } from '@/components/skeletons';
 
 import type { ListReviewsQuery } from '@/lib/definitions/review';
 
@@ -24,7 +25,7 @@ export default function Page({
       <ReviewBoardHeader />
 
       <section className="w-full py-4">
-        <Suspense key={JSON.stringify(query)} /* TODO: fallback skeleton */>
+        <Suspense key={JSON.stringify(query)} fallback={<ReviewCardsListSkeleton />}>
           <ReviewCardsList query={query} />
         </Suspense>
       </section>
