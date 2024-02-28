@@ -29,7 +29,7 @@ export function ReviewCard({ review }: { review: Review }) {
         <Text lineClamp={3}>{description}</Text>
       </Link>
 
-      <div className="mt-4 flex items-center gap-1">
+      <div className="mt-4 flex flex-wrap items-center gap-1">
         <UserChip nickname={nickname} tag={tag} />
 
         <Text weight="bold">&#183;</Text>
