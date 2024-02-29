@@ -24,7 +24,7 @@ function ReviewCardSkeleton() {
         <div className={clsx('mb-1 h-5 w-full', skeletonClass)}></div>
         <div className={clsx('mb-1 h-5 w-full', skeletonClass)}></div>
       </div>
-      <div className="mt-4 flex items-center gap-1">
+      <div className="mt-4 flex flex-wrap items-center gap-1">
         <UserchipSkeleton />
         <p>&#183;</p>
         <div className={clsx('h-5 w-14 shrink-0 pb-1', skeletonClass)}></div>
