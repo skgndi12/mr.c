@@ -26,16 +26,11 @@ export function validateReviewFields(rawData: RawReviewField): OnSuccess | OnFai
   const { title, movieName, editorState } = rawData;
 
   if (title.length < 1) {
-    errors.set('title', 'title is empty');
+    errors.set('title', '제목을 입력해주세요.');
   }
 
-  // TODO: validate max length after dicussion
-  // if (title.length > 20) {
-  //   errors.set('title', 'title is too long. it should be less than 20');
-  // }
-
   if (movieName.length < 1) {
-    errors.set('movieName', 'movieName is empty');
+    errors.set('movieName', '영화 제목을 입력해주세요.');
   }
 
   let reviewContent: {
@@ -46,13 +41,13 @@ export function validateReviewFields(rawData: RawReviewField): OnSuccess | OnFai
 
   try {
     if (editorState.read($isRootTextContentEmptyCurry(false))) {
-      errors.set('content', 'content is empty');
+      errors.set('content', '내용을 입력해주세요.');
     }
 
     reviewContent = getReviewContent(editorState);
     serializedContent = JSON.stringify(reviewContent);
   } catch (error) {
-    errors.set('content', 'content has something wrong');
+    errors.set('content', `내용을 저장하는 중 오류가 발생했습니다.`);
   }
 
   if (errors.size > 0) {
