@@ -105,6 +105,7 @@ describe('Test comment v1 controller', () => {
         direction: 'desc',
         pageOffset: 1,
         pageSize: 10,
+        totalEntryCount: commentCount,
         totalPageCount
       };
       commentService.getComments = jest.fn(() =>
@@ -139,6 +140,7 @@ describe('Test comment v1 controller', () => {
           direction: 'desc',
           pageOffset: 1,
           pageSize: 10,
+          totalEntryCount: commentCount,
           totalPageCount
         }
       });
@@ -161,6 +163,7 @@ describe('Test comment v1 controller', () => {
         direction: 'desc',
         pageOffset: 1,
         pageSize: 10,
+        totalEntryCount: commentCount,
         totalPageCount
       };
       commentService.getComments = jest.fn(() =>
@@ -198,6 +201,7 @@ describe('Test comment v1 controller', () => {
           direction: 'desc',
           pageOffset: 1,
           pageSize: 10,
+          totalEntryCount: commentCount,
           totalPageCount
         },
         filter: {
@@ -233,6 +237,7 @@ describe('Test comment v1 controller', () => {
         direction: givenDirection,
         pageOffset: givenPageOffset,
         pageSize: givenPageSize,
+        totalEntryCount: commentCount,
         totalPageCount
       };
       commentService.getComments = jest.fn(() =>
@@ -272,6 +277,7 @@ describe('Test comment v1 controller', () => {
           direction: req.query.direction,
           pageOffset: req.query.pageOffset,
           pageSize: req.query.pageSize,
+          totalEntryCount: commentCount,
           totalPageCount
         }
       });
@@ -295,6 +301,7 @@ describe('Test comment v1 controller', () => {
             direction: 'desc',
             pageOffset: 1,
             pageSize: 10,
+            totalEntryCount: commentCount,
             totalPageCount
           }
         })

@@ -11,6 +11,7 @@ export type CommentsPaginationResponse = {
   direction: Direction;
   pageOffset: number;
   pageSize: number;
+  totalEntryCount: number;
   totalPageCount: number;
 };
 

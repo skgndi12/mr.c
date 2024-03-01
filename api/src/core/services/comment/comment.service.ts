@@ -124,6 +124,7 @@ export class CommentService {
       direction,
       pageOffset,
       pageSize,
+      totalEntryCount: commentCount,
       totalPageCount
     };
 
