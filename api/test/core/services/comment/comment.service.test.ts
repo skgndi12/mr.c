@@ -224,6 +224,7 @@ describe('Test comment service', () => {
         direction: 'desc',
         pageOffset: 1,
         pageSize: 10,
+        totalEntryCount: commentCount,
         totalPageCount
       });
       expect(JSON.stringify(actualResults.users)).toEqual(
@@ -276,6 +277,7 @@ describe('Test comment service', () => {
         direction: 'desc',
         pageOffset: 1,
         pageSize: givenPageSize,
+        totalEntryCount: commentCount,
         totalPageCount
       });
       expect(JSON.stringify(actualResults.users)).toEqual(

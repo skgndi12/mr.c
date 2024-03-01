@@ -5,6 +5,7 @@ export type CommentV1PaginationType = {
   direction: Direction;
   pageOffset: number;
   pageSize: number;
+  totalEntryCount: number;
   totalPageCount: number;
 };
 
