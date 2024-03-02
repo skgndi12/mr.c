@@ -162,11 +162,33 @@
         ],
         "parameters": [
           {
+            "name": "nickname",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
+            "name": "movieName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "allowReserved": true
+          },
+          {
             "name": "sortBy",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/SortBy"
+              "enum": [
+                "createdAt",
+                "movieName"
+              ],
+              "type": "string"
             }
           },
           {
@@ -196,24 +218,6 @@
             "schema": {
               "type": "number"
             }
-          },
-          {
-            "name": "nickname",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "allowReserved": true
-          },
-          {
-            "name": "movieName",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "allowReserved": true
           }
         ],
         "responses": {
@@ -705,13 +709,6 @@
         "type": "object",
         "additionalProperties": false
       },
-      "SortBy": {
-        "enum": [
-          "createdAt",
-          "movieName"
-        ],
-        "type": "string"
-      },
       "ListCommentsV1Response": {
         "type": "object",
         "properties": {
@@ -809,6 +806,13 @@
           "updatedAt",
           "userId"
         ]
+      },
+      "SortBy": {
+        "enum": [
+          "createdAt",
+          "movieName"
+        ],
+        "type": "string"
       },
       "Direction": {
         "enum": [
