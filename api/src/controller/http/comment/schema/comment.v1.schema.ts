@@ -15,10 +15,10 @@ import { HttpErrorResponse } from '@controller/http/response';
 
 export type CommentV1ApiSpec = Tspec.DefineApiSpec<{
   security: 'jwt';
-  basePath: '/api/v1/comments';
+  basePath: '/api/v1';
   tags: ['Comment'];
   paths: {
-    '/': {
+    '/comments': {
       post: {
         summary: 'Create comment';
         body: CreateCommentV1Request;
@@ -36,7 +36,7 @@ export type CommentV1ApiSpec = Tspec.DefineApiSpec<{
         };
       };
     };
-    '/{commentId}': {
+    '/comments/{commentId}': {
       put: {
         summary: 'Update comment';
         path: { commentId: number };
@@ -51,24 +51,6 @@ export type CommentV1ApiSpec = Tspec.DefineApiSpec<{
         path: { commentId: number };
         responses: {
           200: DeleteCommentV1Response;
-          default: HttpErrorResponse;
-        };
-      };
-    };
-    '/test': {
-      post: {
-        summary: 'Create comment';
-        body: CreateCommentV1Request;
-        responses: {
-          200: CreateCommentV1Response;
-          default: HttpErrorResponse;
-        };
-      };
-      get: {
-        summary: 'List comments';
-        query: ListCommentsV1QueryParameter;
-        responses: {
-          200: ListCommentsV1Response;
           default: HttpErrorResponse;
         };
       };
