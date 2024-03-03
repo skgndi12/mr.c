@@ -44,6 +44,7 @@ model Review {
   content   String   @db.VarChar
   createdAt DateTime @map("created_at") @db.Timestamptz
   updatedAt DateTime @map("updated_at") @db.Timestamptz
+  Reply     Reply[]
 
   @@map("reviews")
 }
@@ -51,6 +52,7 @@ model Review {
 model Reply {
   id        Int      @id @default(autoincrement())
   reviewId  Int      @map("review_id") @db.Integer
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   userId    String   @map("user_id") @db.Char(36)
   user      User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   content   String   @db.VarChar
