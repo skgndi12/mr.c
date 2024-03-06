@@ -59,6 +59,7 @@ model Reply {
   createdAt DateTime @map("created_at") @db.Timestamptz
   updatedAt DateTime @map("updated_at") @db.Timestamptz
 
+  @@index([reviewId])
   @@map("replies")
 }
 
