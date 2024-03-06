@@ -8,10 +8,10 @@ export interface CreateCommentParams {
   content: string;
 }
 
-export type FindManyAndCountResponse = {
+export interface FindManyAndCountResponse {
   comments: Comment[];
   commentCount: number;
-};
+}
 
 export interface FindCommentsParams {
   // filter

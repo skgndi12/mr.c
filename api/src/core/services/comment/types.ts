@@ -6,30 +6,30 @@ export type SortBy = 'createdAt' | 'movieName';
 
 export type Direction = 'asc' | 'desc';
 
-export type CommentsPaginationResponse = {
+export interface CommentsPaginationResponse {
   sortBy: SortBy;
   direction: Direction;
   pageOffset: number;
   pageSize: number;
   totalEntryCount: number;
   totalPageCount: number;
-};
+}
 
-export type CreateCommentResponse = {
+export interface CreateCommentResponse {
   user: User;
   comment: Comment;
-};
+}
 
-export type GetCommentsResponse = {
+export interface GetCommentsResponse {
   users: User[];
   comments: Comment[];
   pagination: CommentsPaginationResponse;
-};
+}
 
-export type UpdateCommentResponse = {
+export interface UpdateCommentResponse {
   user: User;
   comment: Comment;
-};
+}
 
 export interface CreateCommentDto {
   requesterIdToken: AppIdToken;
