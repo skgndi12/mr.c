@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from '@/lib/definitions/user';
+import { User } from '@/lib/definitions/auth';
 
 export async function getUserSelf() {
   const response = await fetch('/api/v1/users/self');

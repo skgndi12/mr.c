@@ -1,4 +1,4 @@
-import type { Pagination } from '@/lib/definitions/pagination';
+import type { Pagination } from '@/lib/definitions/common';
 
 interface Comment {
   id: number; //123,

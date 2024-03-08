@@ -1,4 +1,4 @@
-import type { Pagination } from '@/lib/definitions/pagination';
+import type { Pagination } from '@/lib/definitions/common';
 
 export interface Review {
   id: number; // 213,
