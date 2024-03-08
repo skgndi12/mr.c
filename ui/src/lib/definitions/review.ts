@@ -27,3 +27,9 @@ export interface ListReviewsResponse {
 export interface ListReviewsQuery
   extends ReviewFilter,
     Partial<Omit<Pagination, 'totalPageCount'>> {}
+
+export interface CreateReviewRequest {
+  title: string;
+  movieName: string;
+  content: string;
+}

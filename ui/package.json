@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
+    "@lexical/headless": "^0.13.1",
     "@lexical/react": "^0.13.1",
     "clsx": "^2.1.0",
     "dayjs": "^1.11.10",
