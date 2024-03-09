@@ -1,5 +1,7 @@
 import clsx from 'clsx';
 
+import Text from '@/components/common/server/text';
+
 // https://delba.dev/blog/animated-loading-skeletons-with-tailwind
 const shimmer = clsx(
   'relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-gray-100/60 before:to-transparent'
@@ -19,14 +21,18 @@ function ReviewCardSkeleton() {
     <div className="flex flex-col border-t p-6 [&:first-child]:border-none">
       <div className={clsx('mb-1 h-6 w-56', skeletonClass)}></div>
       <div className={clsx('mb-1 h-5 w-52', skeletonClass)}></div>
+
       <div className="mt-4">
         <div className={clsx('mb-1 h-5 w-full', skeletonClass)}></div>
         <div className={clsx('mb-1 h-5 w-full', skeletonClass)}></div>
         <div className={clsx('mb-1 h-5 w-full', skeletonClass)}></div>
       </div>
+
+      <div className={clsx('mt-3 h-5 w-14', skeletonClass)}></div>
+
       <div className="mt-4 flex flex-wrap items-center gap-1">
         <UserchipSkeleton />
-        <p>&#183;</p>
+        <Text weight="bold">&#183;</Text>
         <div className={clsx('h-5 w-14 shrink-0 pb-1', skeletonClass)}></div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ChatBubbleOvalLeftIcon } from '@heroicons/react/24/outline';
 
 import Text from '@/components/common/server/text';
 import Time from '@/components/common/server/time';
@@ -8,7 +9,7 @@ import type { Review } from '@/lib/definitions/review';
 import { parseReviewContent } from '@/lib/utils/review/parse-review-content';
 
 export function ReviewCard({ review }: { review: Review }) {
-  const { content, createdAt, movieName, nickname, tag, updatedAt, title } = review;
+  const { content, createdAt, movieName, nickname, tag, updatedAt, title, replyCount } = review;
 
   const { description } = parseReviewContent(content);
 
@@ -28,6 +29,12 @@ export function ReviewCard({ review }: { review: Review }) {
       <Link href={`/review/${review.id}`} className="mt-4">
         <Text lineClamp={3}>{description}</Text>
       </Link>
+
+      <div className="mt-3 flex items-center gap-1">
+        {/* TODO: this has to be Link with scrollIntoView reply */}
+        <ChatBubbleOvalLeftIcon className="w-4" />
+        <Text size="sm">{`${replyCount}`}</Text>
+      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-1">
         <UserChip nickname={nickname} tag={tag} />
