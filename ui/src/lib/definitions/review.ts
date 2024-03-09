@@ -10,6 +10,7 @@ export interface Review {
   content: string; // "{review_content}",
   createdAt: string; //"2023-04-02T15:08:00+09:00",
   updatedAt: string; //"2023-04-02T15:08:00+09:00"
+  replyCount: number;
 }
 
 export interface ReviewFilter {
@@ -26,7 +27,7 @@ export interface ListReviewsResponse {
 
 export interface ListReviewsQuery
   extends ReviewFilter,
-    Partial<Omit<Pagination, 'totalPageCount'>> {}
+    Partial<Omit<Pagination, 'totalPageCount' | 'totalEntryCount'>> {}
 
 export interface CreateReviewRequest {
   title: string;
