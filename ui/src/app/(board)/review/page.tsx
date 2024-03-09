@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 
-import { ReviewBoardHeader } from '@/components/review-board-header';
-import { ReviewCardsList } from '@/components/review-cards-list';
+import { ReviewBoardHeader } from '@/components/review/client/review-board-header';
+import { ReviewCardsList } from '@/components/review/server/review-cards-list';
 import { ReviewCardsListSkeleton } from '@/components/skeletons';
 
 import type { ListReviewsQuery } from '@/lib/definitions/review';
