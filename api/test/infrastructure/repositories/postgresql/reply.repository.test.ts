@@ -11,7 +11,8 @@ import {
 } from '@src/core/nickname.generator';
 import {
   CreateReplyParams,
-  FindRepliesParams
+  FindRepliesParams,
+  UpdateReplyParams
 } from '@src/core/ports/reply.repository';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -324,6 +325,98 @@ describe('Test reply repository', () => {
 
       expect(actualResult.replyCount).toEqual(0);
       expect(JSON.stringify(actualResult.replies)).toEqual(JSON.stringify([]));
+    });
+  });
+
+  describe('Test update', () => {
+    const userId = randomUUID();
+    const reviewId = generateRandomNumber(userId);
+    const content = 'randomContent';
+    const createdAt = new Date();
+    const contentUpdated = 'updatedContent';
+    const updatedAt = new Date();
+    let replyCreated: Reply;
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id: userId,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      await prismaClient.review.create({
+        data: {
+          id: reviewId,
+          userId,
+          title: 'randomTitle',
+          movieName: 'randomMovieName',
+          content,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      const replyResultCreated = await prismaClient.reply.create({
+        data: {
+          reviewId,
+          userId,
+          content,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      replyCreated = replyResultCreated.convertToEntity();
+    });
+
+    afterAll(async () => {
+      await prismaClient.review.delete({ where: { id: reviewId } });
+      await prismaClient.user.delete({ where: { id: userId } });
+    });
+
+    it('should success when valid', async () => {
+      const replyExpectResult = new Reply(
+        replyCreated.id,
+        replyCreated.reviewId,
+        replyCreated.userId,
+        contentUpdated,
+        replyCreated.createdAt,
+        updatedAt
+      );
+      const params: UpdateReplyParams = {
+        id: replyCreated.id,
+        content: contentUpdated
+      };
+
+      const replyUpdated = await replyRepository.update(params);
+
+      expect(replyUpdated.getData()).toEqual(
+        expect.objectContaining({
+          id: replyExpectResult.id,
+          reviewId: replyExpectResult.reviewId,
+          userId: replyExpectResult.userId,
+          content: replyExpectResult.content,
+          createdAt: replyExpectResult.createdAt
+        })
+      );
+    });
+
+    it('should fail to update a reply when no existing reply is found with the given ID', async () => {
+      const params: UpdateReplyParams = {
+        id: replyCreated.id + 1,
+        content: contentUpdated
+      };
+
+      try {
+        await replyRepository.update(params);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
     });
   });
 });
