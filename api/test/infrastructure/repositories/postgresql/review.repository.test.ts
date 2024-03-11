@@ -10,7 +10,8 @@ import {
 } from '@src/core/nickname.generator';
 import {
   CreateReviewParams,
-  FindReviewsParams
+  FindReviewsParams,
+  UpdateReviewParams
 } from '@src/core/ports/review.repository';
 import { AccessLevelEnum, IdpEnum } from '@src/core/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
@@ -566,6 +567,102 @@ describe('Test review repository', () => {
 
       expect(actualResult.reviewCount).toEqual(0);
       expect(JSON.stringify(actualResult.reviews)).toEqual(JSON.stringify([]));
+    });
+  });
+
+  describe('Test update', () => {
+    const userId = randomUUID();
+    const createdAt = new Date();
+    const titleUpdated = 'updatedTitle';
+    const movieNameUpdated = 'updatedMovieName';
+    const contentUpdated = 'updatedContent';
+    let reviewCreated: Review;
+
+    beforeAll(async () => {
+      await prismaClient.user.create({
+        data: {
+          id: userId,
+          nickname: generateUserNickname(userId),
+          tag: generateUserTag(userId),
+          idp: Idp.GOOGLE,
+          email: `${userId}@gmail.com`,
+          accessLevel: AccessLevel.USER,
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      const reviewResultCreated = await prismaClient.review.create({
+        data: {
+          userId,
+          title: 'randomTitle',
+          movieName: 'randomMovieName',
+          content: 'randomContent',
+          createdAt,
+          updatedAt: createdAt
+        }
+      });
+      reviewCreated = reviewRepository['convertToEntity'](
+        reviewResultCreated.id,
+        reviewResultCreated.userId,
+        reviewResultCreated.title,
+        reviewResultCreated.movieName,
+        reviewResultCreated.content,
+        0,
+        reviewResultCreated.createdAt,
+        reviewResultCreated.updatedAt
+      );
+    });
+
+    afterAll(async () => {
+      await prismaClient.review.delete({ where: { id: reviewCreated.id } });
+      await prismaClient.user.delete({ where: { id: userId } });
+    });
+
+    it('should success when valid', async () => {
+      const reviewExpectResult = new Review(
+        reviewCreated.id,
+        reviewCreated.userId,
+        titleUpdated,
+        movieNameUpdated,
+        contentUpdated,
+        0,
+        reviewCreated.createdAt,
+        reviewCreated.updatedAt
+      );
+      const params: UpdateReviewParams = {
+        id: reviewCreated.id,
+        title: titleUpdated,
+        movieName: movieNameUpdated,
+        content: contentUpdated
+      };
+
+      const reivewUpdated = await reviewRepository.update(params);
+
+      expect(reivewUpdated.getData()).toEqual(
+        expect.objectContaining({
+          id: reviewExpectResult.id,
+          title: reviewExpectResult.title,
+          movieName: reviewExpectResult.movieName,
+          content: reviewExpectResult.content,
+          createdAt: reviewExpectResult.createdAt
+        })
+      );
+    });
+
+    it('should fail to update a review when no existing review is found with the given ID', async () => {
+      const params: UpdateReviewParams = {
+        id: reviewCreated.id,
+        title: titleUpdated,
+        movieName: movieNameUpdated,
+        content: contentUpdated
+      };
+
+      try {
+        await reviewRepository.update(params);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error).toHaveProperty('code', AppErrorCode.NOT_FOUND);
+      }
     });
   });
 });
