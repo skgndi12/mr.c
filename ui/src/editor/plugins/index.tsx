@@ -1,6 +1,9 @@
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+
+import { useEditorRef } from '@/context/editor/editor-ref-context';
+import { EditorRefPlugin } from '@/editor/plugins/editor-ref';
 import { MarkdownShortcutPlugin } from '@/editor/plugins/markdown-shorcut';
 
 function Placeholder() {
@@ -8,6 +11,8 @@ function Placeholder() {
 }
 
 export function Plugins() {
+  const { onRef } = useEditorRef() ?? {};
+
   return (
     <>
       <RichTextPlugin
@@ -22,6 +27,7 @@ export function Plugins() {
         ErrorBoundary={LexicalErrorBoundary}
       />
       <MarkdownShortcutPlugin />
+      {onRef !== undefined && <EditorRefPlugin editorRef={onRef} />}
     </>
   );
 }
