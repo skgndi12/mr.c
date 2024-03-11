@@ -73,7 +73,7 @@ jobs:
 
       - name: Deploy preview to Netlify
         id: deploy-preview
-        uses: nwtgck/actions-netlify@v2.1
+        uses: nwtgck/actions-netlify@v3
         with:
           publish-dir: './ui/storybook-static'
           production-branch: develop
