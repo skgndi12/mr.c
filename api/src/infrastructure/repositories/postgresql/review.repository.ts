@@ -1,8 +1,13 @@
+import { Prisma } from '@prisma/client';
+
 import { Review } from '@src/core/entities/review.entity';
 import {
   CreateReviewParams,
+  FindManyAndCountResponse,
+  FindReviewsParams,
   ReviewRepository
 } from '@src/core/ports/review.repository';
+import { Direction, SortBy } from '@src/core/services/review/types';
 import { AppErrorCode, CustomError } from '@src/error/errors';
 import {
   PrismaErrorCode,
@@ -12,6 +17,17 @@ import {
   ExtendedPrismaClient,
   ExtendedPrismaTransactionClient
 } from '@src/infrastructure/prisma/types';
+
+type OrderBy =
+  | {
+      movieName: Direction;
+    }
+  | { createdAt: Direction };
+
+type SortingCriteria = {
+  sortBy: SortBy;
+  direction: Direction;
+};
 
 export class PostgresqlReviewRepository implements Partial<ReviewRepository> {
   constructor(private readonly client: ExtendedPrismaClient) {}
@@ -99,6 +115,67 @@ export class PostgresqlReviewRepository implements Partial<ReviewRepository> {
     }
   };
 
+  public findManyAndCount = async (
+    params: FindReviewsParams,
+    txClient?: ExtendedPrismaTransactionClient
+  ): Promise<FindManyAndCountResponse> => {
+    try {
+      const client = txClient ?? this.client;
+      const args: Prisma.ReviewFindManyArgs = {
+        skip: (params.pageOffset - 1) * params.pageSize,
+        take: params.pageSize,
+        where: {
+          AND: [
+            { user: { nickname: { contains: params.nickname } } },
+            { title: { contains: params.title, mode: 'insensitive' } },
+            {
+              movieName: { contains: params.movieName, mode: 'insensitive' }
+            }
+          ]
+        },
+        orderBy: this.convertToOrderBy(params)
+      };
+
+      const reviewResults = await client.review.findMany({
+        skip: args.skip,
+        take: args.take,
+        where: args.where,
+        include: {
+          _count: {
+            select: { Reply: true }
+          }
+        },
+        orderBy: args.orderBy
+      });
+      const reviewCount = await client.review.count({ where: args.where });
+
+      const reviews = reviewResults.map((review) =>
+        this.convertToEntity(
+          review.id,
+          review.userId,
+          review.title,
+          review.movieName,
+          review.content,
+          review._count.Reply,
+          review.createdAt,
+          review.updatedAt
+        )
+      );
+
+      return {
+        reviews,
+        reviewCount
+      };
+    } catch (error: unknown) {
+      throw new CustomError({
+        code: AppErrorCode.INTERNAL_ERROR,
+        cause: error,
+        message: 'failed to find many reviews and count',
+        context: { params }
+      });
+    }
+  };
+
   private convertToEntity = (
     id: number,
     userId: string,
@@ -119,5 +196,18 @@ export class PostgresqlReviewRepository implements Partial<ReviewRepository> {
       createdAt,
       updatedAt
     );
+  };
+
+  private convertToOrderBy = (criteria: SortingCriteria): OrderBy => {
+    switch (criteria.sortBy) {
+      case 'movieName':
+        return {
+          movieName: criteria.direction
+        };
+      case 'createdAt':
+        return {
+          createdAt: criteria.direction
+        };
+    }
   };
 }
