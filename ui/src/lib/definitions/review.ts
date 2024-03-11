@@ -34,3 +34,7 @@ export interface CreateReviewRequest {
   movieName: string;
   content: string;
 }
+
+export interface CreateReviewResponse {
+  review: Review;
+}
