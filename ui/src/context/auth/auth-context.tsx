@@ -11,15 +11,19 @@ interface ContextShape {
   user?: User;
   signOut: () => Promise<void>;
   signIn: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<ContextShape | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>();
+  const [loading, setLoading] = useState(true);
 
   const handleGetUserSelf = async () => {
+    setLoading(true);
     const user = await getUserSelf();
+    setLoading(false);
     setUser(user);
   };
 
@@ -39,7 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   useEffect(() => {
     const protect = async () => {
+      setLoading(true);
       const isLoggedIn = !!(await getUserSelf());
+      setLoading(false);
       if (!isLoggedIn) {
         // TODO: redirect to the sign-in page
         signIn();
@@ -51,7 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [pathname, user]);
 
-  return <AuthContext.Provider value={{ user, signOut, signIn }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, signOut, signIn, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
