@@ -13,7 +13,7 @@ const skeletonClass = clsx(
 );
 
 export function UserchipSkeleton() {
-  return <div className={clsx('h-5 w-56 shrink-0 pb-1', skeletonClass)}></div>;
+  return <div className={clsx('h-6 w-56 shrink-0', skeletonClass)}></div>;
 }
 
 function ReviewCardSkeleton() {

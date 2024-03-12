@@ -43,8 +43,8 @@ export default forwardRef<TitleRef, TitleProps>(function Title(
       className={clsx(
         `w-full resize-none overflow-hidden bg-transparent focus-visible:outline-none`,
         {
-          PlaygroundEditorTheme__h1: subtitle === false,
-          PlaygroundEditorTheme__h2: subtitle === true,
+          'PlaygroundEditorTheme__h1 h-9': subtitle === false,
+          'PlaygroundEditorTheme__h2 h-5': subtitle === true,
         }
       )}
       placeholder={placeholder}
