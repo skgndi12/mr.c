@@ -11,6 +11,11 @@ export interface CreateReviewResponse {
   review: Review;
 }
 
+export interface GetReviewResponse {
+  user: User;
+  review: Review;
+}
+
 export interface CreateReviewDto {
   requesterIdToken: AppIdToken;
   title: string;
