@@ -18,7 +18,7 @@ import {
   ExtendedPrismaTransactionClient
 } from '@src/infrastructure/prisma/types';
 
-export class PostgresqlReplyRepository implements Partial<ReplyRepository> {
+export class PostgresqlReplyRepository implements ReplyRepository {
   constructor(private readonly client: ExtendedPrismaClient) {}
 
   public create = async (
