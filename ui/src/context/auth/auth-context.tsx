@@ -1,8 +1,11 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+
 import { fetchSignOut, getUserSelf, linkToSignIn } from '@/lib/apis/auth/client';
-import { User } from '@/lib/definitions/auth';
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import { protectedPaths } from '@/lib/constants/auth';
+import type { User } from '@/lib/definitions/auth';
 
 interface ContextShape {
   user?: User;
@@ -15,22 +18,38 @@ const AuthContext = createContext<ContextShape | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>();
 
+  const handleGetUserSelf = async () => {
+    const user = await getUserSelf();
+    setUser(user);
+  };
+
   useEffect(() => {
-    // why void?
-    // we don't handle getUserSelf error
-    // becuase failure to getUserSelf is just considered
-    // to be signed out.
-    void getUserSelf().then(setUser);
+    void handleGetUserSelf();
   }, []);
 
   const signOut = async () => {
     await fetchSignOut();
-    void getUserSelf().then(setUser);
+    await handleGetUserSelf();
   };
 
   const signIn = () => {
     linkToSignIn();
   };
+
+  const pathname = usePathname();
+  useEffect(() => {
+    const protect = async () => {
+      const isLoggedIn = !!(await getUserSelf());
+      if (!isLoggedIn) {
+        // TODO: redirect to the sign-in page
+        signIn();
+      }
+    };
+
+    if (protectedPaths.includes(pathname)) {
+      void protect();
+    }
+  }, [pathname, user]);
 
   return <AuthContext.Provider value={{ user, signOut, signIn }}>{children}</AuthContext.Provider>;
 }
