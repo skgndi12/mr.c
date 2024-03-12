@@ -2,7 +2,6 @@ import type { EditorState, SerializedEditorState } from 'lexical';
 import { $isRootTextContentEmptyCurry } from '@lexical/text';
 
 import { getReviewContent } from '@/lib/utils/review/get-review-content';
-import type { CreateReviewRequest } from '@/lib/definitions/review';
 
 interface RawReviewField {
   title: string;
@@ -12,12 +11,20 @@ interface RawReviewField {
 
 interface OnSuccess {
   success: true;
-  data: CreateReviewRequest;
+  data: {
+    title: string;
+    movieName: string;
+    content: string;
+  };
 }
 
 interface OnFail {
   success: false;
-  errors: Partial<CreateReviewRequest>;
+  errors: Partial<{
+    title: string;
+    movieName: string;
+    content: string;
+  }>;
 }
 
 export function validateReviewFields(rawData: RawReviewField): OnSuccess | OnFail {
