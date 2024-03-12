@@ -12,7 +12,7 @@ const skeletonClass = clsx(
   'isolate overflow-hidden rounded-md bg-gray-200 shadow-xl shadow-black/5 before:border-t before:border-gray-100/60'
 );
 
-function UserchipSkeleton() {
+export function UserchipSkeleton() {
   return <div className={clsx('h-5 w-56 shrink-0 pb-1', skeletonClass)}></div>;
 }
 
