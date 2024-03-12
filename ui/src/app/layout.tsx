@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import '@/styles/globals.css';
 import { notoSansKr } from '@/styles/fonts';
 import { AuthProvider } from '@/context/auth/auth-context';
+import { ToastProvider } from '@/context/common/toast-context';
 
 export const metadata: Metadata = {
   title: 'Home',
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${notoSansKr.className} antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <ToastProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );
