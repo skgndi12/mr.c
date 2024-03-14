@@ -31,6 +31,11 @@ export interface GetReviewsResponse {
   pagination: ReviewsPaginationResponse;
 }
 
+export interface UpdateReviewResponse {
+  user: User;
+  review: Review;
+}
+
 export interface CreateReviewDto {
   requesterIdToken: AppIdToken;
   title: string;
@@ -51,4 +56,12 @@ export interface GetReviewsDto {
   // pagination
   pageOffset?: number;
   pageSize?: number;
+}
+
+export interface UpdateReviewDto {
+  requesterIdToken: AppIdToken;
+  reviewId: number;
+  title: string;
+  movieName: string;
+  content: string;
 }
