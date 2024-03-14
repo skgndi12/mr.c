@@ -38,3 +38,7 @@ export interface CreateReviewRequest {
 export interface CreateReviewResponse {
   review: Review;
 }
+
+export interface GetReviewResponse {
+  review: Review;
+}
