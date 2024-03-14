@@ -42,3 +42,13 @@ export interface CreateReviewResponse {
 export interface GetReviewResponse {
   review: Review;
 }
+
+export interface UpdateReviewRequest {
+  title: string;
+  movieName: string;
+  content: string;
+}
+
+export interface UpdateReviewResponse {
+  review: Review;
+}
