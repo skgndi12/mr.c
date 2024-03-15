@@ -1,0 +1,12 @@
+config
+scripts
+test
+node_modules
+
+.eslintignore
+.eslintrc
+.gitignore
+.nvmrc
+.prettierrc
+compose.yaml
+README.md
