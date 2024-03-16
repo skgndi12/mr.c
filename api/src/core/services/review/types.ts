@@ -118,3 +118,9 @@ export interface UpdateReplyDto {
   replyId: number;
   content: string;
 }
+
+export interface DeleteReplyDto {
+  requesterIdToken: AppIdToken;
+  reviewId: number;
+  replyId: number;
+}
